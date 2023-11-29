@@ -30,15 +30,6 @@ import (
 	// ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 	imagePullSecrets?: [...corev1.LocalObjectReference]
 
-	// Labels to apply to all resources
-	// Please note that this does not add labels to the resources created dynamically by the controllers.
-	// For these resources, you have to add the labels in the template in the cert-manager custom resource:
-	// eg. podTemplate/ ingressTemplate in ACMEChallengeSolverHTTP01Ingress
-	//    ref: https://cert-manager.io/docs/reference/api-docs/#acme.cert-manager.io/v1.ACMEChallengeSolverHTTP01Ingress
-	// eg. secretTemplate in CertificateSpec
-	//    ref: https://cert-manager.io/docs/reference/api-docs/#cert-manager.io/v1.CertificateSpec
-	commonLabels?: #Labels
-
 	// Optional priority class to be used for the cert-manager pods
 	priorityClassName: string
 
@@ -74,7 +65,7 @@ import (
 	// The maximum number of challenges that can be scheduled as 'processing' at once
 	maxConcurrentChallenges: *60 | int
 
-	image!:           timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-controller", tag: "v1.13.2"}
+	image!: timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-controller", tag: "v1.13.2"}
 	imagePullPolicy:  *"IfNotPresent" | string
 
 	// Override the namespace used to store DNS provider credentials etc. for ClusterIssuer
@@ -144,8 +135,8 @@ import (
 	// Additional command line flags to pass to cert-manager controller binary.
 	// To see all available flags run docker run quay.io/jetstack/cert-manager-controller:<version> --help
 	extraArgs: [...string]
-	//# Use this flag to enable or disable arbitrary controllers, for example, disable the CertificiateRequests approver
-	//# --controllers=*,-certificaterequests-approver
+	// Use this flag to enable or disable arbitrary controllers, for example, disable the CertificiateRequests approver
+	// --controllers=*,-certificaterequests-approver
 
 	extraEnv: [...corev1.EnvVar]
 
@@ -165,8 +156,10 @@ import (
 	podAnnotations?: #Annotations
 	serviceLabels?: #Labels
 	serviceAnnotations?: #Annotations
-
+	tolerations?: [ ...corev1.#Toleration]
+	affinity?: corev1.#Affinity
 	nodeSelector: #Labels & {"kubernetes.io/os": "linux"}
+	topologySpreadConstraints?: [...corev1.#TopologySpreadConstraint]
 
 	// Optional DNS settings, useful if you have a public and private DNS zone for
 	// the same domain on Route 53. What follows is an example of ensuring
@@ -206,16 +199,199 @@ import (
 	https_proxy?: string
 	no_proxy?: string
 
+	// LivenessProbe settings for the controller container of the controller Pod.
+	//
+	// Disabled by default, because the controller has a leader election mechanism
+	// which should cause it to exit if it is unable to renew its leader election
+	// record.
+	// LivenessProbe durations and thresholds are based on those used for the Kubernetes
+	// controller-manager. See:
+	// https://github.com/kubernetes/kubernetes/blob/806b30170c61a38fedd54cc9ede4cd6275a1ad3b/cmd/kubeadm/app/util/staticpod/utils.go#L241-L245
+	livenessProbe: {
+		enabled: *false | bool
+		initialDelaySeconds: *10 | int
+		periodSeconds: *10 | int
+		timeoutSeconds: *15 | int
+		successThreshold: *1 | int
+		failureThreshold: *8 | int
+	}
+
+	// enableServiceLinks indicates whether information about services should be
+	// injected into pod's environment variables, matching the syntax of Docker
+	// links.
+	enableServiceLinks: *false | bool
+
+	webhook: {
+		replicaCount: *1 | int
+		timeoutSeconds: *10 | int
+
+		// Used to configure options for the webhook pod.
+		// This allows setting options that'd usually be provided via flags.
+		// An APIVersion and Kind must be specified in your values.yaml file.
+		// Flags will override options that are set here.
+		config: {
+			apiVersion: *"webhook.config.cert-manager.io/v1alpha1" | string
+			kind: *"WebhookConfiguration" | string
+			// The port that the webhook should listen on for requests.
+			// In GKE private clusters, by default kubernetes apiservers are allowed to
+			// talk to the cluster nodes only on 443 and 10250. so configuring
+			// securePort: 10250, will work out of the box without needing to add firewall
+			// rules or requiring NET_BIND_SERVICE capabilities to bind port numbers <1000.
+			// This should be uncommented and set as a default by the chart once we graduate
+			// the apiVersion of WebhookConfiguration past v1alpha1.
+			securePort: *10250 | int
+		}
+
+		strategy?: corev1.#DeploymentStrategy
+
+		// Pod Security Context to be set on the webhook component Pod
+		// ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+		securityContext?: corev1.#SecurityContext & {runAsNonRoot: true, seccompProfile: type: "RuntimeDefault"}
+
+		podDisruptionBudget: {
+			enabled: *false | bool
+			minAvailable: *1 | int | #Percent
+			maxUnavailable: *1 | int | #Percent
+		}
+
+		// Container Security Context to be set on the webhook component container
+		// ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+		containerSecurityContext?: corev1.#ContainerSecurityContext & {allowPrivilegeEscalation: false, capabilities: {drop: ["ALL"], readOnlyRootFilesystem: true, runAsNonRoot: true}}
+
+		// Optional additional annotations to add to the webhook Deployment
+		deploymentAnnotations?: #Annotations
+
+		// Optional additional annotations to add to the webhook Pods
+		podAnnotations?: #Annotations
+
+		// Optional additional annotations to add to the webhook Service
+		serviceAnnotations?: #Annotations
+
+		// Optional additional annotations to add to the webhook MutatingWebhookConfiguration
+		mutatingWebhookConfigurationAnnotations?: #Annotations
+
+		// Optional additional annotations to add to the webhook ValidatingWebhookConfiguration
+		validatingWebhookConfigurationAnnotations?: #Annotations
+
+		// Additional command line flags to pass to cert-manager webhook binary.
+		// To see all available flags run docker run quay.io/jetstack/cert-manager-webhook:<version> --help
+		extraArgs?: [...string]
+		// Path to a file containing a WebhookConfiguration object used to configure the webhook
+		// --config=<path-to-config-file>
+
+		// Comma separated list of feature gates that should be enabled on the webhook pod.
+		featureGates?: string
+
+		resources?: corev1.#ResourceRequirements & {requests: {cpu: "10m", memory: "32Mi"}}
+
+		// Liveness and readiness probe values
+		// Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-probes
+		//
+		livenessProbe?: corev1.#Probe & {failureThreshold: 3, initialDelaySeconds: 60, periodSeconds: 10, successThreshold: 1, timeoutSeconds: 1}
+		readinessProbe?: corev1.#Probe & {failureThreshold: 3, initialDelaySeconds: 5, periodSeconds: 5, successThreshold: 1, timeoutSeconds: 1}
+
+		nodeSelector: #Labels & {"kubernetes.io/os": "linux"}
+
+		affinity?: corev1.#Affinity
+
+		tolerations?: [ ...corev1.#Toleration]
+
+		topologySpreadConstraints?: [...corev1.#TopologySpreadConstraint]
+
+		// Optional additional labels to add to the Webhook Pods
+		podLabels?: #Labels
+
+		// Optional additional labels to add to the Webhook Service
+		serviceLabels?: #Labels
+
+		image!: timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-webhook", tag: "v1.13.2"}
+		imagePullPolicy:  *"IfNotPresent" | string
+
+		serviceAccount: {
+			// Specifies whether a service account should be created
+			create: true
+			// The name of the service account to use.
+			// If not set and create is true, a name is generated using the fullname template
+			name?: string
+			// Optional additional annotations to add to the controller's ServiceAccount
+			annotations?: #Annotations
+			// Optional additional labels to add to the webhook's ServiceAccount
+			labels?: #Labels
+			// Automount API credentials for a Service Account.
+			automountServiceAccountToken: *true | bool
+		}
+
+		// Automounting API credentials for a particular pod
+		automountServiceAccountToken: *true | bool
+
+		// The port that the webhook should listen on for requests.
+		// In GKE private clusters, by default kubernetes apiservers are allowed to
+		// talk to the cluster nodes only on 443 and 10250. so configuring
+		// securePort: 10250, will work out of the box without needing to add firewall
+		// rules or requiring NET_BIND_SERVICE capabilities to bind port numbers <1000
+		securePort: *10250 | int
+
+		// Specifies if the webhook should be started in hostNetwork mode.
+		//
+		// Required for use in some managed kubernetes clusters (such as AWS EKS) with custom
+		// CNI (such as calico), because control-plane managed by AWS cannot communicate
+		// with pods' IP CIDR and admission webhooks are not working
+		//
+		// Since the default port for the webhook conflicts with kubelet on the host
+		// network, `webhook.securePort` should be changed to an available port if
+		// running in hostNetwork mode.
+		hostNetwork: *false | bool
+
+		// Specifies how the service should be handled. Useful if you want to expose the
+		// webhook to outside of the cluster. In some cases, the control plane cannot
+		// reach internal services.
+		serviceType: "ClusterIP"
+		loadBalancerIP?: string
+
+		// Overrides the mutating webhook and validating webhook so they reach the webhook
+		// service using the `url` field instead of a service.
+		url?: string
+		host?: string
+
+		// Enables default network policies for webhooks.
+		networkPolicy:
+			enabled: false
+			ingress:
+			- from:
+				- ipBlock:
+						cidr: 0.0.0.0/0
+			egress:
+			- ports:
+				- port: 80
+					protocol: TCP
+				- port: 443
+					protocol: TCP
+				- port: 53
+					protocol: TCP
+				- port: 53
+					protocol: UDP
+				// On OpenShift and OKD, the Kubernetes API server listens on
+				// port 6443.
+				- port: 6443
+					protocol: TCP
+				to:
+				- ipBlock:
+						cidr: 0.0.0.0/0
+
+		volumes?: [...corev1.#Volume]
+		volumeMounts?: [...corev1.#VolumeMount]
+
+		// enableServiceLinks indicates whether information about services should be
+		// injected into pod's environment variables, matching the syntax of Docker
+		// links.
+		enableServiceLinks: *false | bool
+	}
 
 
 
 
 
 
-	// Pod
-	tolerations?: [ ...corev1.#Toleration]
-	affinity?: corev1.#Affinity
-	topologySpreadConstraints?: [...corev1.#TopologySpreadConstraint]
 
 	// Test Job
 	test: {
