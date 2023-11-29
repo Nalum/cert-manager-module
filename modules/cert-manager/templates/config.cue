@@ -166,11 +166,8 @@ import (
 	// cert-manager can access an ingress or DNS TXT records at all times.
 	// NOTE: This requires Kubernetes 1.10 or `CustomPodDNS` feature gate enabled for
 	// the cluster to work.
-	// podDnsPolicy: "None"
-	// podDnsConfig:
-	//   nameservers:
-	//     - "1.1.1.1"
-	//     - "8.8.8.8"
+	podDNSPolicy: *"ClusterFirst" | "Default" | "ClusterFirstWithHostNet" | "None"
+	podDNSConfig?: corev1.#PodDNSConfig
 
 	ingressShim?: {
 		defaultIssuerName?: string
@@ -181,7 +178,7 @@ import (
 	prometheus: {
 		enabled: *true | bool
 		servicemonitor: {
-			enabled: false | bool
+			enabled: *false | bool
 			prometheusInstance: *"default" | string
 			targetPort: *9402 | int
 			path: *"/metrics" | string
@@ -189,8 +186,8 @@ import (
 			scrapeTimeout: *"30s" | #Duration
 			labels?: #Labels
 			annotations?: #Annotations
-			honorLabels: false | bool
-			endpointAdditionalProperties: {}
+			honorLabels: *false | bool
+			endpointAdditionalProperties: {[ string]: string}
 		}
 	}
 
@@ -209,11 +206,7 @@ import (
 	// https://github.com/kubernetes/kubernetes/blob/806b30170c61a38fedd54cc9ede4cd6275a1ad3b/cmd/kubeadm/app/util/staticpod/utils.go#L241-L245
 	livenessProbe: {
 		enabled: *false | bool
-		initialDelaySeconds: *10 | int
-		periodSeconds: *10 | int
-		timeoutSeconds: *15 | int
-		successThreshold: *1 | int
-		failureThreshold: *8 | int
+		corev1.#Probe & {initialDelaySeconds: 10, timeoutSeconds: 15, failureThreshold: 8}
 	}
 
 	// enableServiceLinks indicates whether information about services should be
@@ -258,20 +251,16 @@ import (
 		// ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 		containerSecurityContext?: corev1.#ContainerSecurityContext & {allowPrivilegeEscalation: false, capabilities: {drop: ["ALL"], readOnlyRootFilesystem: true, runAsNonRoot: true}}
 
-		// Optional additional annotations to add to the webhook Deployment
+		// Optional additional annotations to add to the webhook resources
 		deploymentAnnotations?: #Annotations
-
-		// Optional additional annotations to add to the webhook Pods
 		podAnnotations?: #Annotations
-
-		// Optional additional annotations to add to the webhook Service
 		serviceAnnotations?: #Annotations
-
-		// Optional additional annotations to add to the webhook MutatingWebhookConfiguration
 		mutatingWebhookConfigurationAnnotations?: #Annotations
-
-		// Optional additional annotations to add to the webhook ValidatingWebhookConfiguration
 		validatingWebhookConfigurationAnnotations?: #Annotations
+
+		// Optional additional labels to add to the Webhook resources
+		podLabels?: #Labels
+		serviceLabels?: #Labels
 
 		// Additional command line flags to pass to cert-manager webhook binary.
 		// To see all available flags run docker run quay.io/jetstack/cert-manager-webhook:<version> --help
@@ -291,18 +280,9 @@ import (
 		readinessProbe?: corev1.#Probe & {failureThreshold: 3, initialDelaySeconds: 5, periodSeconds: 5, successThreshold: 1, timeoutSeconds: 1}
 
 		nodeSelector: #Labels & {"kubernetes.io/os": "linux"}
-
 		affinity?: corev1.#Affinity
-
 		tolerations?: [ ...corev1.#Toleration]
-
 		topologySpreadConstraints?: [...corev1.#TopologySpreadConstraint]
-
-		// Optional additional labels to add to the Webhook Pods
-		podLabels?: #Labels
-
-		// Optional additional labels to add to the Webhook Service
-		serviceLabels?: #Labels
 
 		image!: timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-webhook", tag: "v1.13.2"}
 		imagePullPolicy:  *"IfNotPresent" | string
@@ -354,29 +334,10 @@ import (
 		host?: string
 
 		// Enables default network policies for webhooks.
-		networkPolicy:
+		networkPolicy: {
 			enabled: false
-			ingress:
-			- from:
-				- ipBlock:
-						cidr: 0.0.0.0/0
-			egress:
-			- ports:
-				- port: 80
-					protocol: TCP
-				- port: 443
-					protocol: TCP
-				- port: 53
-					protocol: TCP
-				- port: 53
-					protocol: UDP
-				// On OpenShift and OKD, the Kubernetes API server listens on
-				// port 6443.
-				- port: 6443
-					protocol: TCP
-				to:
-				- ipBlock:
-						cidr: 0.0.0.0/0
+			networkingv1.#NetworkPolicySpec
+		}
 
 		volumes?: [...corev1.#Volume]
 		volumeMounts?: [...corev1.#VolumeMount]
