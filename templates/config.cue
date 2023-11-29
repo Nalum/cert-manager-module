@@ -156,6 +156,56 @@ import (
 	// ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 	containerSecurityContext?: corev1.#ContainerSecurityContext & {allowPrivilegeEscalation: false, capabilities: {drop: ["ALL"], readOnlyRootFilesystem: true, runAsNonRoot: true}}
 
+	volumes?: [...corev1.#Volume]
+	volumeMounts?: [...corev1.#VolumeMount]
+
+	deploymentLabels?: #Labels
+	deploymentAnnotations?: #Annotations
+	podLabels?: #Labels
+	podAnnotations?: #Annotations
+	serviceLabels?: #Labels
+	serviceAnnotations?: #Annotations
+
+	nodeSelector: #Labels & {"kubernetes.io/os": "linux"}
+
+	// Optional DNS settings, useful if you have a public and private DNS zone for
+	// the same domain on Route 53. What follows is an example of ensuring
+	// cert-manager can access an ingress or DNS TXT records at all times.
+	// NOTE: This requires Kubernetes 1.10 or `CustomPodDNS` feature gate enabled for
+	// the cluster to work.
+	// podDnsPolicy: "None"
+	// podDnsConfig:
+	//   nameservers:
+	//     - "1.1.1.1"
+	//     - "8.8.8.8"
+
+	ingressShim?: {
+		defaultIssuerName?: string
+		defaultIssuerKind?: *"ClusterIssuer" | "Issuer"
+		defaultIssuerGroup?: string
+	}
+
+	prometheus: {
+		enabled: *true | bool
+		servicemonitor: {
+			enabled: false | bool
+			prometheusInstance: *"default" | string
+			targetPort: *9402 | int
+			path: *"/metrics" | string
+			interval: *"60s" | #Duration
+			scrapeTimeout: *"30s" | #Duration
+			labels?: #Labels
+			annotations?: #Annotations
+			honorLabels: false | bool
+			endpointAdditionalProperties: {}
+		}
+	}
+
+	// Use these variables to configure the HTTP_PROXY environment variables
+	http_proxy?: string
+	https_proxy?: string
+	no_proxy?: string
+
 
 
 
@@ -163,14 +213,9 @@ import (
 
 
 	// Pod
-	podAnnotations?: {[ string]: string}
-	podSecurityContext?: corev1.#PodSecurityContext
 	tolerations?: [ ...corev1.#Toleration]
 	affinity?: corev1.#Affinity
 	topologySpreadConstraints?: [...corev1.#TopologySpreadConstraint]
-
-	// Service
-	service: port: *80 | int & >0 & <=65535
 
 	// Test Job
 	test: {
