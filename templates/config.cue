@@ -37,7 +37,7 @@ import (
 	//    ref: https://cert-manager.io/docs/reference/api-docs/#acme.cert-manager.io/v1.ACMEChallengeSolverHTTP01Ingress
 	// eg. secretTemplate in CertificateSpec
 	//    ref: https://cert-manager.io/docs/reference/api-docs/#cert-manager.io/v1.CertificateSpec
-	commonLabels?: {[string & =~"^(([A-Za-z0-9][-A-Za-z0-9_./]*)?[A-Za-z0-9])?$" & strings.MaxRunes(63)]: string & =~"^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?$" & strings.MaxRunes(63)}
+	commonLabels?: #Labels
 
 	// Optional priority class to be used for the cert-manager pods
 	priorityClassName: string
@@ -68,18 +68,106 @@ import (
 		maxUnavailable: *1 | int | #Percent
 	}
 
+	// Comma separated list of feature gates that should be enabled on the controller pod.
+	featureGates?: string
+
+	// The maximum number of challenges that can be scheduled as 'processing' at once
+	maxConcurrentChallenges: *60 | int
+
+	image!:           timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-controller", tag: "v1.13.2"}
+	imagePullPolicy:  *"IfNotPresent" | string
+
+	// Override the namespace used to store DNS provider credentials etc. for ClusterIssuer
+	// resources. By default, the same namespace as cert-manager is deployed within is
+	// used. This namespace will not be automatically created.
+	clusterResourceNamespace?: string
+
+	// This namespace allows you to define where the services will be installed into
+	// if not set then they will use the namespace of the release
+	// This is helpful when installing cert manager as a chart dependency (sub chart)
+	namespace?: string
+
+	serviceAccount: {
+		// Specifies whether a service account should be created
+		create: *true | bool
+		// The name of the service account to use.
+		// If not set and create is true, a name is generated using the fullname template
+		name: *"" | string
+		// Optional additional annotations to add to the controller's ServiceAccount
+		annotations: #Annotations
+		// Automount API credentials for a Service Account.
+		automountServiceAccountToken: *true | bool
+		// Optional additional labels to add to the controller's ServiceAccount
+		labels: #Labels
+	}
+
+	// Automounting API credentials for a particular pod
+	automountServiceAccountToken: *true | bool
+
+	// When this flag is enabled, secrets will be automatically removed when the certificate resource is deleted
+	enableCertificateOwnerRef: *false | bool
+
+	// Used to configure options for the controller pod.
+	// This allows setting options that'd usually be provided via flags.
+	// An APIVersion and Kind must be specified in your values.yaml file.
+	// Flags will override options that are set here.
+	config: { // TODO: Grab this from the Cert Manager repo instead of defining here
+		apiVersion: *"controller.config.cert-manager.io/v1alpha1" | string
+		kind: *"ControllerConfiguration" | string
+		logging: {
+			verbosity: *2 | int & >=0 & <=6
+			format: *"text" | string
+		}
+		leaderElectionConfig: namespace: *"kube-system" | string
+		kubernetesAPIQPS: *9000 | int & >0 & <=65535
+		kubernetesAPIBurst: *9000 | int & >0 & <=65535
+		numberOfConcurrentWorkers: *200 | int
+		featureGates: {
+			additionalCertificateOutputFormats: *true | bool
+			experimentalCertificateSigningRequestControllers: *true | bool
+			experimentalGatewayAPISupport: *true | bool
+			serverSideApply: *true | bool
+			literalCertificateSubject: *true | bool
+			useCertificateRequestBasicConstraints: *true | bool
+		}
+	}
+
+	// Setting Nameservers for DNS01 Self Check
+	// See: https://cert-manager.io/docs/configuration/acme/dns01/#setting-nameservers-for-dns01-self-check
+	// Comma separated string with host and port of the recursive nameservers cert-manager should query
+	dns01RecursiveNameservers?: string
+
+	// Forces cert-manager to only use the recursive nameservers for verification.
+	// Enabling this option could cause the DNS01 self check to take longer due to caching performed by the recursive nameservers
+	dns01RecursiveNameserversOnly: *false | bool
+
+	// Additional command line flags to pass to cert-manager controller binary.
+	// To see all available flags run docker run quay.io/jetstack/cert-manager-controller:<version> --help
+	extraArgs: [...string]
+	//# Use this flag to enable or disable arbitrary controllers, for example, disable the CertificiateRequests approver
+	//# --controllers=*,-certificaterequests-approver
+
+	extraEnv: [...corev1.EnvVar]
+
+	resources?: corev1.#ResourceRequirements & {requests: {cpu: "10m", memory: "32Mi"}}
+	securityContext?: corev1.#SecurityContext & {runAsNonRoot: true, seccompProfile: type: "RuntimeDefault"}
+
+	// Container Security Context to be set on the controller component container
+	// ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+	containerSecurityContext?: corev1.#ContainerSecurityContext & {allowPrivilegeEscalation: false, capabilities: {drop: ["ALL"], readOnlyRootFilesystem: true, runAsNonRoot: true}}
+
+
+
+
+
+
+
 	// Pod
 	podAnnotations?: {[ string]: string}
 	podSecurityContext?: corev1.#PodSecurityContext
 	tolerations?: [ ...corev1.#Toleration]
 	affinity?: corev1.#Affinity
 	topologySpreadConstraints?: [...corev1.#TopologySpreadConstraint]
-
-	// Container
-	image!:           timoniv1.#Image
-	imagePullPolicy:  *"IfNotPresent" | string
-	resources?:       corev1.#ResourceRequirements
-	securityContext?: corev1.#SecurityContext
 
 	// Service
 	service: port: *80 | int & >0 & <=65535
@@ -93,6 +181,8 @@ import (
 
 #Duration: string & =~"^[0-9]+(ns|us|µs|ms|s|m|h)$"
 #Percent: string & =~"^(1)?([1-9])?([0-9])%$"
+#Labels: {[string & =~"^(([A-Za-z0-9][-A-Za-z0-9_./]*)?[A-Za-z0-9])?$" & strings.MaxRunes(63)]: string & =~"^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?$" & strings.MaxRunes(63)}
+#Annotations: {[string & =~"^(([A-Za-z0-9][-A-Za-z0-9_./]*)?[A-Za-z0-9])?$" & strings.MaxRunes(63)]: string & =~"^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?$" & strings.MaxRunes(63)}
 
 // Instance takes the config values and outputs the Kubernetes objects.
 #Instance: {
