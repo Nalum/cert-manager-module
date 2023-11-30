@@ -19,7 +19,7 @@ import (
 
 	// Pod Security Policy
 	podSecurityPolicy: {
-		enabled: *false | bool
+		enabled:     *false | bool
 		useAppArmor: *true | bool
 	}
 
@@ -41,10 +41,10 @@ import (
 	}
 
 	leaderElection: {
-		namespace: *"kube-system" | string
+		namespace:     *"kube-system" | string
 		leaseDuration: *"60s" | #Duration
 		renewDeadline: *"40s" | #Duration
-		retryPeriod: *"15s" | #Duration
+		retryPeriod:   *"15s" | #Duration
 	}
 
 	installCRDs: *false | bool
@@ -54,8 +54,8 @@ import (
 	strategy?: corev1.#DeploymentStrategy
 
 	podDisruptionBudget: {
-		enabled: *false | bool
-		minAvailable: *1 | int | #Percent
+		enabled:        *false | bool
+		minAvailable:   *1 | int | #Percent
 		maxUnavailable: *1 | int | #Percent
 	}
 
@@ -65,8 +65,8 @@ import (
 	// The maximum number of challenges that can be scheduled as 'processing' at once
 	maxConcurrentChallenges: *60 | int
 
-	image!: timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-controller", tag: "v1.13.2"}
-	imagePullPolicy:  *"IfNotPresent" | "Always" | "Never"
+	image!:          timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-controller", tag: "v1.13.2"}
+	imagePullPolicy: *"IfNotPresent" | "Always" | "Never"
 
 	// Override the namespace used to store DNS provider credentials etc. for ClusterIssuer
 	// resources. By default, the same namespace as cert-manager is deployed within is
@@ -102,24 +102,24 @@ import (
 	// This allows setting options that'd usually be provided via flags.
 	// An APIVersion and Kind must be specified in your values.yaml file.
 	// Flags will override options that are set here.
-	config: { // TODO: Grab this from the Cert Manager repo instead of defining here
+	config: {// TODO: Grab this from the Cert Manager repo instead of defining here
 		apiVersion: *"controller.config.cert-manager.io/v1alpha1" | string
-		kind: *"ControllerConfiguration" | string
+		kind:       *"ControllerConfiguration" | string
 		logging: {
 			verbosity: *2 | int & >=0 & <=6
-			format: *"text" | string
+			format:    *"text" | string
 		}
 		leaderElectionConfig: namespace: *"kube-system" | string
-		kubernetesAPIQPS: *9000 | int
-		kubernetesAPIBurst: *9000 | int
+		kubernetesAPIQPS:          *9000 | int
+		kubernetesAPIBurst:        *9000 | int
 		numberOfConcurrentWorkers: *200 | int
 		featureGates: {
-			additionalCertificateOutputFormats: *true | bool
+			additionalCertificateOutputFormats:               *true | bool
 			experimentalCertificateSigningRequestControllers: *true | bool
-			experimentalGatewayAPISupport: *true | bool
-			serverSideApply: *true | bool
-			literalCertificateSubject: *true | bool
-			useCertificateRequestBasicConstraints: *true | bool
+			experimentalGatewayAPISupport:                    *true | bool
+			serverSideApply:                                  *true | bool
+			literalCertificateSubject:                        *true | bool
+			useCertificateRequestBasicConstraints:            *true | bool
 		}
 	}
 
@@ -140,8 +140,8 @@ import (
 
 	extraEnv: [...corev1.EnvVar]
 
-	resources?: corev1.#ResourceRequirements & {requests: {cpu: "10m", memory: "32Mi"}}
-	securityContext?: corev1.#SecurityContext & {runAsNonRoot: true, seccompProfile: type: "RuntimeDefault"}
+	resources?:       corev1.#ResourceRequirements & {requests: {cpu: "10m", memory:              "32Mi"}}
+	securityContext?: corev1.#SecurityContext & {runAsNonRoot:        true, seccompProfile: type: "RuntimeDefault"}
 
 	// Container Security Context to be set on the controller component container
 	// ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
@@ -150,14 +150,14 @@ import (
 	volumes?: [...corev1.#Volume]
 	volumeMounts?: [...corev1.#VolumeMount]
 
-	deploymentLabels?: #Labels
+	deploymentLabels?:      #Labels
 	deploymentAnnotations?: #Annotations
-	podLabels?: #Labels
-	podAnnotations?: #Annotations
-	serviceLabels?: #Labels
-	serviceAnnotations?: #Annotations
+	podLabels?:             #Labels
+	podAnnotations?:        #Annotations
+	serviceLabels?:         #Labels
+	serviceAnnotations?:    #Annotations
 	tolerations?: [ ...corev1.#Toleration]
-	affinity?: corev1.#Affinity
+	affinity?:    corev1.#Affinity
 	nodeSelector: #Labels & {"kubernetes.io/os": "linux"}
 	topologySpreadConstraints?: [...corev1.#TopologySpreadConstraint]
 
@@ -166,35 +166,35 @@ import (
 	// cert-manager can access an ingress or DNS TXT records at all times.
 	// NOTE: This requires Kubernetes 1.10 or `CustomPodDNS` feature gate enabled for
 	// the cluster to work.
-	podDNSPolicy: *"ClusterFirst" | "Default" | "ClusterFirstWithHostNet" | "None"
+	podDNSPolicy:  *"ClusterFirst" | "Default" | "ClusterFirstWithHostNet" | "None"
 	podDNSConfig?: corev1.#PodDNSConfig
 
 	ingressShim?: {
-		defaultIssuerName?: string
-		defaultIssuerKind?: *"ClusterIssuer" | "Issuer"
+		defaultIssuerName?:  string
+		defaultIssuerKind?:  *"ClusterIssuer" | "Issuer"
 		defaultIssuerGroup?: string
 	}
 
 	prometheus: {
 		enabled: *true | bool
 		servicemonitor: {
-			enabled: *false | bool
+			enabled:            *false | bool
 			prometheusInstance: *"default" | string
-			targetPort: *9402 | int
-			path: *"/metrics" | string
-			interval: *"60s" | #Duration
-			scrapeTimeout: *"30s" | #Duration
-			labels?: #Labels
-			annotations?: #Annotations
-			honorLabels: *false | bool
+			targetPort:         *9402 | int
+			path:               *"/metrics" | string
+			interval:           *"60s" | #Duration
+			scrapeTimeout:      *"30s" | #Duration
+			labels?:            #Labels
+			annotations?:       #Annotations
+			honorLabels:        *false | bool
 			endpointAdditionalProperties: {[ string]: string}
 		}
 	}
 
 	// Use these variables to configure the HTTP_PROXY environment variables
-	http_proxy?: string
+	http_proxy?:  string
 	https_proxy?: string
-	no_proxy?: string
+	no_proxy?:    string
 
 	// LivenessProbe settings for the controller container of the controller Pod.
 	//
@@ -206,7 +206,7 @@ import (
 	// https://github.com/kubernetes/kubernetes/blob/806b30170c61a38fedd54cc9ede4cd6275a1ad3b/cmd/kubeadm/app/util/staticpod/utils.go#L241-L245
 	livenessProbe: {
 		enabled: *false | bool
-		probe: corev1.#Probe & {initialDelaySeconds: 10, timeoutSeconds: 15, failureThreshold: 8}
+		probe:   corev1.#Probe & {initialDelaySeconds: 10, timeoutSeconds: 15, failureThreshold: 8}
 	}
 
 	// enableServiceLinks indicates whether information about services should be
@@ -215,7 +215,7 @@ import (
 	enableServiceLinks: *false | bool
 
 	webhook: {
-		replicaCount: *1 | int
+		replicaCount:   *1 | int
 		timeoutSeconds: *10 | int
 
 		// Used to configure options for the webhook pod.
@@ -224,7 +224,7 @@ import (
 		// Flags will override options that are set here.
 		config: {
 			apiVersion: *"webhook.config.cert-manager.io/v1alpha1" | string
-			kind: *"WebhookConfiguration" | string
+			kind:       *"WebhookConfiguration" | string
 			// The port that the webhook should listen on for requests.
 			// In GKE private clusters, by default kubernetes apiservers are allowed to
 			// talk to the cluster nodes only on 443 and 10250. so configuring
@@ -242,8 +242,8 @@ import (
 		securityContext?: corev1.#SecurityContext & {runAsNonRoot: true, seccompProfile: type: "RuntimeDefault"}
 
 		podDisruptionBudget: {
-			enabled: *false | bool
-			minAvailable: *1 | int | #Percent
+			enabled:        *false | bool
+			minAvailable:   *1 | int | #Percent
 			maxUnavailable: *1 | int | #Percent
 		}
 
@@ -252,14 +252,14 @@ import (
 		containerSecurityContext?: corev1.#ContainerSecurityContext & {allowPrivilegeEscalation: false, capabilities: {drop: ["ALL"], readOnlyRootFilesystem: true, runAsNonRoot: true}}
 
 		// Optional additional annotations to add to the webhook resources
-		deploymentAnnotations?: #Annotations
-		podAnnotations?: #Annotations
-		serviceAnnotations?: #Annotations
-		mutatingWebhookConfigurationAnnotations?: #Annotations
+		deploymentAnnotations?:                     #Annotations
+		podAnnotations?:                            #Annotations
+		serviceAnnotations?:                        #Annotations
+		mutatingWebhookConfigurationAnnotations?:   #Annotations
 		validatingWebhookConfigurationAnnotations?: #Annotations
 
 		// Optional additional labels to add to the Webhook resources
-		podLabels?: #Labels
+		podLabels?:     #Labels
 		serviceLabels?: #Labels
 
 		// Additional command line flags to pass to cert-manager webhook binary.
@@ -276,16 +276,16 @@ import (
 		// Liveness and readiness probe values
 		// Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-probes
 		//
-		livenessProbe?: corev1.#Probe & {failureThreshold: 3, initialDelaySeconds: 60, periodSeconds: 10, successThreshold: 1, timeoutSeconds: 1}
-		readinessProbe?: corev1.#Probe & {failureThreshold: 3, initialDelaySeconds: 5, periodSeconds: 5, successThreshold: 1, timeoutSeconds: 1}
+		livenessProbe?:  corev1.#Probe & {failureThreshold: 3, initialDelaySeconds: 60, periodSeconds: 10, successThreshold: 1, timeoutSeconds: 1}
+		readinessProbe?: corev1.#Probe & {failureThreshold: 3, initialDelaySeconds: 5, periodSeconds:  5, successThreshold:  1, timeoutSeconds: 1}
 
 		nodeSelector: #Labels & {"kubernetes.io/os": "linux"}
-		affinity?: corev1.#Affinity
+		affinity?:    corev1.#Affinity
 		tolerations?: [ ...corev1.#Toleration]
 		topologySpreadConstraints?: [...corev1.#TopologySpreadConstraint]
 
-		image!: timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-webhook", tag: "v1.13.2"}
-		imagePullPolicy:  *"IfNotPresent" | "Always" | "Never"
+		image!:          timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-webhook", tag: "v1.13.2"}
+		imagePullPolicy: *"IfNotPresent" | "Always" | "Never"
 
 		serviceAccount: {
 			// Specifies whether a service account should be created
@@ -325,18 +325,18 @@ import (
 		// Specifies how the service should be handled. Useful if you want to expose the
 		// webhook to outside of the cluster. In some cases, the control plane cannot
 		// reach internal services.
-		serviceType: *"ClusterIP" | "NodePort" | "LoadBalancer" | "ExternalName"
+		serviceType:     *"ClusterIP" | "NodePort" | "LoadBalancer" | "ExternalName"
 		loadBalancerIP?: string
 
 		// Overrides the mutating webhook and validating webhook so they reach the webhook
 		// service using the `url` field instead of a service.
-		url?: string
+		url?:  string
 		host?: string
 
 		// Enables default network policies for webhooks.
 		networkPolicy: {
 			enabled: *false | bool
-			spec?: networkingv1.#NetworkPolicySpec
+			spec?:   networkingv1.#NetworkPolicySpec
 		}
 
 		volumes?: [...corev1.#Volume]
@@ -349,7 +349,7 @@ import (
 	}
 
 	caInjector: {
-		enabled: *true | bool
+		enabled:      *true | bool
 		replicaCount: *1 | int
 
 		strategy?: corev1.#DeploymentStrategy
@@ -359,8 +359,8 @@ import (
 		securityContext?: corev1.#SecurityContext & {runAsNonRoot: true, seccompProfile: type: "RuntimeDefault"}
 
 		podDisruptionBudget: {
-			enabled: *false | bool
-			minAvailable: *1 | int | #Percent
+			enabled:        *false | bool
+			minAvailable:   *1 | int | #Percent
 			maxUnavailable: *1 | int | #Percent
 		}
 
@@ -370,7 +370,7 @@ import (
 
 		// Optional additional annotations to add to the webhook resources
 		deploymentAnnotations?: #Annotations
-		podAnnotations?: #Annotations
+		podAnnotations?:        #Annotations
 
 		// Additional command line flags to pass to cert-manager cainjector binary.
 		// To see all available flags run docker run quay.io/jetstack/cert-manager-cainjector:<version> --help
@@ -378,17 +378,17 @@ import (
 		// Enable profiling for cainjector
 		// - --enable-profiling=true
 
-		resources?: corev1.#ResourceRequirements & {requests: {cpu: "10m", memory: "32Mi"}}
-		nodeSelector: #Labels & {"kubernetes.io/os": "linux"}
-		affinity?: corev1.#Affinity
+		resources?:   corev1.#ResourceRequirements & {requests: {cpu: "10m", memory: "32Mi"}}
+		nodeSelector: #Labels & {"kubernetes.io/os":                  "linux"}
+		affinity?:    corev1.#Affinity
 		tolerations?: [ ...corev1.#Toleration]
 		topologySpreadConstraints?: [...corev1.#TopologySpreadConstraint]
 
 		// Optional additional labels to add to the CA Injector Pods
 		podLabels?: #Labels
 
-		image!: timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-cainjector", tag: "v1.13.2"}
-		imagePullPolicy:  *"IfNotPresent" | "Always" | "Never"
+		image!:          timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-cainjector", tag: "v1.13.2"}
+		imagePullPolicy: *"IfNotPresent" | "Always" | "Never"
 
 		serviceAccount: {
 			// Specifies whether a service account should be created
@@ -417,8 +417,8 @@ import (
 	}
 
 	acmeSolver: {
-		image!: timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-acmesolver", tag: "v1.13.2"}
-		imagePullPolicy:  *"IfNotPresent" | "Always" | "Never"
+		image!:          timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-acmesolver", tag: "v1.13.2"}
+		imagePullPolicy: *"IfNotPresent" | "Always" | "Never"
 	}
 
 	// TODO: turn this into a Timoni Test
@@ -456,18 +456,18 @@ import (
 		// To see all available flags run docker run quay.io/jetstack/cert-manager-ctl:<version> --help
 		extraArgs: [...string]
 
-		resources?: corev1.#ResourceRequirements & {requests: {cpu: "10m", memory: "32Mi"}}
-		nodeSelector: #Labels & {"kubernetes.io/os": "linux"}
-		affinity?: corev1.#Affinity
+		resources?:   corev1.#ResourceRequirements & {requests: {cpu: "10m", memory: "32Mi"}}
+		nodeSelector: #Labels & {"kubernetes.io/os":                  "linux"}
+		affinity?:    corev1.#Affinity
 		tolerations?: [ ...corev1.#Toleration]
 
 		// Optional additional labels to add to the startupapicheck Pods
 		podLabels?: #Labels
 
-		image!: timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-ctl", tag: "v1.13.2"}
-		imagePullPolicy:  *"IfNotPresent" | "Always" | "Never"
+		image!:          timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-ctl", tag: "v1.13.2"}
+		imagePullPolicy: *"IfNotPresent" | "Always" | "Never"
 
-			// annotations for the startup API Check job RBAC and PSP resources
+		// annotations for the startup API Check job RBAC and PSP resources
 		rbac: annotations?: #Annotations
 
 		// Automounting API credentials for a particular pod
@@ -508,7 +508,7 @@ import (
 }
 
 #Duration: string & =~"^[0-9]+(ns|us|µs|ms|s|m|h)$"
-#Percent: string & =~"^(1)?([1-9])?([0-9])%$"
+#Percent:  string & =~"^(1)?([1-9])?([0-9])%$"
 #Labels: {[string & =~"^(([A-Za-z0-9][-A-Za-z0-9_./]*)?[A-Za-z0-9])?$" & strings.MaxRunes(63)]: string & =~"^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?$" & strings.MaxRunes(63)}
 #Annotations: {[string & =~"^(([A-Za-z0-9][-A-Za-z0-9_./]*)?[A-Za-z0-9])?$" & strings.MaxRunes(63)]: string & =~"^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?$" & strings.MaxRunes(63)}
 
@@ -517,11 +517,19 @@ import (
 	config: #Config
 
 	objects: {
-		deployment: #Deployment & {_config: config}
-		webhookDeployment: #Deployment & {_config: config}
-		webhookMutatingWebhook: #MutatingWebhook & {_config: config}
+		deployment:               #Deployment & {_config:        config}
+		webhookDeployment:        #Deployment & {_config:        config}
+		webhookMutatingWebhook:   #MutatingWebhook & {_config:   config}
 		webhookValidatingWebhook: #ValidatingWebhook & {_config: config}
-		webhookService: #Service & {_config: config}
+		webhookService:           #Service & {_config:           config}
+	}
+
+	objects: {
+		for name, crd in customresourcedefinition {
+			"\(name)": crd
+			"\(name)": metadata: labels:      config.metadata.labels
+			"\(name)": metadata: annotations: config.metadata.annotations
+		}
 	}
 
 	if config.caInjector.enabled {
@@ -535,18 +543,18 @@ import (
 
 		if config.podSecurityPolicy.enbaled {
 			objects: {
-				caInjectorPSPClusterRole: #ClusterRole & {_config: config}
+				caInjectorPSPClusterRole:        #ClusterRole & {_config:        config}
 				caInjectorPSPClusterRoleBinding: #ClusterRoleBinding & {_config: config}
-				caInjectorPSP: #PodSecurityPolicy & {_config: config}
+				caInjectorPSP:                   #PodSecurityPolicy & {_config:  config}
 			}
 		}
 
 		if config.rbac.create {
 			objects: {
-				caInjectorClusterRole: #ClusterRole & {_config: config}
+				caInjectorClusterRole:        #ClusterRole & {_config:        config}
 				caInjectorClusterRoleBinding: #ClusterRoleBinding & {_config: config}
-				caInjectorRole: #Role & {_config: config}
-				caInjectorRoleBinding: #RoleBinding & {_config: config}
+				caInjectorRole:               #Role & {_config:               config}
+				caInjectorRoleBinding:        #RoleBinding & {_config:        config}
 			}
 		}
 
@@ -563,7 +571,7 @@ import (
 
 	if config.webhook.networkPolicy.enabled {
 		objects: {
-			networkPolicyEgress: #NetworkPolicy & {_config: config}
+			networkPolicyEgress:   #NetworkPolicy & {_config: config}
 			networkPolicyWebhooks: #NetworkPolicy & {_config: config}
 		}
 	}
@@ -578,52 +586,52 @@ import (
 
 	if config.podSecurityPolicy.enbaled {
 		objects: {
-			pspClusterRole: #ClusterRole & {_config: config}
+			pspClusterRole:        #ClusterRole & {_config:        config}
 			pspClusterRoleBinding: #ClusterRoleBinding & {_config: config}
-			podSecurityPolicy: #PodSecurityPolicy & {_config: config}
+			podSecurityPolicy:     #PodSecurityPolicy & {_config:  config}
 
-			webhookPSPClusterRole: #ClusterRole & {_config: config}
+			webhookPSPClusterRole:        #ClusterRole & {_config:        config}
 			webhookPSPClusterRoleBinding: #ClusterRoleBinding & {_config: config}
-			webhookPSP: #PodSecurityPolicy & {_config: config}
+			webhookPSP:                   #PodSecurityPolicy & {_config:  config}
 		}
 	}
 
 	if config.rbac.create {
 		objects: {
-			leaderElectionRole: #Role & {_config: config}
+			leaderElectionRole:        #Role & {_config:        config}
 			leaderElectionRoleBinding: #RoleBinding & {_config: config}
 
 			clusterViewClusterRole: #ClusterRole & {_config: config}
-			viewClusterRole: #ClusterRole & {_config: config}
-			editClusterRole: #ClusterRole & {_config: config}
+			viewClusterRole:        #ClusterRole & {_config: config}
+			editClusterRole:        #ClusterRole & {_config: config}
 
-			controllerIssuersClusterRole: #ClusterRole & {_config: config}
-			controllerClusterIssuersClusterRole: #ClusterRole & {_config: config}
-			controllerCertificatesClusterRole: #ClusterRole & {_config: config}
-			controllerOrdersClusterRole: #ClusterRole & {_config: config}
-			controllerChallengesClusterRole: #ClusterRole & {_config: config}
-			controllerIngressShimClusterRole: #ClusterRole & {_config: config}
-			controllerApproveClusterRole: #ClusterRole & {_config: config}
-			controllerCertificateSigningRequestsClusterRole: #ClusterRole & {_config: config}
-			controllerIssuersClusterRoleBinding: #ClusterRoleBinding & {_config: config}
-			controllerClusterIssuersClusterRoleBinding: #ClusterRoleBinding & {_config: config}
-			controllerCertificatesClusterRoleBinding: #ClusterRoleBinding & {_config: config}
-			controllerOrdersClusterRoleBinding: #ClusterRoleBinding & {_config: config}
-			controllerChallengesClusterRoleBinding: #ClusterRoleBinding & {_config: config}
-			controllerIngressShimClusterRoleBinding: #ClusterRoleBinding & {_config: config}
-			controllerApproveClusterRoleBinding: #ClusterRoleBinding & {_config: config}
+			controllerIssuersClusterRole:                           #ClusterRole & {_config:        config}
+			controllerClusterIssuersClusterRole:                    #ClusterRole & {_config:        config}
+			controllerCertificatesClusterRole:                      #ClusterRole & {_config:        config}
+			controllerOrdersClusterRole:                            #ClusterRole & {_config:        config}
+			controllerChallengesClusterRole:                        #ClusterRole & {_config:        config}
+			controllerIngressShimClusterRole:                       #ClusterRole & {_config:        config}
+			controllerApproveClusterRole:                           #ClusterRole & {_config:        config}
+			controllerCertificateSigningRequestsClusterRole:        #ClusterRole & {_config:        config}
+			controllerIssuersClusterRoleBinding:                    #ClusterRoleBinding & {_config: config}
+			controllerClusterIssuersClusterRoleBinding:             #ClusterRoleBinding & {_config: config}
+			controllerCertificatesClusterRoleBinding:               #ClusterRoleBinding & {_config: config}
+			controllerOrdersClusterRoleBinding:                     #ClusterRoleBinding & {_config: config}
+			controllerChallengesClusterRoleBinding:                 #ClusterRoleBinding & {_config: config}
+			controllerIngressShimClusterRoleBinding:                #ClusterRoleBinding & {_config: config}
+			controllerApproveClusterRoleBinding:                    #ClusterRoleBinding & {_config: config}
 			controllerCertificateSigningRequestsClusterRoleBinding: #ClusterRoleBinding & {_config: config}
 
-			webhookRole: #Role & {_config: config}
-			webhookRoleBinding: #RoleBinding & {_config: config}
-			webhookClusterRole: #ClusterRole & {_config: config}
+			webhookRole:               #Role & {_config:               config}
+			webhookRoleBinding:        #RoleBinding & {_config:        config}
+			webhookClusterRole:        #ClusterRole & {_config:        config}
 			webhookClusterRoleBinding: #ClusterRoleBinding & {_config: config}
 		}
 	}
 
 	if config.prometheus.enabled && config.prometheus.serviceMonitor.enabled {
 		objects: {
-			service: #Service & {_config: config}
+			service:        #Service & {_config:        config}
 			serviceMonitor: #ServiceMonitor & {_config: config}
 		}
 	}
@@ -637,15 +645,15 @@ import (
 
 		if config.podSecurityPolicy.enbaled {
 			objects: {
-				startupAPICheckPSPClusterRole: #ClusterRole & {_config: config}
+				startupAPICheckPSPClusterRole:        #ClusterRole & {_config:        config}
 				startupAPICheckPSPClusterRoleBinding: #ClusterRoleBinding & {_config: config}
-				startupAPICheckPSP: #PodSecurityPolicy & {_config: config}
+				startupAPICheckPSP:                   #PodSecurityPolicy & {_config:  config}
 			}
 		}
 
 		if config.rbac.create {
 			objects: {
-				startupAPICheckRole: #Role & {_config: config}
+				startupAPICheckRole:        #Role & {_config:        config}
 				startupAPICheckRoleBinding: #RoleBinding & {_config: config}
 			}
 		}
