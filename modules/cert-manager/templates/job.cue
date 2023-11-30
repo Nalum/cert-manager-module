@@ -9,6 +9,8 @@ import (
 	timoniv1 "timoni.sh/core/v1alpha1"
 )
 
+#Job: batchv1.#Job
+
 #TestJob: batchv1.#Job & {
 	_config:    #Config
 	apiVersion: "batch/v1"
