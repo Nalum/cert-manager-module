@@ -66,7 +66,7 @@ import (
 	maxConcurrentChallenges: *60 | int
 
 	image!: timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-controller", tag: "v1.13.2"}
-	imagePullPolicy:  *"IfNotPresent" | string
+	imagePullPolicy:  *"IfNotPresent" | "Always" | "Never"
 
 	// Override the namespace used to store DNS provider credentials etc. for ClusterIssuer
 	// resources. By default, the same namespace as cert-manager is deployed within is
@@ -83,13 +83,13 @@ import (
 		create: *true | bool
 		// The name of the service account to use.
 		// If not set and create is true, a name is generated using the fullname template
-		name: *"" | string
+		name?: string
 		// Optional additional annotations to add to the controller's ServiceAccount
-		annotations: #Annotations
+		annotations?: #Annotations
 		// Automount API credentials for a Service Account.
 		automountServiceAccountToken: *true | bool
 		// Optional additional labels to add to the controller's ServiceAccount
-		labels: #Labels
+		labels?: #Labels
 	}
 
 	// Automounting API credentials for a particular pod
@@ -110,8 +110,8 @@ import (
 			format: *"text" | string
 		}
 		leaderElectionConfig: namespace: *"kube-system" | string
-		kubernetesAPIQPS: *9000 | int & >0 & <=65535
-		kubernetesAPIBurst: *9000 | int & >0 & <=65535
+		kubernetesAPIQPS: *9000 | int
+		kubernetesAPIBurst: *9000 | int
 		numberOfConcurrentWorkers: *200 | int
 		featureGates: {
 			additionalCertificateOutputFormats: *true | bool
@@ -206,7 +206,7 @@ import (
 	// https://github.com/kubernetes/kubernetes/blob/806b30170c61a38fedd54cc9ede4cd6275a1ad3b/cmd/kubeadm/app/util/staticpod/utils.go#L241-L245
 	livenessProbe: {
 		enabled: *false | bool
-		corev1.#Probe & {initialDelaySeconds: 10, timeoutSeconds: 15, failureThreshold: 8}
+		probe: corev1.#Probe & {initialDelaySeconds: 10, timeoutSeconds: 15, failureThreshold: 8}
 	}
 
 	// enableServiceLinks indicates whether information about services should be
@@ -285,11 +285,11 @@ import (
 		topologySpreadConstraints?: [...corev1.#TopologySpreadConstraint]
 
 		image!: timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-webhook", tag: "v1.13.2"}
-		imagePullPolicy:  *"IfNotPresent" | string
+		imagePullPolicy:  *"IfNotPresent" | "Always" | "Never"
 
 		serviceAccount: {
 			// Specifies whether a service account should be created
-			create: true
+			create: *true | bool
 			// The name of the service account to use.
 			// If not set and create is true, a name is generated using the fullname template
 			name?: string
@@ -325,7 +325,7 @@ import (
 		// Specifies how the service should be handled. Useful if you want to expose the
 		// webhook to outside of the cluster. In some cases, the control plane cannot
 		// reach internal services.
-		serviceType: "ClusterIP"
+		serviceType: *"ClusterIP" | "NodePort" | "LoadBalancer" | "ExternalName"
 		loadBalancerIP?: string
 
 		// Overrides the mutating webhook and validating webhook so they reach the webhook
@@ -335,8 +335,8 @@ import (
 
 		// Enables default network policies for webhooks.
 		networkPolicy: {
-			enabled: false
-			networkingv1.#NetworkPolicySpec
+			enabled: *false | bool
+			spec?: networkingv1.#NetworkPolicySpec
 		}
 
 		volumes?: [...corev1.#Volume]
@@ -348,11 +348,157 @@ import (
 		enableServiceLinks: *false | bool
 	}
 
+	caInjector: {
+		enabled: *true | bool
+		replicaCount: *1 | int
 
+		strategy?: corev1.#DeploymentStrategy
 
+		// Pod Security Context to be set on the cainjector component Pod
+		// ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+		securityContext?: corev1.#SecurityContext & {runAsNonRoot: true, seccompProfile: type: "RuntimeDefault"}
 
+		podDisruptionBudget: {
+			enabled: *false | bool
+			minAvailable: *1 | int | #Percent
+			maxUnavailable: *1 | int | #Percent
+		}
 
+		// Container Security Context to be set on the cainjector component container
+		// ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+		containerSecurityContext?: corev1.#ContainerSecurityContext & {allowPrivilegeEscalation: false, capabilities: {drop: ["ALL"], readOnlyRootFilesystem: true, runAsNonRoot: true}}
 
+		// Optional additional annotations to add to the webhook resources
+		deploymentAnnotations?: #Annotations
+		podAnnotations?: #Annotations
+
+		// Additional command line flags to pass to cert-manager cainjector binary.
+		// To see all available flags run docker run quay.io/jetstack/cert-manager-cainjector:<version> --help
+		extraArgs?: [...string]
+		// Enable profiling for cainjector
+		// - --enable-profiling=true
+
+		resources?: corev1.#ResourceRequirements & {requests: {cpu: "10m", memory: "32Mi"}}
+		nodeSelector: #Labels & {"kubernetes.io/os": "linux"}
+		affinity?: corev1.#Affinity
+		tolerations?: [ ...corev1.#Toleration]
+		topologySpreadConstraints?: [...corev1.#TopologySpreadConstraint]
+
+		// Optional additional labels to add to the CA Injector Pods
+		podLabels?: #Labels
+
+		image!: timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-cainjector", tag: "v1.13.2"}
+		imagePullPolicy:  *"IfNotPresent" | "Always" | "Never"
+
+		serviceAccount: {
+			// Specifies whether a service account should be created
+			create: *true | bool
+			// The name of the service account to use.
+			// If not set and create is true, a name is generated using the fullname template
+			name?: string
+			// Optional additional annotations to add to the controller's ServiceAccount
+			annotations?: #Annotations
+			// Optional additional labels to add to the webhook's ServiceAccount
+			labels?: #Labels
+			// Automount API credentials for a Service Account.
+			automountServiceAccountToken: *true | bool
+		}
+
+		// Automounting API credentials for a particular pod
+		automountServiceAccountToken: *true | bool
+
+		volumes?: [...corev1.#Volume]
+		volumeMounts?: [...corev1.#VolumeMount]
+
+		// enableServiceLinks indicates whether information about services should be
+		// injected into pod's environment variables, matching the syntax of Docker
+		// links.
+		enableServiceLinks: *false | bool
+	}
+
+	acmeSolver: {
+		image!: timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-acmesolver", tag: "v1.13.2"}
+		imagePullPolicy:  *"IfNotPresent" | "Always" | "Never"
+	}
+
+	// TODO: turn this into a Timoni Test
+	// This startupapicheck is a Helm post-install hook that waits for the webhook
+	// endpoints to become available.
+	// The check is implemented using a Kubernetes Job- if you are injecting mesh
+	// sidecar proxies into cert-manager pods, you probably want to ensure that they
+	// are not injected into this Job's pod. Otherwise the installation may time out
+	// due to the Job never being completed because the sidecar proxy does not exit.
+	// See https://github.com/cert-manager/cert-manager/pull/4414 for context.
+	startupAPICheck: {
+		enabled: *true | bool
+
+		// Pod Security Context to be set on the startupapicheck component Pod
+		// ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+		securityContext?: corev1.#SecurityContext & {runAsNonRoot: true, seccompProfile: type: "RuntimeDefault"}
+
+		// Container Security Context to be set on the controller component container
+		// ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+		containerSecurityContext?: corev1.#ContainerSecurityContext & {allowPrivilegeEscalation: false, capabilities: {drop: ["ALL"], readOnlyRootFilesystem: true, runAsNonRoot: true}}
+
+		// Timeout for 'kubectl check api' command
+		timeout: *"1m" | #Duration
+
+		// Job backoffLimit
+		backoffLimit: *4 | int
+
+		// Optional additional annotations to add to the startupapicheck Job
+		jobAnnotations?: #Annotations
+
+		// Optional additional annotations to add to the startupapicheck Pods
+		podAnnotations?: #Annotations
+
+		// Additional command line flags to pass to startupapicheck binary.
+		// To see all available flags run docker run quay.io/jetstack/cert-manager-ctl:<version> --help
+		extraArgs: [...string]
+
+		resources?: corev1.#ResourceRequirements & {requests: {cpu: "10m", memory: "32Mi"}}
+		nodeSelector: #Labels & {"kubernetes.io/os": "linux"}
+		affinity?: corev1.#Affinity
+		tolerations?: [ ...corev1.#Toleration]
+
+		// Optional additional labels to add to the startupapicheck Pods
+		podLabels?: #Labels
+
+		image!: timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-ctl", tag: "v1.13.2"}
+		imagePullPolicy:  *"IfNotPresent" | "Always" | "Never"
+
+			// annotations for the startup API Check job RBAC and PSP resources
+		rbac: annotations?: #Annotations
+
+		// Automounting API credentials for a particular pod
+		automountServiceAccountToken: *true | bool
+
+		serviceAccount: {
+			// Specifies whether a service account should be created
+			create: *true | bool
+
+			// The name of the service account to use.
+			// If not set and create is true, a name is generated using the fullname template
+			name?: string
+
+			// Optional additional annotations to add to the Job's ServiceAccount
+			annotations?: #Annotations
+
+			// Automount API credentials for a Service Account.
+			automountServiceAccountToken: *true | bool
+
+			// Optional additional labels to add to the startupapicheck's ServiceAccount
+			labels?: #Labels
+		}
+
+		volumes?: [...corev1.#Volume]
+		volumeMounts?: [...corev1.#VolumeMount]
+
+		// enableServiceLinks indicates whether information about services should be
+		// injected into pod's environment variables, matching the syntax of Docker
+		// links.
+		enableServiceLinks: *false | bool
+	}
 
 	// Test Job
 	test: {
