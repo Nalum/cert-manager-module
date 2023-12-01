@@ -5,17 +5,69 @@
 
 package main
 
+import (
+	timoniv1 "timoni.sh/core/v1alpha1"
+)
+
 // Defaults
 values: {
-	message: "Hello World"
-	image: {
-		repository: "cgr.dev/chainguard/nginx"
-		digest:     "sha256:3dd8fa303f77d7eb6ce541cb05009a5e8723bd7e3778b95131ab4a2d12fadb8f"
-		tag:        "1.25.3"
+	metadata: labels: team: "dev"
+	installCRDs: true
+	config: logging: format:  "json"
+	resources: requests: cpu: "100m"
+	ingressShim: defaultIssuerName: "dev"
+
+	webhook: {
+		networkPolicy: {
+			enabled: true
+			spec: {
+				ingress: [
+					{
+						from: [
+							{
+								ipBlock: cidr: "0.0.0.0/0"
+							},
+						]
+					},
+				]
+				egress: [
+					{
+						ports: [
+							{
+								port:     80
+								protocol: "TCP"
+							},
+							{
+								port:     443
+								protocol: "TCP"
+							},
+							{
+								port:     53
+								protocol: "TCP"
+							},
+							{
+								port:     53
+								protocol: "UDP"
+							},
+							{
+								port:     6443
+								protocol: "TCP"
+							},
+						]
+						to: [
+							{
+								ipBlock: cidr: "0.0.0.0/0"
+							},
+						]
+					},
+				]
+			}
+		}
 	}
-	test: image: {
-		repository: "cgr.dev/chainguard/curl"
-		digest:     ""
-		tag:        "latest"
+
+	// Test Job
+	test: {
+		enabled: *false | bool
+		image!:  timoniv1.#Image
 	}
 }

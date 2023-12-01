@@ -6,7 +6,7 @@
 VERSION:=$(shell grep 'version:' modules/cert-manager/values.cue | awk '{ print $$2}' | tr -d '"')
 ORG:="nalum"
 REPO:="cert-manager-bundle"
-CERT_MANAGER_VERSION:=v1.13.2
+CERT_MANAGER_VERSION:=1.13.2
 MV:=0.1.0
 KV:=1.28.0
 NAME:="cert-manager"
@@ -41,7 +41,7 @@ gen-deploy: ## Print the Flux deployment
 
 .PHONY: push-mod
 push-mod: ## Push the Timoni modules to GHCR
-	@timoni mod push ./modules/cert-manager oci://ghcr.io/$(ORG)/modules/cert-manager -v=$(VERSION:v%=%) --latest \
+	@timoni mod push ./modules/cert-manager oci://ghcr.io/$(ORG)/modules/$(NAME) -v=$(VERSION:v%=%) --latest \
 		--sign cosign \
 		-a 'org.opencontainers.image.source=https://github.com/$(ORG)/$(REPO)'  \
 		-a 'org.opencontainers.image.licenses=Apache-2.0' \
@@ -59,6 +59,6 @@ push-manifests: ## Build and push the Cert-Manager manifests to GHCR
 .PHONY: import-crds
 import-crds: ## Update Cert-Manager API CUE definitions
 	@cd modules/cert-manager/templates
-	@curl -LJ -o crds.yaml https://github.com/cert-manager/cert-manager/releases/download/v1.13.2/cert-manager.crds.yaml
+	@curl -LJ -o crds.yaml https://github.com/cert-manager/cert-manager/releases/download/v$(CERT_MANAGER_VERSION)/cert-manager.crds.yaml
 	@cue import -f -o crds.cue -l 'strings.ToLower(kind)' -l 'metadata.name' -p templates crds.yaml
 	@rm crds.yaml

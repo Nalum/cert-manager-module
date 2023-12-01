@@ -143,8 +143,8 @@ import (
 
 	extraEnv: [...corev1.EnvVar]
 
-	resources?:       corev1.#ResourceRequirements & {requests: {cpu: "10m", memory:              "32Mi"}}
-	securityContext?: corev1.#SecurityContext & {runAsNonRoot:        true, seccompProfile: type: "RuntimeDefault"}
+	resources?:       corev1.#ResourceRequirements & {requests: {cpu: *"10m" | string, memory:            *"32Mi" | string}}
+	securityContext?: corev1.#SecurityContext & {runAsNonRoot:        *true | bool, seccompProfile: type: *"RuntimeDefault" | string}
 
 	// Container Security Context to be set on the controller component container
 	// ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
