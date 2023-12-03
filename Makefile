@@ -41,7 +41,7 @@ ls: ## List the CUE generated objects
 	@cue cmd -t name=$(NAME) -t namespace=$(NAMESPACE) -t mv=v$(MV) -t kv=$(KV) ls
 
 .PHONY: gen-deploy
-gen-deploy: ## Print the Flux deployment
+gen-deploy: ## Print the deployment
 	@timoni -n $(NAMESPACE) build $(NAME) ./modules/cert-manager/ -f ./modules/cert-manager/debug_values.cue | yq e '. | select(.kind == "Deployment")'
 
 .PHONY: push-mod

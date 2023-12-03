@@ -532,7 +532,13 @@ import (
 	config: #Config
 
 	objects: {
-		deployment:               #Deployment & {_config:        config}
+		namespace: #Deployment & {
+			_config: config
+		}
+		deployment: #Deployment & {
+			_config: config
+			metadata: labels: "app.kubernetes.io/component": "controller"
+		}
 		webhookDeployment:        #Deployment & {_config:        config}
 		webhookMutatingWebhook:   #MutatingWebhook & {_config:   config}
 		webhookValidatingWebhook: #ValidatingWebhook & {_config: config}
