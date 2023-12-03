@@ -64,6 +64,7 @@ push-manifests: ## Build and push the Cert-Manager manifests to GHCR
 .PHONY: import-crds
 import-crds: ## Update Cert-Manager API CUE definitions
 	@cd modules/cert-manager/templates
-	@curl -LJ -o crds.yaml https://github.com/cert-manager/cert-manager/releases/download/v$(CERT_MANAGER_VERSION)/cert-manager.crds.yaml
+	@curl -OLJ https://github.com/cert-manager/cert-manager/releases/download/v$(CERT_MANAGER_VERSION)/cert-manager.crds.yaml
+	@yq --yaml-output 'del(.metadata.labels["app.kubernetes.io/name"], .metadata.labels["app.kubernetes.io/instance"], .metadata.labels["app.kubernetes.io/version"])' cert-manager.crds.yaml > crds.yaml
 	@cue import -f -o crds.cue -l 'strings.ToLower(kind)' -l 'metadata.name' -p templates crds.yaml
-	@rm crds.yaml
+	@rm *crds.yaml
