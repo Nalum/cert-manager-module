@@ -13,6 +13,7 @@ import (
 	// Runtime version info
 	moduleVersion!: string
 	kubeVersion!:   string
+	version!:       string
 
 	// Metadata (common to all resources)
 	metadata: timoniv1.#Metadata & {#Version: moduleVersion}
@@ -21,8 +22,7 @@ import (
 	selector: timoniv1.#Selector & {#Name: metadata.name}
 
 	// Pod Security Policy
-	podSecurityPolicy: {
-		enabled:     *false | bool
+	podSecurityPolicy?: {
 		useAppArmor: *true | bool
 	}
 
@@ -37,8 +37,7 @@ import (
 	priorityClassName: string
 
 	// Setup the Cluster RBAC roles and bindings
-	rbac: {
-		create: *true | bool
+	rbac?: {
 		// Aggregate ClusterRoles to Kubernetes default user-facing roles. Ref: https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles
 		aggregateClusterRoles: *true | bool
 	}
@@ -56,8 +55,7 @@ import (
 
 	strategy?: corev1.#DeploymentStrategy
 
-	podDisruptionBudget: {
-		enabled:        *false | bool
+	podDisruptionBudget?: {
 		minAvailable:   *1 | int | #Percent
 		maxUnavailable: *1 | int | #Percent
 	}
@@ -81,9 +79,7 @@ import (
 	// This is helpful when installing cert manager as a chart dependency (sub chart)
 	namespace?: string
 
-	serviceAccount: {
-		// Specifies whether a service account should be created
-		create: *true | bool
+	serviceAccount?: {
 		// The name of the service account to use.
 		// If not set and create is true, a name is generated using the fullname template
 		name?: string
@@ -105,7 +101,7 @@ import (
 	// This allows setting options that'd usually be provided via flags.
 	// An APIVersion and Kind must be specified in your values.yaml file.
 	// Flags will override options that are set here.
-	config: {// TODO: Grab this from the Cert Manager repo instead of defining here
+	config?: {// TODO: Grab this from the Cert Manager repo instead of defining here
 		apiVersion: *"controller.config.cert-manager.io/v1alpha1" | string
 		kind:       *"ControllerConfiguration" | string
 		logging: {
@@ -178,10 +174,9 @@ import (
 		defaultIssuerGroup?: string
 	}
 
-	prometheus: {
-		enabled: *true | bool
-		servicemonitor: {
-			enabled:            *false | bool
+	prometheus?: {
+		podMonitor?: {}
+		serviceMonitor?: {
 			prometheusInstance: *"default" | string
 			targetPort:         *9402 | int
 			path:               *"/metrics" | string
@@ -207,10 +202,7 @@ import (
 	// LivenessProbe durations and thresholds are based on those used for the Kubernetes
 	// controller-manager. See:
 	// https://github.com/kubernetes/kubernetes/blob/806b30170c61a38fedd54cc9ede4cd6275a1ad3b/cmd/kubeadm/app/util/staticpod/utils.go#L241-L245
-	livenessProbe: {
-		enabled: *false | bool
-		probe:   corev1.#Probe & {initialDelaySeconds: 10, timeoutSeconds: 15, failureThreshold: 8}
-	}
+	livenessProbe?: corev1.#Probe & {initialDelaySeconds: 10, timeoutSeconds: 15, failureThreshold: 8}
 
 	// enableServiceLinks indicates whether information about services should be
 	// injected into pod's environment variables, matching the syntax of Docker
@@ -225,7 +217,7 @@ import (
 		// This allows setting options that'd usually be provided via flags.
 		// An APIVersion and Kind must be specified in your values.yaml file.
 		// Flags will override options that are set here.
-		config: {
+		config?: {
 			apiVersion: *"webhook.config.cert-manager.io/v1alpha1" | string
 			kind:       *"WebhookConfiguration" | string
 			// The port that the webhook should listen on for requests.
@@ -244,8 +236,7 @@ import (
 		// ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 		securityContext?: corev1.#SecurityContext & {runAsNonRoot: true, seccompProfile: type: "RuntimeDefault"}
 
-		podDisruptionBudget: {
-			enabled:        *false | bool
+		podDisruptionBudget?: {
 			minAvailable:   *1 | int | #Percent
 			maxUnavailable: *1 | int | #Percent
 		}
@@ -290,9 +281,7 @@ import (
 		image!:          timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-webhook", tag: "v1.13.2"}
 		imagePullPolicy: *"IfNotPresent" | "Always" | "Never"
 
-		serviceAccount: {
-			// Specifies whether a service account should be created
-			create: *true | bool
+		serviceAccount?: {
 			// The name of the service account to use.
 			// If not set and create is true, a name is generated using the fullname template
 			name?: string
@@ -337,10 +326,7 @@ import (
 		host?: string
 
 		// Enables default network policies for webhooks.
-		networkPolicy: {
-			enabled: *false | bool
-			spec?:   networkingv1.#NetworkPolicySpec
-		}
+		networkPolicy?: networkingv1.#NetworkPolicySpec
 
 		volumes?: [...corev1.#Volume]
 		volumeMounts?: [...corev1.#VolumeMount]
@@ -351,18 +337,17 @@ import (
 		enableServiceLinks: *false | bool
 	}
 
-	caInjector: {
-		enabled:      *true | bool
+	caInjector?: {
 		replicaCount: *1 | int
 
 		strategy?: corev1.#DeploymentStrategy
+		config?: {[string]: string}
 
 		// Pod Security Context to be set on the cainjector component Pod
 		// ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 		securityContext?: corev1.#SecurityContext & {runAsNonRoot: true, seccompProfile: type: "RuntimeDefault"}
 
-		podDisruptionBudget: {
-			enabled:        *false | bool
+		podDisruptionBudget?: {
 			minAvailable:   *1 | int | #Percent
 			maxUnavailable: *1 | int | #Percent
 		}
@@ -393,9 +378,7 @@ import (
 		image!:          timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-cainjector", tag: "v1.13.2"}
 		imagePullPolicy: *"IfNotPresent" | "Always" | "Never"
 
-		serviceAccount: {
-			// Specifies whether a service account should be created
-			create: *true | bool
+		serviceAccount?: {
 			// The name of the service account to use.
 			// If not set and create is true, a name is generated using the fullname template
 			name?: string
@@ -432,9 +415,7 @@ import (
 	// are not injected into this Job's pod. Otherwise the installation may time out
 	// due to the Job never being completed because the sidecar proxy does not exit.
 	// See https://github.com/cert-manager/cert-manager/pull/4414 for context.
-	startupAPICheck: {
-		enabled: *true | bool
-
+	startupAPICheck?: {
 		// Pod Security Context to be set on the startupapicheck component Pod
 		// ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
 		securityContext?: corev1.#SecurityContext & {runAsNonRoot: true, seccompProfile: type: "RuntimeDefault"}
@@ -476,10 +457,7 @@ import (
 		// Automounting API credentials for a particular pod
 		automountServiceAccountToken: *true | bool
 
-		serviceAccount: {
-			// Specifies whether a service account should be created
-			create: *true | bool
-
+		serviceAccount?: {
 			// The name of the service account to use.
 			// If not set and create is true, a name is generated using the fullname template
 			name?: string
@@ -535,16 +513,16 @@ import (
 		}
 	}
 
-	if config.caInjector.enabled {
-		if config.caInjector.config {
+	if config.caInjector != _|_ {
+		if config.caInjector.config != _|_ {
 			objects: caInjectorConfigMap: #ConfigMap & {_config: config}
 		}
 
-		if config.caInjector.podDisruptionBudget.enabled {
+		if config.caInjector.podDisruptionBudget != _|_ {
 			objects: caInjectorPodDisruptionBudget: #PodDisruptionBudget & {_config: config}
 		}
 
-		if config.podSecurityPolicy.enbaled {
+		if config.podSecurityPolicy != _|_ {
 			objects: {
 				caInjectorPSPClusterRole:        #ClusterRole & {_config:        config}
 				caInjectorPSPClusterRoleBinding: #ClusterRoleBinding & {_config: config}
@@ -552,7 +530,7 @@ import (
 			}
 		}
 
-		if config.rbac.create {
+		if config.rbac != _|_ {
 			objects: {
 				caInjectorClusterRole:        #ClusterRole & {_config:        config}
 				caInjectorClusterRoleBinding: #ClusterRoleBinding & {_config: config}
@@ -561,33 +539,33 @@ import (
 			}
 		}
 
-		if config.caInjector.serviceAccount.enabled {
+		if config.caInjector.serviceAccount != _|_ {
 			objects: caInjectorServiceAccount: #ServiceAccount & {_config: config}
 		}
 
 		objects: caInjectorDeployment: #Deployment & {_config: config}
 	}
 
-	if config.config.enabled {
+	if config.config != _|_ {
 		objects: controllerConfigMap: #ConfigMap & {_config: config}
 	}
 
-	if config.webhook.networkPolicy.enabled {
+	if config.webhook.networkPolicy != _|_ {
 		objects: {
 			networkPolicyEgress:   #NetworkPolicy & {_config: config}
 			networkPolicyWebhooks: #NetworkPolicy & {_config: config}
 		}
 	}
 
-	if config.podDisruptionBudget.enabled {
+	if config.podDisruptionBudget != _|_ {
 		objects: podDisruptionBudget: #PodDisruptionBudget & {_config: config}
 	}
 
-	if config.prometheus.enabled && config.prometheus.podMonitor.enabled {
+	if config.prometheus != _|_ && config.prometheus.podMonitor != _|_ {
 		objects: podMonitor: #PodMonitor & {_config: config}
 	}
 
-	if config.podSecurityPolicy.enbaled {
+	if config.podSecurityPolicy != _|_ {
 		objects: {
 			pspClusterRole:        #ClusterRole & {_config:        config}
 			pspClusterRoleBinding: #ClusterRoleBinding & {_config: config}
@@ -599,7 +577,7 @@ import (
 		}
 	}
 
-	if config.rbac.create {
+	if config.rbac != _|_ {
 		objects: {
 			leaderElectionRole:        #Role & {_config:        config}
 			leaderElectionRoleBinding: #RoleBinding & {_config: config}
@@ -632,21 +610,21 @@ import (
 		}
 	}
 
-	if config.prometheus.enabled && config.prometheus.serviceMonitor.enabled {
+	if config.prometheus != _|_ && config.prometheus.serviceMonitor != _|_ {
 		objects: {
 			service:        #Service & {_config:        config}
 			serviceMonitor: #ServiceMonitor & {_config: config}
 		}
 	}
 
-	if config.serviceAccount.create {
+	if config.serviceAccount != _|_ {
 		objects: serviceAccount: #ServiceAccount & {_config: config}
 	}
 
-	if config.startupAPICheck.enabled {
+	if config.startupAPICheck != _|_ {
 		objects: startupAPICheckJob: #Job & {_config: config}
 
-		if config.podSecurityPolicy.enbaled {
+		if config.podSecurityPolicy != _|_ {
 			objects: {
 				startupAPICheckPSPClusterRole:        #ClusterRole & {_config:        config}
 				startupAPICheckPSPClusterRoleBinding: #ClusterRoleBinding & {_config: config}
@@ -654,27 +632,27 @@ import (
 			}
 		}
 
-		if config.rbac.create {
+		if config.rbac != _|_ {
 			objects: {
 				startupAPICheckRole:        #Role & {_config:        config}
 				startupAPICheckRoleBinding: #RoleBinding & {_config: config}
 			}
 		}
 
-		if config.startupAPICheck.serviceAccount.create {
+		if config.startupAPICheck.serviceAccount != _|_ {
 			objects: startupAPICheckServiceAccount: #ServiceAccount & {_config: config}
 		}
 	}
 
-	if config.webhook.config {
+	if config.webhook.config != _|_ {
 		objects: webhookConfigMap: #ConfigMap & {_config: config}
 	}
 
-	if config.webhook.podDisruptionBudget.enabled {
+	if config.webhook.podDisruptionBudget != _|_ {
 		objects: webhookPodDisruptionBudget: #PodDisruptionBudget & {_config: config}
 	}
 
-	if config.webhook.serviceAccount.create {
+	if config.webhook.serviceAccount != _|_ {
 		objects: webhookServiceAccount: #ServiceAccount & {_config: config}
 	}
 

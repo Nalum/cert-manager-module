@@ -5,12 +5,10 @@
 
 package main
 
-import (
-	timoniv1 "timoni.sh/core/v1alpha1"
-)
-
 // Defaults
 values: {
+	version: "0.1.0"
+	test: enabled: false
 	metadata: labels: team: "dev"
 	installCRDs: true
 	config: logging: format:  "json"
@@ -19,55 +17,46 @@ values: {
 
 	webhook: {
 		networkPolicy: {
-			enabled: true
-			spec: {
-				ingress: [
-					{
-						from: [
-							{
-								ipBlock: cidr: "0.0.0.0/0"
-							},
-						]
-					},
-				]
-				egress: [
-					{
-						ports: [
-							{
-								port:     80
-								protocol: "TCP"
-							},
-							{
-								port:     443
-								protocol: "TCP"
-							},
-							{
-								port:     53
-								protocol: "TCP"
-							},
-							{
-								port:     53
-								protocol: "UDP"
-							},
-							{
-								port:     6443
-								protocol: "TCP"
-							},
-						]
-						to: [
-							{
-								ipBlock: cidr: "0.0.0.0/0"
-							},
-						]
-					},
-				]
-			}
+			ingress: [
+				{
+					from: [
+						{
+							ipBlock: cidr: "0.0.0.0/0"
+						},
+					]
+				},
+			]
+			egress: [
+				{
+					ports: [
+						{
+							port:     80
+							protocol: "TCP"
+						},
+						{
+							port:     443
+							protocol: "TCP"
+						},
+						{
+							port:     53
+							protocol: "TCP"
+						},
+						{
+							port:     53
+							protocol: "UDP"
+						},
+						{
+							port:     6443
+							protocol: "TCP"
+						},
+					]
+					to: [
+						{
+							ipBlock: cidr: "0.0.0.0/0"
+						},
+					]
+				},
+			]
 		}
-	}
-
-	// Test Job
-	test: {
-		enabled: *false | bool
-		image!:  timoniv1.#Image
 	}
 }

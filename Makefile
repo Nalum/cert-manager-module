@@ -7,7 +7,7 @@ VERSION:=$(shell grep 'version:' modules/cert-manager/values.cue | awk '{ print 
 ORG:="nalum"
 REPO:="cert-manager-bundle"
 CERT_MANAGER_VERSION:=1.13.2
-MV:=0.1.0
+MV:=1.13.2
 KV:=1.28.0
 NAME:="cert-manager"
 NAMESPACE:="cert-manager"
@@ -28,12 +28,12 @@ fmt: ## Format all CUE definitions
 .PHONY: gen
 gen: ## Print the CUE generated objects
 	@cd modules/cert-manager
-	@cue cmd -t name=$(NAME) -t namespace=$(NAMESPACE) -t mv=$(MV) -t kv=$(KV) build
+	@cue cmd -t name=$(NAME) -t namespace=$(NAMESPACE) -t mv=v$(MV) -t kv=$(KV) build
 
 .PHONY: ls
 ls: ## List the CUE generated objects
 	@cd modules/cert-manager
-	@cue cmd -t name=$(NAME) -t namespace=$(NAMESPACE) -t mv=$(MV) -t kv=$(KV) ls
+	@cue cmd -t name=$(NAME) -t namespace=$(NAMESPACE) -t mv=v$(MV) -t kv=$(KV) ls
 
 .PHONY: gen-deploy
 gen-deploy: ## Print the Flux deployment
