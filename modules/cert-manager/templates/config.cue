@@ -17,6 +17,7 @@ import (
 
 	// Metadata (common to all resources)
 	metadata: timoniv1.#Metadata & {#Version: moduleVersion}
+	metadata: namespace: *"cert-manager" | string
 
 	// Label selector (common to all resources)
 	selector: timoniv1.#Selector & {#Name: metadata.name}
@@ -541,7 +542,7 @@ import (
 	objects: {
 		for name, crd in customresourcedefinition {
 			"\(name)": crd
-			//"\(name)": metadata: labels:      config.metadata.labels
+			"\(name)": metadata: labels: config.metadata.labels
 			if config.metadata.annotations != _|_ {
 				"\(name)": metadata: annotations: config.metadata.annotations
 			}
