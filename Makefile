@@ -30,6 +30,11 @@ gen: ## Print the CUE generated objects
 	@cd modules/cert-manager
 	@cue cmd -t name=$(NAME) -t namespace=$(NAMESPACE) -t mv=v$(MV) -t kv=$(KV) build
 
+.PHONY: vet
+vet:
+	@cd modules/cert-manager
+	@timoni mod vet
+
 .PHONY: ls
 ls: ## List the CUE generated objects
 	@cd modules/cert-manager
