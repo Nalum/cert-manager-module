@@ -4,6 +4,9 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 )
 
-#Job: batchv1.#Job
-
-#TestJob: batchv1.#Job
+#Job: batchv1.#Job & {
+	_config:    #Config
+	apiVersion: "v1"
+	kind:       "Job"
+	metadata:   _config.metadata
+}

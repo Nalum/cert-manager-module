@@ -34,7 +34,7 @@ import (
 	imagePullSecrets?: [...corev1.LocalObjectReference]
 
 	// Optional priority class to be used for the cert-manager pods
-	priorityClassName: string
+	priorityClassName?: string
 
 	// Setup the Cluster RBAC roles and bindings
 	rbac?: {
@@ -48,8 +48,6 @@ import (
 		renewDeadline: *"40s" | #Duration
 		retryPeriod:   *"15s" | #Duration
 	}
-
-	installCRDs: *false | bool
 
 	replicaCount: *1 | int
 
@@ -66,7 +64,7 @@ import (
 	// The maximum number of challenges that can be scheduled as 'processing' at once
 	maxConcurrentChallenges: *60 | int
 
-	image!:          timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-controller", tag: "v1.13.2"}
+	image!:          timoniv1.#Image
 	imagePullPolicy: *"IfNotPresent" | "Always" | "Never"
 
 	// Override the namespace used to store DNS provider credentials etc. for ClusterIssuer
@@ -278,7 +276,7 @@ import (
 		tolerations?: [ ...corev1.#Toleration]
 		topologySpreadConstraints?: [...corev1.#TopologySpreadConstraint]
 
-		image!:          timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-webhook", tag: "v1.13.2"}
+		image!:          timoniv1.#Image
 		imagePullPolicy: *"IfNotPresent" | "Always" | "Never"
 
 		serviceAccount?: {
@@ -326,7 +324,48 @@ import (
 		host?: string
 
 		// Enables default network policies for webhooks.
-		networkPolicy?: networkingv1.#NetworkPolicySpec
+		networkPolicy?: networkingv1.#NetworkPolicySpec & {
+			ingress: [...networkingv1.#NetworkPolicyIngressRule] & [
+					{
+					from: [...networkingv1.#NetworkPolicyPeer] & [
+						{
+							ipBlock: networkingv1.#IPBlock & {cidr: *"0.0.0.0/0" | string}
+						},
+					]
+				},
+			]
+			egress: [...networkingv1.#NetworkPolicyEgressRule] & [
+				{
+					ports: [...networkingv1.#NetworkPolicyPort] & [
+						{
+							port:     *80 | int
+							protocol: *"TCP" | string
+						},
+						{
+							port:     *443 | int
+							protocol: *"TCP" | string
+						},
+						{
+							port:     *53 | int
+							protocol: *"TCP" | string
+						},
+						{
+							port:     *53 | int
+							protocol: *"UDP" | string
+						},
+						{
+							port:     *6443 | int
+							protocol: *"TCP" | string
+						},
+					]
+					to: [...networkingv1.#NetworkPolicyPeer] & [
+						{
+							ipBlock: networkingv1.#IPBlock & {cidr: *"0.0.0.0/0" | string}
+						},
+					]
+				},
+			]
+		}
 
 		volumes?: [...corev1.#Volume]
 		volumeMounts?: [...corev1.#VolumeMount]
@@ -375,7 +414,7 @@ import (
 		// Optional additional labels to add to the CA Injector Pods
 		podLabels?: #Labels
 
-		image!:          timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-cainjector", tag: "v1.13.2"}
+		image!:          timoniv1.#Image
 		imagePullPolicy: *"IfNotPresent" | "Always" | "Never"
 
 		serviceAccount?: {
@@ -403,7 +442,7 @@ import (
 	}
 
 	acmeSolver: {
-		image!:          timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-acmesolver", tag: "v1.13.2"}
+		image!:          timoniv1.#Image
 		imagePullPolicy: *"IfNotPresent" | "Always" | "Never"
 	}
 
@@ -448,7 +487,7 @@ import (
 		// Optional additional labels to add to the startupapicheck Pods
 		podLabels?: #Labels
 
-		image!:          timoniv1.#Image & {repository: "quay.io/jetstack/cert-manager-ctl", tag: "v1.13.2"}
+		image!:          timoniv1.#Image
 		imagePullPolicy: *"IfNotPresent" | "Always" | "Never"
 
 		// annotations for the startup API Check job RBAC and PSP resources
@@ -480,12 +519,6 @@ import (
 		// links.
 		enableServiceLinks: *false | bool
 	}
-
-	// Test Job
-	test: {
-		enabled: *false | bool
-		image!:  timoniv1.#Image
-	}
 }
 
 #Duration: string & =~"^[0-9]+(ns|us|µs|ms|s|m|h)$"
@@ -508,8 +541,10 @@ import (
 	objects: {
 		for name, crd in customresourcedefinition {
 			"\(name)": crd
-			"\(name)": metadata: labels:      config.metadata.labels
-			"\(name)": metadata: annotations: config.metadata.annotations
+			//"\(name)": metadata: labels:      config.metadata.labels
+			if config.metadata.annotations != _|_ {
+				"\(name)": metadata: annotations: config.metadata.annotations
+			}
 		}
 	}
 
@@ -654,9 +689,5 @@ import (
 
 	if config.webhook.serviceAccount != _|_ {
 		objects: webhookServiceAccount: #ServiceAccount & {_config: config}
-	}
-
-	tests: {
-		"test-svc": #TestJob & {_config: config}
 	}
 }
