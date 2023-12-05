@@ -1,8 +1,6 @@
 package templates
 
 import (
-	"strings"
-
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	timoniv1 "timoni.sh/core/v1alpha1"
@@ -17,8 +15,6 @@ import (
 
 	// Metadata (common to all resources)
 	metadata: timoniv1.#Metadata & {#Version: moduleVersion}
-	metadata: name:      *"cert-manager" | string
-	metadata: namespace: *"cert-manager" | string
 
 	// Label selector (common to all resources)
 	selector: timoniv1.#Selector & {#Name: metadata.name}
@@ -84,11 +80,11 @@ import (
 		// If not set and create is true, a name is generated using the fullname template
 		name?: string
 		// Optional additional annotations to add to the controller's ServiceAccount
-		annotations?: #Annotations
+		annotations?: timoniv1.#Annotations
 		// Automount API credentials for a Service Account.
 		automountServiceAccountToken: *true | bool
 		// Optional additional labels to add to the controller's ServiceAccount
-		labels?: #Labels
+		labels?: timoniv1.#Labels
 	}
 
 	// Automounting API credentials for a particular pod
@@ -149,15 +145,15 @@ import (
 	volumes?: [...corev1.#Volume]
 	volumeMounts?: [...corev1.#VolumeMount]
 
-	deploymentLabels?:      #Labels
-	deploymentAnnotations?: #Annotations
-	podLabels?:             #Labels
-	podAnnotations?:        #Annotations
-	serviceLabels?:         #Labels
-	serviceAnnotations?:    #Annotations
+	deploymentLabels?:      timoniv1.#Labels
+	deploymentAnnotations?: timoniv1.#Annotations
+	podLabels?:             timoniv1.#Labels
+	podAnnotations?:        timoniv1.#Annotations
+	serviceLabels?:         timoniv1.#Labels
+	serviceAnnotations?:    timoniv1.#Annotations
 	tolerations?: [ ...corev1.#Toleration]
 	affinity?:    corev1.#Affinity
-	nodeSelector: #Labels & {"kubernetes.io/os": "linux"}
+	nodeSelector: timoniv1.#Labels & {"kubernetes.io/os": "linux"}
 	topologySpreadConstraints?: [...corev1.#TopologySpreadConstraint]
 
 	// Optional DNS settings, useful if you have a public and private DNS zone for
@@ -182,8 +178,8 @@ import (
 			path:               *"/metrics" | string
 			interval:           *"60s" | #Duration
 			scrapeTimeout:      *"30s" | #Duration
-			labels?:            #Labels
-			annotations?:       #Annotations
+			labels?:            timoniv1.#Labels
+			annotations?:       timoniv1.#Annotations
 			honorLabels:        *false | bool
 			endpointAdditionalProperties: {[ string]: string}
 		}
@@ -246,15 +242,15 @@ import (
 		containerSecurityContext?: corev1.#ContainerSecurityContext & {allowPrivilegeEscalation: false, capabilities: {drop: ["ALL"], readOnlyRootFilesystem: true, runAsNonRoot: true}}
 
 		// Optional additional annotations to add to the webhook resources
-		deploymentAnnotations?:                     #Annotations
-		podAnnotations?:                            #Annotations
-		serviceAnnotations?:                        #Annotations
-		mutatingWebhookConfigurationAnnotations?:   #Annotations
-		validatingWebhookConfigurationAnnotations?: #Annotations
+		deploymentAnnotations?:                     timoniv1.#Annotations
+		podAnnotations?:                            timoniv1.#Annotations
+		serviceAnnotations?:                        timoniv1.#Annotations
+		mutatingWebhookConfigurationAnnotations?:   timoniv1.#Annotations
+		validatingWebhookConfigurationAnnotations?: timoniv1.#Annotations
 
 		// Optional additional labels to add to the Webhook resources
-		podLabels?:     #Labels
-		serviceLabels?: #Labels
+		podLabels?:     timoniv1.#Labels
+		serviceLabels?: timoniv1.#Labels
 
 		// Additional command line flags to pass to cert-manager webhook binary.
 		// To see all available flags run docker run quay.io/jetstack/cert-manager-webhook:<version> --help
@@ -273,7 +269,7 @@ import (
 		livenessProbe?:  corev1.#Probe & {failureThreshold: 3, initialDelaySeconds: 60, periodSeconds: 10, successThreshold: 1, timeoutSeconds: 1}
 		readinessProbe?: corev1.#Probe & {failureThreshold: 3, initialDelaySeconds: 5, periodSeconds:  5, successThreshold:  1, timeoutSeconds: 1}
 
-		nodeSelector: #Labels & {"kubernetes.io/os": "linux"}
+		nodeSelector: timoniv1.#Labels & {"kubernetes.io/os": "linux"}
 		affinity?:    corev1.#Affinity
 		tolerations?: [ ...corev1.#Toleration]
 		topologySpreadConstraints?: [...corev1.#TopologySpreadConstraint]
@@ -286,9 +282,9 @@ import (
 			// If not set and create is true, a name is generated using the fullname template
 			name?: string
 			// Optional additional annotations to add to the controller's ServiceAccount
-			annotations?: #Annotations
+			annotations?: timoniv1.#Annotations
 			// Optional additional labels to add to the webhook's ServiceAccount
-			labels?: #Labels
+			labels?: timoniv1.#Labels
 			// Automount API credentials for a Service Account.
 			automountServiceAccountToken: *true | bool
 		}
@@ -398,8 +394,8 @@ import (
 		containerSecurityContext?: corev1.#ContainerSecurityContext & {allowPrivilegeEscalation: false, capabilities: {drop: ["ALL"], readOnlyRootFilesystem: true, runAsNonRoot: true}}
 
 		// Optional additional annotations to add to the webhook resources
-		deploymentAnnotations?: #Annotations
-		podAnnotations?:        #Annotations
+		deploymentAnnotations?: timoniv1.#Annotations
+		podAnnotations?:        timoniv1.#Annotations
 
 		// Additional command line flags to pass to cert-manager cainjector binary.
 		// To see all available flags run docker run quay.io/jetstack/cert-manager-cainjector:<version> --help
@@ -408,13 +404,13 @@ import (
 		// - --enable-profiling=true
 
 		resources?:   corev1.#ResourceRequirements & {requests: {cpu: "10m", memory: "32Mi"}}
-		nodeSelector: #Labels & {"kubernetes.io/os":                  "linux"}
+		nodeSelector: timoniv1.#Labels & {"kubernetes.io/os":         "linux"}
 		affinity?:    corev1.#Affinity
 		tolerations?: [ ...corev1.#Toleration]
 		topologySpreadConstraints?: [...corev1.#TopologySpreadConstraint]
 
 		// Optional additional labels to add to the CA Injector Pods
-		podLabels?: #Labels
+		podLabels?: timoniv1.#Labels
 
 		image!:          timoniv1.#Image
 		imagePullPolicy: *"IfNotPresent" | "Always" | "Never"
@@ -424,9 +420,9 @@ import (
 			// If not set and create is true, a name is generated using the fullname template
 			name?: string
 			// Optional additional annotations to add to the controller's ServiceAccount
-			annotations?: #Annotations
+			annotations?: timoniv1.#Annotations
 			// Optional additional labels to add to the webhook's ServiceAccount
-			labels?: #Labels
+			labels?: timoniv1.#Labels
 			// Automount API credentials for a Service Account.
 			automountServiceAccountToken: *true | bool
 		}
@@ -472,28 +468,28 @@ import (
 		backoffLimit: *4 | int
 
 		// Optional additional annotations to add to the startupapicheck Job
-		jobAnnotations?: #Annotations
+		jobAnnotations?: timoniv1.#Annotations
 
 		// Optional additional annotations to add to the startupapicheck Pods
-		podAnnotations?: #Annotations
+		podAnnotations?: timoniv1.#Annotations
 
 		// Additional command line flags to pass to startupapicheck binary.
 		// To see all available flags run docker run quay.io/jetstack/cert-manager-ctl:<version> --help
 		extraArgs: [...string]
 
 		resources?:   corev1.#ResourceRequirements & {requests: {cpu: "10m", memory: "32Mi"}}
-		nodeSelector: #Labels & {"kubernetes.io/os":                  "linux"}
+		nodeSelector: timoniv1.#Labels & {"kubernetes.io/os":         "linux"}
 		affinity?:    corev1.#Affinity
 		tolerations?: [ ...corev1.#Toleration]
 
 		// Optional additional labels to add to the startupapicheck Pods
-		podLabels?: #Labels
+		podLabels?: timoniv1.#Labels
 
 		image!:          timoniv1.#Image
 		imagePullPolicy: *"IfNotPresent" | "Always" | "Never"
 
 		// annotations for the startup API Check job RBAC and PSP resources
-		rbac: annotations?: #Annotations
+		rbac: annotations?: timoniv1.#Annotations
 
 		// Automounting API credentials for a particular pod
 		automountServiceAccountToken: *true | bool
@@ -504,13 +500,13 @@ import (
 			name?: string
 
 			// Optional additional annotations to add to the Job's ServiceAccount
-			annotations?: #Annotations
+			annotations?: timoniv1.#Annotations
 
 			// Automount API credentials for a Service Account.
 			automountServiceAccountToken: *true | bool
 
 			// Optional additional labels to add to the startupapicheck's ServiceAccount
-			labels?: #Labels
+			labels?: timoniv1.#Labels
 		}
 
 		volumes?: [...corev1.#Volume]
@@ -525,177 +521,170 @@ import (
 
 #Duration: string & =~"^[0-9]+(ns|us|µs|ms|s|m|h)$"
 #Percent:  string & =~"^(1)?([1-9])?([0-9])%$"
-#Labels: {[string & =~"^(([A-Za-z0-9][-A-Za-z0-9_./]*)?[A-Za-z0-9])?$" & strings.MaxRunes(63)]: string & =~"^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?$" & strings.MaxRunes(63)}
-#Annotations: {[string & =~"^(([A-Za-z0-9][-A-Za-z0-9_./]*)?[A-Za-z0-9])?$" & strings.MaxRunes(63)]: string & =~"^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?$" & strings.MaxRunes(63)}
 
 // Instance takes the config values and outputs the Kubernetes objects.
 #Instance: {
 	config: #Config
 
 	objects: {
-		namespace: #Deployment & {
-			_config: config
-		}
-		deployment: #Deployment & {
-			_config: config
-			metadata: labels: "app.kubernetes.io/component": "controller"
-		}
-		webhookDeployment:        #Deployment & {_config:        config}
-		webhookMutatingWebhook:   #MutatingWebhook & {_config:   config}
-		webhookValidatingWebhook: #ValidatingWebhook & {_config: config}
-		webhookService:           #Service & {_config:           config}
+		//namespace: #Deployment & {_config: config}
+		deployment:        #Deployment & {_config: config, _component: "controller"}
+		webhookDeployment: #Deployment & {_config: config, _component: "webhook"}
+		//webhookMutatingWebhook:   #MutatingWebhook & {_config:   config}
+		//webhookValidatingWebhook: #ValidatingWebhook & {_config: config}
+		//webhookService:           #Service & {_config:           config}
 	}
 
-	objects: {
-		for name, crd in customresourcedefinition {
-			"\(name)": crd
-			"\(name)": metadata: labels: config.metadata.labels
-			if config.metadata.annotations != _|_ {
-				"\(name)": metadata: annotations: config.metadata.annotations
-			}
-		}
-	}
+	//objects: {
+	//for name, crd in customresourcedefinition {
+	//"\(name)": crd
+	//"\(name)": metadata: labels: config.metadata.labels
+	//if config.metadata.annotations != _|_ {
+	//"\(name)": metadata: annotations: config.metadata.annotations
+	//}
+	//}
+	//}
 
-	if config.caInjector != _|_ {
-		if config.caInjector.config != _|_ {
-			objects: caInjectorConfigMap: #ConfigMap & {_config: config}
-		}
+	//if config.caInjector != _|_ {
+	//if config.caInjector.config != _|_ {
+	//objects: caInjectorConfigMap: #ConfigMap & {_config: config}
+	//}
 
-		if config.caInjector.podDisruptionBudget != _|_ {
-			objects: caInjectorPodDisruptionBudget: #PodDisruptionBudget & {_config: config}
-		}
+	//if config.caInjector.podDisruptionBudget != _|_ {
+	//objects: caInjectorPodDisruptionBudget: #PodDisruptionBudget & {_config: config}
+	//}
 
-		if config.podSecurityPolicy != _|_ {
-			objects: {
-				caInjectorPSPClusterRole:        #ClusterRole & {_config:        config}
-				caInjectorPSPClusterRoleBinding: #ClusterRoleBinding & {_config: config}
-				caInjectorPSP:                   #PodSecurityPolicy & {_config:  config}
-			}
-		}
+	//if config.podSecurityPolicy != _|_ {
+	//objects: {
+	//caInjectorPSPClusterRole:        #ClusterRole & {_config:        config}
+	//caInjectorPSPClusterRoleBinding: #ClusterRoleBinding & {_config: config}
+	//caInjectorPSP:                   #PodSecurityPolicy & {_config:  config}
+	//}
+	//}
 
-		if config.rbac != _|_ {
-			objects: {
-				caInjectorClusterRole:        #ClusterRole & {_config:        config}
-				caInjectorClusterRoleBinding: #ClusterRoleBinding & {_config: config}
-				caInjectorRole:               #Role & {_config:               config}
-				caInjectorRoleBinding:        #RoleBinding & {_config:        config}
-			}
-		}
+	//if config.rbac != _|_ {
+	//objects: {
+	//caInjectorClusterRole:        #ClusterRole & {_config:        config}
+	//caInjectorClusterRoleBinding: #ClusterRoleBinding & {_config: config}
+	//caInjectorRole:               #Role & {_config:               config}
+	//caInjectorRoleBinding:        #RoleBinding & {_config:        config}
+	//}
+	//}
 
-		if config.caInjector.serviceAccount != _|_ {
-			objects: caInjectorServiceAccount: #ServiceAccount & {_config: config}
-		}
+	//if config.caInjector.serviceAccount != _|_ {
+	//objects: caInjectorServiceAccount: #ServiceAccount & {_config: config}
+	//}
 
-		objects: caInjectorDeployment: #Deployment & {_config: config}
-	}
+	//objects: caInjectorDeployment: #Deployment & {_config: config}
+	//}
 
-	if config.config != _|_ {
-		objects: controllerConfigMap: #ConfigMap & {_config: config}
-	}
+	//if config.config != _|_ {
+	//objects: controllerConfigMap: #ConfigMap & {_config: config}
+	//}
 
-	if config.webhook.networkPolicy != _|_ {
-		objects: {
-			networkPolicyEgress:   #NetworkPolicy & {_config: config}
-			networkPolicyWebhooks: #NetworkPolicy & {_config: config}
-		}
-	}
+	//if config.webhook.networkPolicy != _|_ {
+	//objects: {
+	//networkPolicyEgress:   #NetworkPolicy & {_config: config}
+	//networkPolicyWebhooks: #NetworkPolicy & {_config: config}
+	//}
+	//}
 
-	if config.podDisruptionBudget != _|_ {
-		objects: podDisruptionBudget: #PodDisruptionBudget & {_config: config}
-	}
+	//if config.podDisruptionBudget != _|_ {
+	//objects: podDisruptionBudget: #PodDisruptionBudget & {_config: config}
+	//}
 
-	if config.prometheus != _|_ && config.prometheus.podMonitor != _|_ {
-		objects: podMonitor: #PodMonitor & {_config: config}
-	}
+	//if config.prometheus != _|_ && config.prometheus.podMonitor != _|_ {
+	//objects: podMonitor: #PodMonitor & {_config: config}
+	//}
 
-	if config.podSecurityPolicy != _|_ {
-		objects: {
-			pspClusterRole:        #ClusterRole & {_config:        config}
-			pspClusterRoleBinding: #ClusterRoleBinding & {_config: config}
-			podSecurityPolicy:     #PodSecurityPolicy & {_config:  config}
+	//if config.podSecurityPolicy != _|_ {
+	//objects: {
+	//pspClusterRole:        #ClusterRole & {_config:        config}
+	//pspClusterRoleBinding: #ClusterRoleBinding & {_config: config}
+	//podSecurityPolicy:     #PodSecurityPolicy & {_config:  config}
 
-			webhookPSPClusterRole:        #ClusterRole & {_config:        config}
-			webhookPSPClusterRoleBinding: #ClusterRoleBinding & {_config: config}
-			webhookPSP:                   #PodSecurityPolicy & {_config:  config}
-		}
-	}
+	//webhookPSPClusterRole:        #ClusterRole & {_config:        config}
+	//webhookPSPClusterRoleBinding: #ClusterRoleBinding & {_config: config}
+	//webhookPSP:                   #PodSecurityPolicy & {_config:  config}
+	//}
+	//}
 
-	if config.rbac != _|_ {
-		objects: {
-			leaderElectionRole:        #Role & {_config:        config}
-			leaderElectionRoleBinding: #RoleBinding & {_config: config}
+	//if config.rbac != _|_ {
+	//objects: {
+	//leaderElectionRole:        #Role & {_config:        config}
+	//leaderElectionRoleBinding: #RoleBinding & {_config: config}
 
-			clusterViewClusterRole: #ClusterRole & {_config: config}
-			viewClusterRole:        #ClusterRole & {_config: config}
-			editClusterRole:        #ClusterRole & {_config: config}
+	//clusterViewClusterRole: #ClusterRole & {_config: config}
+	//viewClusterRole:        #ClusterRole & {_config: config}
+	//editClusterRole:        #ClusterRole & {_config: config}
 
-			controllerIssuersClusterRole:                           #ClusterRole & {_config:        config}
-			controllerClusterIssuersClusterRole:                    #ClusterRole & {_config:        config}
-			controllerCertificatesClusterRole:                      #ClusterRole & {_config:        config}
-			controllerOrdersClusterRole:                            #ClusterRole & {_config:        config}
-			controllerChallengesClusterRole:                        #ClusterRole & {_config:        config}
-			controllerIngressShimClusterRole:                       #ClusterRole & {_config:        config}
-			controllerApproveClusterRole:                           #ClusterRole & {_config:        config}
-			controllerCertificateSigningRequestsClusterRole:        #ClusterRole & {_config:        config}
-			controllerIssuersClusterRoleBinding:                    #ClusterRoleBinding & {_config: config}
-			controllerClusterIssuersClusterRoleBinding:             #ClusterRoleBinding & {_config: config}
-			controllerCertificatesClusterRoleBinding:               #ClusterRoleBinding & {_config: config}
-			controllerOrdersClusterRoleBinding:                     #ClusterRoleBinding & {_config: config}
-			controllerChallengesClusterRoleBinding:                 #ClusterRoleBinding & {_config: config}
-			controllerIngressShimClusterRoleBinding:                #ClusterRoleBinding & {_config: config}
-			controllerApproveClusterRoleBinding:                    #ClusterRoleBinding & {_config: config}
-			controllerCertificateSigningRequestsClusterRoleBinding: #ClusterRoleBinding & {_config: config}
+	//controllerIssuersClusterRole:                           #ClusterRole & {_config:        config}
+	//controllerClusterIssuersClusterRole:                    #ClusterRole & {_config:        config}
+	//controllerCertificatesClusterRole:                      #ClusterRole & {_config:        config}
+	//controllerOrdersClusterRole:                            #ClusterRole & {_config:        config}
+	//controllerChallengesClusterRole:                        #ClusterRole & {_config:        config}
+	//controllerIngressShimClusterRole:                       #ClusterRole & {_config:        config}
+	//controllerApproveClusterRole:                           #ClusterRole & {_config:        config}
+	//controllerCertificateSigningRequestsClusterRole:        #ClusterRole & {_config:        config}
+	//controllerIssuersClusterRoleBinding:                    #ClusterRoleBinding & {_config: config}
+	//controllerClusterIssuersClusterRoleBinding:             #ClusterRoleBinding & {_config: config}
+	//controllerCertificatesClusterRoleBinding:               #ClusterRoleBinding & {_config: config}
+	//controllerOrdersClusterRoleBinding:                     #ClusterRoleBinding & {_config: config}
+	//controllerChallengesClusterRoleBinding:                 #ClusterRoleBinding & {_config: config}
+	//controllerIngressShimClusterRoleBinding:                #ClusterRoleBinding & {_config: config}
+	//controllerApproveClusterRoleBinding:                    #ClusterRoleBinding & {_config: config}
+	//controllerCertificateSigningRequestsClusterRoleBinding: #ClusterRoleBinding & {_config: config}
 
-			webhookRole:               #Role & {_config:               config}
-			webhookRoleBinding:        #RoleBinding & {_config:        config}
-			webhookClusterRole:        #ClusterRole & {_config:        config}
-			webhookClusterRoleBinding: #ClusterRoleBinding & {_config: config}
-		}
-	}
+	//webhookRole:               #Role & {_config:               config}
+	//webhookRoleBinding:        #RoleBinding & {_config:        config}
+	//webhookClusterRole:        #ClusterRole & {_config:        config}
+	//webhookClusterRoleBinding: #ClusterRoleBinding & {_config: config}
+	//}
+	//}
 
-	if config.prometheus != _|_ && config.prometheus.serviceMonitor != _|_ {
-		objects: {
-			service:        #Service & {_config:        config}
-			serviceMonitor: #ServiceMonitor & {_config: config}
-		}
-	}
+	//if config.prometheus != _|_ && config.prometheus.serviceMonitor != _|_ {
+	//objects: {
+	//service:        #Service & {_config:        config}
+	//serviceMonitor: #ServiceMonitor & {_config: config}
+	//}
+	//}
 
-	if config.serviceAccount != _|_ {
-		objects: serviceAccount: #ServiceAccount & {_config: config}
-	}
+	//if config.serviceAccount != _|_ {
+	//objects: serviceAccount: #ServiceAccount & {_config: config}
+	//}
 
-	if config.startupAPICheck != _|_ {
-		objects: startupAPICheckJob: #Job & {_config: config}
+	//if config.startupAPICheck != _|_ {
+	//objects: startupAPICheckJob: #Job & {_config: config}
 
-		if config.podSecurityPolicy != _|_ {
-			objects: {
-				startupAPICheckPSPClusterRole:        #ClusterRole & {_config:        config}
-				startupAPICheckPSPClusterRoleBinding: #ClusterRoleBinding & {_config: config}
-				startupAPICheckPSP:                   #PodSecurityPolicy & {_config:  config}
-			}
-		}
+	//if config.podSecurityPolicy != _|_ {
+	//objects: {
+	//startupAPICheckPSPClusterRole:        #ClusterRole & {_config:        config}
+	//startupAPICheckPSPClusterRoleBinding: #ClusterRoleBinding & {_config: config}
+	//startupAPICheckPSP:                   #PodSecurityPolicy & {_config:  config}
+	//}
+	//}
 
-		if config.rbac != _|_ {
-			objects: {
-				startupAPICheckRole:        #Role & {_config:        config}
-				startupAPICheckRoleBinding: #RoleBinding & {_config: config}
-			}
-		}
+	//if config.rbac != _|_ {
+	//objects: {
+	//startupAPICheckRole:        #Role & {_config:        config}
+	//startupAPICheckRoleBinding: #RoleBinding & {_config: config}
+	//}
+	//}
 
-		if config.startupAPICheck.serviceAccount != _|_ {
-			objects: startupAPICheckServiceAccount: #ServiceAccount & {_config: config}
-		}
-	}
+	//if config.startupAPICheck.serviceAccount != _|_ {
+	//objects: startupAPICheckServiceAccount: #ServiceAccount & {_config: config}
+	//}
+	//}
 
-	if config.webhook.config != _|_ {
-		objects: webhookConfigMap: #ConfigMap & {_config: config}
-	}
+	//if config.webhook.config != _|_ {
+	//objects: webhookConfigMap: #ConfigMap & {_config: config}
+	//}
 
-	if config.webhook.podDisruptionBudget != _|_ {
-		objects: webhookPodDisruptionBudget: #PodDisruptionBudget & {_config: config}
-	}
+	//if config.webhook.podDisruptionBudget != _|_ {
+	//objects: webhookPodDisruptionBudget: #PodDisruptionBudget & {_config: config}
+	//}
 
-	if config.webhook.serviceAccount != _|_ {
-		objects: webhookServiceAccount: #ServiceAccount & {_config: config}
-	}
+	//if config.webhook.serviceAccount != _|_ {
+	//objects: webhookServiceAccount: #ServiceAccount & {_config: config}
+	//}
 }
