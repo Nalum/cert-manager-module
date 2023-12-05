@@ -33,7 +33,7 @@ gen: ## Print the CUE generated objects
 .PHONY: vet
 vet:
 	@cd modules/cert-manager
-	@timoni mod vet
+	@timoni mod vet --namespace $(NAMESPACE)
 
 .PHONY: ls
 ls: ## List the CUE generated objects
@@ -46,7 +46,7 @@ gen-deploy: ## Print the deployment
 
 .PHONY: push-mod
 push-mod: ## Push the Timoni modules to GHCR
-	@timoni mod push ./modules/cert-manager oci://ghcr.io/$(ORG)/modules/$(NAME) -v=$(VERSION:v%=%) --latest \
+	@timoni mod push ./modules/cert-manager oci://ghcr.io/$(ORG)/modules/cert-manager -v=$(VERSION:v%=%) --latest \
 		--sign cosign \
 		-a 'org.opencontainers.image.source=https://github.com/$(ORG)/$(REPO)'  \
 		-a 'org.opencontainers.image.licenses=Apache-2.0' \
