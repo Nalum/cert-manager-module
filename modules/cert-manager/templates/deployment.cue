@@ -5,9 +5,8 @@ import (
 )
 
 #Deployment: appsv1.#Deployment & {
-	_config:     #Config
-	_nameSuffix: string
-	_component:  string
+	_config:    #Config
+	_component: string
 	_metadata: {
 		name:      "\(_config.metadata.name)-\(_component)"
 		namespace: _config.metadata.namespace
