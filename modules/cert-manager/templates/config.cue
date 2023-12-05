@@ -1,6 +1,7 @@
 package templates
 
 import (
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	timoniv1 "timoni.sh/core/v1alpha1"
@@ -49,7 +50,7 @@ import (
 
 	replicaCount: *1 | int
 
-	strategy?: corev1.#DeploymentStrategy
+	strategy?: appsv1.#DeploymentStrategy
 
 	podDisruptionBudget?: {
 		minAvailable:   *1 | int | #Percent
@@ -226,7 +227,7 @@ import (
 			securePort: *10250 | int
 		}
 
-		strategy?: corev1.#DeploymentStrategy
+		strategy?: appsv1.#DeploymentStrategy
 
 		// Pod Security Context to be set on the webhook component Pod
 		// ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
@@ -377,7 +378,7 @@ import (
 	caInjector?: {
 		replicaCount: *1 | int
 
-		strategy?: corev1.#DeploymentStrategy
+		strategy?: appsv1.#DeploymentStrategy
 		config?: {[string]: string}
 
 		// Pod Security Context to be set on the cainjector component Pod
@@ -528,8 +529,16 @@ import (
 
 	objects: {
 		//namespace: #Deployment & {_config: config}
-		deployment:        #Deployment & {_config: config, _component: "controller"}
-		webhookDeployment: #Deployment & {_config: config, _component: "webhook"}
+		deployment: #Deployment & {
+			_config:    config
+			_component: "controller"
+			_strategy:  _config.strategy
+		}
+		webhookDeployment: #Deployment & {
+			_config:    config
+			_component: "webhook"
+			_strategy:  _config.webhook.strategy
+		}
 		//webhookMutatingWebhook:   #MutatingWebhook & {_config:   config}
 		//webhookValidatingWebhook: #ValidatingWebhook & {_config: config}
 		//webhookService:           #Service & {_config:           config}

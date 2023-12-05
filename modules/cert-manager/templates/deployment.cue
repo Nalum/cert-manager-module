@@ -8,9 +8,11 @@ import (
 #Deployment: appsv1.#Deployment & {
 	_config:    #Config
 	_component: string
+	_strategy:  appsv1.#DeploymentStrategy
 
 	apiVersion: "apps/v1"
 	kind:       "Deployment"
+
 	metadata: {
 		name:      "\(_config.metadata.name)-\(_component)"
 		namespace: _config.metadata.namespace
@@ -21,13 +23,14 @@ import (
 			annotations: _config.metadata.annotations
 		}
 	}
+
 	spec: appsv1.#DeploymentSpec & {
 		replicas: _config.replicaCount
 		selector: matchLabels: _config.selector.labels
 		selector: matchLabels: "\(timoniv1.#StdLabelComponent)": _component
 
-		if _config.strategy != _|_ {
-			strategy: _config.strategy
+		if _strategy != _|_ {
+			strategy: _strategy
 		}
 
 		template: {

@@ -9,6 +9,15 @@ package main
 values: {
 	version: "0.1.0"
 
+	strategy: {
+		type: "RollingUpdate"
+		rollingUpdate: {
+			maxSurge: 2
+		}
+	}
+
+	prometheus: {}
+
 	image: {
 		repository: "quay.io/jetstack/cert-manager-controller"
 		tag:        "v1.13.2"

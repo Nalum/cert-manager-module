@@ -11,6 +11,13 @@ values: {
 	resources: requests: cpu: "100m"
 	ingressShim: defaultIssuerName: "dev"
 
+	strategy: {
+		type: "RollingUpdate"
+		rollingUpdate: {
+			maxSurge: 2
+		}
+	}
+
 	image: {
 		repository: "quay.io/jetstack/cert-manager-controller"
 		tag:        "v1.13.2"
