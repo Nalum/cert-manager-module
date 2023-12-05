@@ -17,6 +17,7 @@ import (
 
 	// Metadata (common to all resources)
 	metadata: timoniv1.#Metadata & {#Version: moduleVersion}
+	metadata: name:      *"cert-manager" | string
 	metadata: namespace: *"cert-manager" | string
 
 	// Label selector (common to all resources)
