@@ -520,8 +520,8 @@ import (
 	}
 }
 
-#Duration: string & =~"^[0-9]+(ns|us|µs|ms|s|m|h)$"
-#Percent:  string & =~"^(1)?([1-9])?([0-9])%$"
+#Duration: string & =~"^[+-]?((\\d+h)?(\\d+m)?(\\d+s)?(\\d+ms)?(\\d+(us|µs))?(\\d+ns)?)$"
+#Percent:  string & =~"^(100|[1-9]?[0-9])%$"
 
 // Instance takes the config values and outputs the Kubernetes objects.
 #Instance: {
