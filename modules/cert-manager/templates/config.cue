@@ -528,11 +528,12 @@ import (
 	config: #Config
 
 	objects: {
-		//namespace: #Deployment & {_config: config}
+		namespace:  #Namespace & {_config: config}
 		deployment: #Deployment & {
-			_config:    config
-			_component: "controller"
-			_strategy:  _config.strategy
+			_config:     config
+			_component:  "controller"
+			_strategy:   _config.strategy
+			_prometheus: _config.prometheus
 		}
 		webhookDeployment: #Deployment & {
 			_config:    config

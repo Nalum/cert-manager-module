@@ -9,6 +9,7 @@ import (
 	_config:    #Config
 	_component: string
 	_strategy:  appsv1.#DeploymentStrategy
+	_prometheus?: {...}
 
 	apiVersion: "apps/v1"
 	kind:       "Deployment"
@@ -40,7 +41,7 @@ import (
 				metadata: annotations: _config.metadata.annotations
 			}
 
-			if _config.prometheus != _|_ {
+			if _prometheus != _|_ && _prometheus.serviceMonitor == _|_ {
 				metadata: annotations: "prometheus.io/path":   "/metrics"
 				metadata: annotations: "prometheus.io/scrape": "true"
 				metadata: annotations: "prometheus.io/port":   "9402"
