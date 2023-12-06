@@ -14,31 +14,29 @@ import (
 	apiVersion: "apps/v1"
 	kind:       "Deployment"
 
-	metadata: {
-		name:      "\(_config.metadata.name)-\(_component)"
-		namespace: _config.metadata.namespace
-		labels:    _config.metadata.labels
-		labels: "\(timoniv1.#StdLabelComponent)": _component
-
-		if _config.metadata.annotations != _|_ {
-			annotations: _config.metadata.annotations
-		}
+	_metadata: timoniv1.#MetaComponent & {
+		#Meta:      _config.metadata
+		#Component: _component
 	}
+
+	metadata: _metadata
 
 	spec: appsv1.#DeploymentSpec & {
 		replicas: _config.replicaCount
-		selector: matchLabels: _config.selector.labels
-		selector: matchLabels: "\(timoniv1.#StdLabelComponent)": _component
+		selector: timoniv1.#MatchLabelsComponent & {
+			#SelectorLabels: _config.selector.labels
+			#Component:      _component
+		}
 
 		if _strategy != _|_ {
 			strategy: _strategy
 		}
 
 		template: {
-			metadata: labels: _config.metadata.labels
+			metadata: labels: _metadata.labels
 
-			if _config.metadata.annotations != _|_ {
-				metadata: annotations: _config.metadata.annotations
+			if _metadata.annotations != _|_ {
+				metadata: annotations: _metadata.annotations
 			}
 
 			if _prometheus != _|_ && _prometheus.serviceMonitor == _|_ {
