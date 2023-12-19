@@ -45,7 +45,12 @@ import "strings"
 	labels: {
 		"\(#StdLabelName)":      name
 		"\(#StdLabelVersion)":   #Version
-		"\(#StdLabelManagedBy)": "Timoni"
+		"\(#StdLabelManagedBy)": "timoni"
+	}
+
+	// LabelSelector selects Pods based on the app.kubernetes.io/name label.
+	#LabelSelector: #Labels & {
+		"\(#StdLabelName)": name
 	}
 }
 
@@ -70,6 +75,13 @@ import "strings"
 	if #Meta.annotations != _|_ {
 		annotations: #Meta.annotations
 	}
+
+	// LabelSelector selects Pods based on the app.kubernetes.io/name
+	// and app.kubernetes.io/component labels.
+	#LabelSelector: #Labels & {
+		"\(#StdLabelComponent)": #Component
+		"\(#StdLabelName)":      #Meta.name
+	}
 }
 
 // MetaClusterComponent generates the Kubernetes object metadata for a module non-namespaced component.
@@ -92,5 +104,12 @@ import "strings"
 	annotations?: #Annotations
 	if #Meta.annotations != _|_ {
 		annotations: #Meta.annotations
+	}
+
+	// LabelSelector selects Pods based on the app.kubernetes.io/name
+	// and app.kubernetes.io/component labels.
+	#LabelSelector: #Labels & {
+		"\(#StdLabelComponent)": #Component
+		"\(#StdLabelName)":      #Meta.name
 	}
 }
