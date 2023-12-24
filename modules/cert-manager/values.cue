@@ -9,16 +9,16 @@ package main
 values: {
 	version: "0.1.0"
 
-	strategy: {
+	controller: strategy: {
 		type: "RollingUpdate"
 		rollingUpdate: {
 			maxSurge: 2
 		}
 	}
 
-	prometheus: {}
+	controller: prometheus: {}
 
-	image: {
+	controller: image: {
 		repository: "quay.io/jetstack/cert-manager-controller"
 		tag:        "v1.13.2"
 		digest:     "sha256:9c67cf8c92d8693f9b726bec79c2a84d2cebeb217af6947355601dec4acfa966"
@@ -46,5 +46,21 @@ values: {
 		repository: "quay.io/jetstack/cert-manager-ctl"
 		tag:        "v1.13.2"
 		digest:     "sha256:4d9fce2c050eaadabedac997d9bd4a003341e9172c3f48fae299d94fa5f03435"
+	}
+
+	webhook: networkPolicy: {
+		ingress: [{from: [{ipBlock: cidr: "0.0.0.0/0"}]}]
+		egress: [
+			{
+				ports: [
+					{port: 80, protocol:   "TCP"},
+					{port: 443, protocol:  "TCP"},
+					{port: 53, protocol:   "TCP"},
+					{port: 53, protocol:   "UDP"},
+					{port: 6443, protocol: "TCP"},
+				]
+				to: [{ipBlock: cidr: "0.0.0.0/0"}]
+			},
+		]
 	}
 }

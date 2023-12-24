@@ -6,50 +6,45 @@ import (
 )
 
 #Deployment: appsv1.#Deployment & {
-	_config:    #Config
-	_component: string
-	_strategy:  appsv1.#DeploymentStrategy
-	_prometheus?: {...}
+	_config:      #Config
+	_component:   string
+	_strategy:    appsv1.#DeploymentStrategy
+	_prometheus?: #Prometheus
 
-	apiVersion: "apps/v1"
-	kind:       "Deployment"
-
-	_metadata: timoniv1.#MetaComponent & {
+	_meta: timoniv1.#MetaComponent & {
 		#Meta:      _config.metadata
 		#Component: _component
 	}
 
-	metadata: _metadata
+	apiVersion: "apps/v1"
+	kind:       "Deployment"
 
-	spec: appsv1.#DeploymentSpec & {
-		replicas: _config.replicaCount
-		selector: timoniv1.#MatchLabelsComponent & {
-			#SelectorLabels: _config.selector.labels
-			#Component:      _component
+	metadata: _meta
+
+	if _component == "controller" {
+		spec: #ControllerDeploymentSpec & {
+			_main_config:           _config
+			_deployment_component:  _component
+			_deployment_strategy:   _strategy
+			_deployment_prometheus: _prometheus
 		}
+	}
 
-		if _strategy != _|_ {
-			strategy: _strategy
+	if _component == "webhook" {
+		spec: #WebhookDeploymentSpec & {
+			_config:     _config
+			_component:  _component
+			_strategy:   _strategy
+			_prometheus: _prometheus
 		}
+	}
 
-		template: {
-			metadata: labels: _metadata.labels
-
-			if _metadata.annotations != _|_ {
-				metadata: annotations: _metadata.annotations
-			}
-
-			if _prometheus != _|_ && _prometheus.serviceMonitor == _|_ {
-				metadata: annotations: "prometheus.io/path":   "/metrics"
-				metadata: annotations: "prometheus.io/scrape": "true"
-				metadata: annotations: "prometheus.io/port":   "9402"
-			}
-
-			spec: {
-				if _config.serviceAccount != _|_ {
-					serviceAccountName: _config.serviceAccount.name
-				}
-			}
+	if _component == "cainjector" {
+		spec: #CAInjectorDeploymentSpec & {
+			_config:     _config
+			_component:  _component
+			_strategy:   _strategy
+			_prometheus: _prometheus
 		}
 	}
 }

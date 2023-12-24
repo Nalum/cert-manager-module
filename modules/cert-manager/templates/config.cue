@@ -17,17 +17,6 @@ import (
 	// Metadata (common to all resources)
 	metadata: timoniv1.#Metadata & {#Version: moduleVersion}
 
-	// Label selector (common to all resources)
-	selector: timoniv1.#Selector & {#Name: metadata.name}
-
-	// Pod Security Policy
-	podSecurityPolicy?: {
-		useAppArmor: *true | bool
-	}
-
-	// Logging verbosity
-	logLevel: *2 | int & >=0 & <=6
-
 	// Reference to one or more secrets to be used when pulling images
 	// ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 	imagePullSecrets?: [...corev1.LocalObjectReference]
@@ -41,6 +30,14 @@ import (
 		aggregateClusterRoles: *true | bool
 	}
 
+	// Pod Security Policy
+	podSecurityPolicy?: {
+		useAppArmor: *true | bool
+	}
+
+	// Logging verbosity
+	logLevel: *2 | int & >=0 & <=6
+
 	leaderElection: {
 		namespace:     *"kube-system" | string
 		leaseDuration: *"60s" | #Duration
@@ -48,51 +45,134 @@ import (
 		retryPeriod:   *"15s" | #Duration
 	}
 
-	replicaCount: *1 | int
+	controller: #Controller
 
-	strategy?: appsv1.#DeploymentStrategy
+	webhook: #Webhook
 
-	podDisruptionBudget?: {
-		minAvailable:   *1 | int | #Percent
-		maxUnavailable: *1 | int | #Percent
+	caInjector?: #CAInjector
+
+	acmeSolver: {
+		image!:          timoniv1.#Image
+		imagePullPolicy: #ImagePullPolicy
 	}
 
-	// Comma separated list of feature gates that should be enabled on the controller pod.
-	featureGates?: string
+	// TODO: turn this into a Timoni Test
+	// This startupapicheck is a Helm post-install hook that waits for the webhook
+	// endpoints to become available.
+	// The check is implemented using a Kubernetes Job- if you are injecting mesh
+	// sidecar proxies into cert-manager pods, you probably want to ensure that they
+	// are not injected into this Job's pod. Otherwise the installation may time out
+	// due to the Job never being completed because the sidecar proxy does not exit.
+	// See https://github.com/cert-manager/cert-manager/pull/4414 for context.
+	startupAPICheck?: #StartupAPICheck
+}
 
-	// The maximum number of challenges that can be scheduled as 'processing' at once
-	maxConcurrentChallenges: *60 | int
+#Duration:        string & =~"^[+-]?((\\d+h)?(\\d+m)?(\\d+s)?(\\d+ms)?(\\d+(us|µs))?(\\d+ns)?)$"
+#Percent:         string & =~"^(100|[1-9]?[0-9])%$"
+#ImagePullPolicy: *corev1.#PullIfNotPresent | corev1.#enumPullPolicy
 
-	image!:          timoniv1.#Image
-	imagePullPolicy: *"IfNotPresent" | "Always" | "Never"
-
-	// Override the namespace used to store DNS provider credentials etc. for ClusterIssuer
-	// resources. By default, the same namespace as cert-manager is deployed within is
-	// used. This namespace will not be automatically created.
-	clusterResourceNamespace?: string
-
-	// This namespace allows you to define where the services will be installed into
-	// if not set then they will use the namespace of the release
-	// This is helpful when installing cert manager as a chart dependency (sub chart)
-	namespace?: string
-
-	serviceAccount?: {
-		// The name of the service account to use.
-		// If not set and create is true, a name is generated using the fullname template
-		name?: string
-		// Optional additional annotations to add to the controller's ServiceAccount
-		annotations?: timoniv1.#Annotations
-		// Automount API credentials for a Service Account.
-		automountServiceAccountToken: *true | bool
-		// Optional additional labels to add to the controller's ServiceAccount
-		labels?: timoniv1.#Labels
+#Prometheus: {
+	podMonitor?: {...}
+	serviceMonitor?: {
+		prometheusInstance: *"default" | string
+		targetPort:         *9402 | int
+		path:               *"/metrics" | string
+		interval:           *"60s" | #Duration
+		scrapeTimeout:      *"30s" | #Duration
+		labels?:            timoniv1.#Labels
+		annotations?:       timoniv1.#Annotations
+		honorLabels:        *false | bool
+		endpointAdditionalProperties: {[ string]: string}
 	}
+}
 
-	// Automounting API credentials for a particular pod
+#Proxy: {
+	httpProxy:  string
+	httpsProxy: string
+	noProxy:    string
+}
+
+#Resources: corev1.#ResourceRequirements & {
+	requests?: corev1.#ResourceList & {
+		cpu:    *"10m" | string
+		memory: *"32Mi" | string
+	}
+}
+
+#ServiceAccount: {
+	// The name of the service account to use.
+	// If not set and create is true, a name is generated using the fullname template
+	name?: string
+	// Optional additional annotations to add to the controller's ServiceAccount
+	annotations?: timoniv1.#Annotations
+	// Optional additional labels to add to the webhook's ServiceAccount
+	labels?: timoniv1.#Labels
+	// Automount API credentials for a Service Account.
 	automountServiceAccountToken: *true | bool
+}
 
-	// When this flag is enabled, secrets will be automatically removed when the certificate resource is deleted
-	enableCertificateOwnerRef: *false | bool
+#SecurityContext: {
+	runAsNonRoot: *true | bool
+	seccompProfile: type: *"RuntimeDefault" | string
+}
+
+#ContainerSecurityContext: corev1.#ContainerSecurityContext & {
+	allowPrivilegeEscalation: *false | bool
+	capabilities: {
+		drop:                   *["ALL"] | [...string]
+		readOnlyRootFilesystem: *true | bool
+		runAsNonRoot:           *true | bool
+	}
+}
+
+#PodDisruptionBudget: {
+	minAvailable:   *1 | int | #Percent
+	maxUnavailable: *1 | int | #Percent
+}
+
+#CommonData: {
+	affinity?:                    corev1.#Affinity
+	automountServiceAccountToken: *true | bool
+	containerSecurityContext?:    #ContainerSecurityContext
+	deploymentAnnotations?:       timoniv1.#Annotations
+	deploymentLabels?:            timoniv1.#Labels
+	enableServiceLinks:           *false | bool
+	extraArgs: [...string]
+	extraEnv: [...corev1.#EnvVar]
+	image!:               timoniv1.#Image
+	imagePullPolicy:      #ImagePullPolicy
+	livenessProbe?:       corev1.#Probe
+	nodeSelector:         timoniv1.#Labels & {"kubernetes.io/os": "linux"}
+	podAnnotations?:      timoniv1.#Annotations
+	podDisruptionBudget?: #PodDisruptionBudget
+	podLabels?:           timoniv1.#Labels
+	proxy?:               #Proxy
+	readynessProbe?:      corev1.#Probe
+	replicas:             *1 | int32
+	resources?:           #Resources
+	securityContext?:     #SecurityContext
+	serviceAccount?:      #ServiceAccount
+	serviceAnnotations?:  timoniv1.#Annotations
+	serviceLabels?:       timoniv1.#Labels
+	serviceType:          *corev1.#ServiceTypeClusterIP | corev1.#enumServiceType
+	strategy?:            appsv1.#DeploymentStrategy
+	tolerations?: [ ...corev1.#Toleration]
+	topologySpreadConstraints?: [...corev1.#TopologySpreadConstraint]
+	volumeMounts?: [...corev1.#VolumeMount]
+	volumes?: [...corev1.#Volume]
+}
+
+#Controller: {
+	#CommonData
+	clusterResourceNamespace?:     string
+	dns01RecursiveNameservers?:    string
+	dns01RecursiveNameserversOnly: *false | bool
+	enableCertificateOwnerRef:     *false | bool
+	featureGates?:                 string
+	maxConcurrentChallenges:       *60 | int
+	podDNSConfig?:                 corev1.#PodDNSConfig
+	podDNSPolicy:                  *"ClusterFirst" | "Default" | "ClusterFirstWithHostNet" | "None"
+	prometheus?:                   #Prometheus
 
 	// Used to configure options for the controller pod.
 	// This allows setting options that'd usually be provided via flags.
@@ -119,421 +199,77 @@ import (
 		}
 	}
 
-	// Setting Nameservers for DNS01 Self Check
-	// See: https://cert-manager.io/docs/configuration/acme/dns01/#setting-nameservers-for-dns01-self-check
-	// Comma separated string with host and port of the recursive nameservers cert-manager should query
-	dns01RecursiveNameservers?: string
-
-	// Forces cert-manager to only use the recursive nameservers for verification.
-	// Enabling this option could cause the DNS01 self check to take longer due to caching performed by the recursive nameservers
-	dns01RecursiveNameserversOnly: *false | bool
-
-	// Additional command line flags to pass to cert-manager controller binary.
-	// To see all available flags run docker run quay.io/jetstack/cert-manager-controller:<version> --help
-	extraArgs: [...string]
-	// Use this flag to enable or disable arbitrary controllers, for example, disable the CertificiateRequests approver
-	// --controllers=*,-certificaterequests-approver
-
-	extraEnv: [...corev1.EnvVar]
-
-	resources?:       corev1.#ResourceRequirements & {requests: {cpu: *"10m" | string, memory:            *"32Mi" | string}}
-	securityContext?: corev1.#SecurityContext & {runAsNonRoot:        *true | bool, seccompProfile: type: *"RuntimeDefault" | string}
-
-	// Container Security Context to be set on the controller component container
-	// ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-	containerSecurityContext?: corev1.#ContainerSecurityContext & {allowPrivilegeEscalation: false, capabilities: {drop: ["ALL"], readOnlyRootFilesystem: true, runAsNonRoot: true}}
-
-	volumes?: [...corev1.#Volume]
-	volumeMounts?: [...corev1.#VolumeMount]
-
-	deploymentLabels?:      timoniv1.#Labels
-	deploymentAnnotations?: timoniv1.#Annotations
-	podLabels?:             timoniv1.#Labels
-	podAnnotations?:        timoniv1.#Annotations
-	serviceLabels?:         timoniv1.#Labels
-	serviceAnnotations?:    timoniv1.#Annotations
-	tolerations?: [ ...corev1.#Toleration]
-	affinity?:    corev1.#Affinity
-	nodeSelector: timoniv1.#Labels & {"kubernetes.io/os": "linux"}
-	topologySpreadConstraints?: [...corev1.#TopologySpreadConstraint]
-
-	// Optional DNS settings, useful if you have a public and private DNS zone for
-	// the same domain on Route 53. What follows is an example of ensuring
-	// cert-manager can access an ingress or DNS TXT records at all times.
-	// NOTE: This requires Kubernetes 1.10 or `CustomPodDNS` feature gate enabled for
-	// the cluster to work.
-	podDNSPolicy:  *"ClusterFirst" | "Default" | "ClusterFirstWithHostNet" | "None"
-	podDNSConfig?: corev1.#PodDNSConfig
-
 	ingressShim?: {
 		defaultIssuerName?:  string
 		defaultIssuerKind?:  *"ClusterIssuer" | "Issuer"
 		defaultIssuerGroup?: string
 	}
+}
 
-	prometheus?: {
-		podMonitor?: {}
-		serviceMonitor?: {
-			prometheusInstance: *"default" | string
-			targetPort:         *9402 | int
-			path:               *"/metrics" | string
-			interval:           *"60s" | #Duration
-			scrapeTimeout:      *"30s" | #Duration
-			labels?:            timoniv1.#Labels
-			annotations?:       timoniv1.#Annotations
-			honorLabels:        *false | bool
-			endpointAdditionalProperties: {[ string]: string}
-		}
-	}
+#Webhook: {
+	#CommonData
+	featureGates?:                              string
+	hostNetwork:                                *false | bool
+	loadBalancerIP?:                            string
+	mutatingWebhookConfigurationAnnotations?:   timoniv1.#Annotations
+	networkPolicy?:                             networkingv1.#NetworkPolicySpec
+	securePort:                                 *10250 | int
+	timeoutSeconds:                             *10 | int
+	validatingWebhookConfigurationAnnotations?: timoniv1.#Annotations
 
-	// Use these variables to configure the HTTP_PROXY environment variables
-	http_proxy?:  string
-	https_proxy?: string
-	no_proxy?:    string
+	args: [...string]
 
-	// LivenessProbe settings for the controller container of the controller Pod.
-	//
-	// Disabled by default, because the controller has a leader election mechanism
-	// which should cause it to exit if it is unable to renew its leader election
-	// record.
-	// LivenessProbe durations and thresholds are based on those used for the Kubernetes
-	// controller-manager. See:
-	// https://github.com/kubernetes/kubernetes/blob/806b30170c61a38fedd54cc9ede4cd6275a1ad3b/cmd/kubeadm/app/util/staticpod/utils.go#L241-L245
-	livenessProbe?: corev1.#Probe & {initialDelaySeconds: 10, timeoutSeconds: 15, failureThreshold: 8}
-
-	// enableServiceLinks indicates whether information about services should be
-	// injected into pod's environment variables, matching the syntax of Docker
-	// links.
-	enableServiceLinks: *false | bool
-
-	webhook: {
-		replicaCount:   *1 | int
-		timeoutSeconds: *10 | int
-
-		// Used to configure options for the webhook pod.
-		// This allows setting options that'd usually be provided via flags.
-		// An APIVersion and Kind must be specified in your values.yaml file.
-		// Flags will override options that are set here.
-		config?: {
-			apiVersion: *"webhook.config.cert-manager.io/v1alpha1" | string
-			kind:       *"WebhookConfiguration" | string
-			// The port that the webhook should listen on for requests.
-			// In GKE private clusters, by default kubernetes apiservers are allowed to
-			// talk to the cluster nodes only on 443 and 10250. so configuring
-			// securePort: 10250, will work out of the box without needing to add firewall
-			// rules or requiring NET_BIND_SERVICE capabilities to bind port numbers <1000.
-			// This should be uncommented and set as a default by the chart once we graduate
-			// the apiVersion of WebhookConfiguration past v1alpha1.
-			securePort: *10250 | int
-		}
-
-		strategy?: appsv1.#DeploymentStrategy
-
-		// Pod Security Context to be set on the webhook component Pod
-		// ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-		securityContext?: corev1.#SecurityContext & {runAsNonRoot: true, seccompProfile: type: "RuntimeDefault"}
-
-		podDisruptionBudget?: {
-			minAvailable:   *1 | int | #Percent
-			maxUnavailable: *1 | int | #Percent
-		}
-
-		// Container Security Context to be set on the webhook component container
-		// ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-		containerSecurityContext?: corev1.#ContainerSecurityContext & {allowPrivilegeEscalation: false, capabilities: {drop: ["ALL"], readOnlyRootFilesystem: true, runAsNonRoot: true}}
-
-		// Optional additional annotations to add to the webhook resources
-		deploymentAnnotations?:                     timoniv1.#Annotations
-		podAnnotations?:                            timoniv1.#Annotations
-		serviceAnnotations?:                        timoniv1.#Annotations
-		mutatingWebhookConfigurationAnnotations?:   timoniv1.#Annotations
-		validatingWebhookConfigurationAnnotations?: timoniv1.#Annotations
-
-		// Optional additional labels to add to the Webhook resources
-		podLabels?:     timoniv1.#Labels
-		serviceLabels?: timoniv1.#Labels
-
-		// Additional command line flags to pass to cert-manager webhook binary.
-		// To see all available flags run docker run quay.io/jetstack/cert-manager-webhook:<version> --help
-		extraArgs?: [...string]
-		// Path to a file containing a WebhookConfiguration object used to configure the webhook
-		// --config=<path-to-config-file>
-
-		// Comma separated list of feature gates that should be enabled on the webhook pod.
-		featureGates?: string
-
-		resources?: corev1.#ResourceRequirements & {requests: {cpu: "10m", memory: "32Mi"}}
-
-		// Liveness and readiness probe values
-		// Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-probes
-		//
-		livenessProbe?:  corev1.#Probe & {failureThreshold: 3, initialDelaySeconds: 60, periodSeconds: 10, successThreshold: 1, timeoutSeconds: 1}
-		readinessProbe?: corev1.#Probe & {failureThreshold: 3, initialDelaySeconds: 5, periodSeconds:  5, successThreshold:  1, timeoutSeconds: 1}
-
-		nodeSelector: timoniv1.#Labels & {"kubernetes.io/os": "linux"}
-		affinity?:    corev1.#Affinity
-		tolerations?: [ ...corev1.#Toleration]
-		topologySpreadConstraints?: [...corev1.#TopologySpreadConstraint]
-
-		image!:          timoniv1.#Image
-		imagePullPolicy: *"IfNotPresent" | "Always" | "Never"
-
-		serviceAccount?: {
-			// The name of the service account to use.
-			// If not set and create is true, a name is generated using the fullname template
-			name?: string
-			// Optional additional annotations to add to the controller's ServiceAccount
-			annotations?: timoniv1.#Annotations
-			// Optional additional labels to add to the webhook's ServiceAccount
-			labels?: timoniv1.#Labels
-			// Automount API credentials for a Service Account.
-			automountServiceAccountToken: *true | bool
-		}
-
-		// Automounting API credentials for a particular pod
-		automountServiceAccountToken: *true | bool
-
+	// Used to configure options for the webhook pod.
+	// This allows setting options that'd usually be provided via flags.
+	// An APIVersion and Kind must be specified in your values.yaml file.
+	// Flags will override options that are set here.
+	config?: {
+		apiVersion: *"webhook.config.cert-manager.io/v1alpha1" | string
+		kind:       *"WebhookConfiguration" | string
 		// The port that the webhook should listen on for requests.
 		// In GKE private clusters, by default kubernetes apiservers are allowed to
 		// talk to the cluster nodes only on 443 and 10250. so configuring
 		// securePort: 10250, will work out of the box without needing to add firewall
-		// rules or requiring NET_BIND_SERVICE capabilities to bind port numbers <1000
+		// rules or requiring NET_BIND_SERVICE capabilities to bind port numbers <1000.
+		// This should be uncommented and set as a default by the chart once we graduate
+		// the apiVersion of WebhookConfiguration past v1alpha1.
 		securePort: *10250 | int
-
-		// Specifies if the webhook should be started in hostNetwork mode.
-		//
-		// Required for use in some managed kubernetes clusters (such as AWS EKS) with custom
-		// CNI (such as calico), because control-plane managed by AWS cannot communicate
-		// with pods' IP CIDR and admission webhooks are not working
-		//
-		// Since the default port for the webhook conflicts with kubelet on the host
-		// network, `webhook.securePort` should be changed to an available port if
-		// running in hostNetwork mode.
-		hostNetwork: *false | bool
-
-		// Specifies how the service should be handled. Useful if you want to expose the
-		// webhook to outside of the cluster. In some cases, the control plane cannot
-		// reach internal services.
-		serviceType:     *"ClusterIP" | "NodePort" | "LoadBalancer" | "ExternalName"
-		loadBalancerIP?: string
-
-		// Overrides the mutating webhook and validating webhook so they reach the webhook
-		// service using the `url` field instead of a service.
-		url?:  string
-		host?: string
-
-		// Enables default network policies for webhooks.
-		networkPolicy?: networkingv1.#NetworkPolicySpec & {
-			ingress: [...networkingv1.#NetworkPolicyIngressRule] & [
-					{
-					from: [...networkingv1.#NetworkPolicyPeer] & [
-						{
-							ipBlock: networkingv1.#IPBlock & {cidr: *"0.0.0.0/0" | string}
-						},
-					]
-				},
-			]
-			egress: [...networkingv1.#NetworkPolicyEgressRule] & [
-				{
-					ports: [...networkingv1.#NetworkPolicyPort] & [
-						{
-							port:     *80 | int
-							protocol: *"TCP" | string
-						},
-						{
-							port:     *443 | int
-							protocol: *"TCP" | string
-						},
-						{
-							port:     *53 | int
-							protocol: *"TCP" | string
-						},
-						{
-							port:     *53 | int
-							protocol: *"UDP" | string
-						},
-						{
-							port:     *6443 | int
-							protocol: *"TCP" | string
-						},
-					]
-					to: [...networkingv1.#NetworkPolicyPeer] & [
-						{
-							ipBlock: networkingv1.#IPBlock & {cidr: *"0.0.0.0/0" | string}
-						},
-					]
-				},
-			]
-		}
-
-		volumes?: [...corev1.#Volume]
-		volumeMounts?: [...corev1.#VolumeMount]
-
-		// enableServiceLinks indicates whether information about services should be
-		// injected into pod's environment variables, matching the syntax of Docker
-		// links.
-		enableServiceLinks: *false | bool
 	}
 
-	caInjector?: {
-		replicaCount: *1 | int
-
-		strategy?: appsv1.#DeploymentStrategy
-		config?: {[string]: string}
-
-		// Pod Security Context to be set on the cainjector component Pod
-		// ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-		securityContext?: corev1.#SecurityContext & {runAsNonRoot: true, seccompProfile: type: "RuntimeDefault"}
-
-		podDisruptionBudget?: {
-			minAvailable:   *1 | int | #Percent
-			maxUnavailable: *1 | int | #Percent
-		}
-
-		// Container Security Context to be set on the cainjector component container
-		// ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-		containerSecurityContext?: corev1.#ContainerSecurityContext & {allowPrivilegeEscalation: false, capabilities: {drop: ["ALL"], readOnlyRootFilesystem: true, runAsNonRoot: true}}
-
-		// Optional additional annotations to add to the webhook resources
-		deploymentAnnotations?: timoniv1.#Annotations
-		podAnnotations?:        timoniv1.#Annotations
-
-		// Additional command line flags to pass to cert-manager cainjector binary.
-		// To see all available flags run docker run quay.io/jetstack/cert-manager-cainjector:<version> --help
-		extraArgs?: [...string]
-		// Enable profiling for cainjector
-		// - --enable-profiling=true
-
-		resources?:   corev1.#ResourceRequirements & {requests: {cpu: "10m", memory: "32Mi"}}
-		nodeSelector: timoniv1.#Labels & {"kubernetes.io/os":         "linux"}
-		affinity?:    corev1.#Affinity
-		tolerations?: [ ...corev1.#Toleration]
-		topologySpreadConstraints?: [...corev1.#TopologySpreadConstraint]
-
-		// Optional additional labels to add to the CA Injector Pods
-		podLabels?: timoniv1.#Labels
-
-		image!:          timoniv1.#Image
-		imagePullPolicy: *"IfNotPresent" | "Always" | "Never"
-
-		serviceAccount?: {
-			// The name of the service account to use.
-			// If not set and create is true, a name is generated using the fullname template
-			name?: string
-			// Optional additional annotations to add to the controller's ServiceAccount
-			annotations?: timoniv1.#Annotations
-			// Optional additional labels to add to the webhook's ServiceAccount
-			labels?: timoniv1.#Labels
-			// Automount API credentials for a Service Account.
-			automountServiceAccountToken: *true | bool
-		}
-
-		// Automounting API credentials for a particular pod
-		automountServiceAccountToken: *true | bool
-
-		volumes?: [...corev1.#Volume]
-		volumeMounts?: [...corev1.#VolumeMount]
-
-		// enableServiceLinks indicates whether information about services should be
-		// injected into pod's environment variables, matching the syntax of Docker
-		// links.
-		enableServiceLinks: *false | bool
-	}
-
-	acmeSolver: {
-		image!:          timoniv1.#Image
-		imagePullPolicy: *"IfNotPresent" | "Always" | "Never"
-	}
-
-	// TODO: turn this into a Timoni Test
-	// This startupapicheck is a Helm post-install hook that waits for the webhook
-	// endpoints to become available.
-	// The check is implemented using a Kubernetes Job- if you are injecting mesh
-	// sidecar proxies into cert-manager pods, you probably want to ensure that they
-	// are not injected into this Job's pod. Otherwise the installation may time out
-	// due to the Job never being completed because the sidecar proxy does not exit.
-	// See https://github.com/cert-manager/cert-manager/pull/4414 for context.
-	startupAPICheck?: {
-		// Pod Security Context to be set on the startupapicheck component Pod
-		// ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-		securityContext?: corev1.#SecurityContext & {runAsNonRoot: true, seccompProfile: type: "RuntimeDefault"}
-
-		// Container Security Context to be set on the controller component container
-		// ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
-		containerSecurityContext?: corev1.#ContainerSecurityContext & {allowPrivilegeEscalation: false, capabilities: {drop: ["ALL"], readOnlyRootFilesystem: true, runAsNonRoot: true}}
-
-		// Timeout for 'kubectl check api' command
-		timeout: *"1m" | #Duration
-
-		// Job backoffLimit
-		backoffLimit: *4 | int
-
-		// Optional additional annotations to add to the startupapicheck Job
-		jobAnnotations?: timoniv1.#Annotations
-
-		// Optional additional annotations to add to the startupapicheck Pods
-		podAnnotations?: timoniv1.#Annotations
-
-		// Additional command line flags to pass to startupapicheck binary.
-		// To see all available flags run docker run quay.io/jetstack/cert-manager-ctl:<version> --help
-		extraArgs: [...string]
-
-		resources?:   corev1.#ResourceRequirements & {requests: {cpu: "10m", memory: "32Mi"}}
-		nodeSelector: timoniv1.#Labels & {"kubernetes.io/os":         "linux"}
-		affinity?:    corev1.#Affinity
-		tolerations?: [ ...corev1.#Toleration]
-
-		// Optional additional labels to add to the startupapicheck Pods
-		podLabels?: timoniv1.#Labels
-
-		image!:          timoniv1.#Image
-		imagePullPolicy: *"IfNotPresent" | "Always" | "Never"
-
-		// annotations for the startup API Check job RBAC and PSP resources
-		rbac: annotations?: timoniv1.#Annotations
-
-		// Automounting API credentials for a particular pod
-		automountServiceAccountToken: *true | bool
-
-		serviceAccount?: {
-			// The name of the service account to use.
-			// If not set and create is true, a name is generated using the fullname template
-			name?: string
-
-			// Optional additional annotations to add to the Job's ServiceAccount
-			annotations?: timoniv1.#Annotations
-
-			// Automount API credentials for a Service Account.
-			automountServiceAccountToken: *true | bool
-
-			// Optional additional labels to add to the startupapicheck's ServiceAccount
-			labels?: timoniv1.#Labels
-		}
-
-		volumes?: [...corev1.#Volume]
-		volumeMounts?: [...corev1.#VolumeMount]
-
-		// enableServiceLinks indicates whether information about services should be
-		// injected into pod's environment variables, matching the syntax of Docker
-		// links.
-		enableServiceLinks: *false | bool
-	}
+	// Overrides the mutating webhook and validating webhook so they reach the webhook
+	// service using the `url` field instead of a service.
+	url?:  string
+	host?: string
 }
 
-#Duration: string & =~"^[+-]?((\\d+h)?(\\d+m)?(\\d+s)?(\\d+ms)?(\\d+(us|µs))?(\\d+ns)?)$"
-#Percent:  string & =~"^(100|[1-9]?[0-9])%$"
+#CAInjector: {
+	#CommonData
+	config?: {[string]: string}
+
+	args: [...string]
+}
+
+#StartupAPICheck: {
+	#CommonData
+	backoffLimit:    *4 | int
+	jobAnnotations?: timoniv1.#Annotations
+	rbac: annotations?: timoniv1.#Annotations
+
+	// Timeout for 'kubectl check api' command
+	timeout: *"1m" | #Duration
+}
 
 // Instance takes the config values and outputs the Kubernetes objects.
 #Instance: {
 	config: #Config
 
 	objects: {
-		namespace:  #Namespace & {_config: config}
-		deployment: #Deployment & {
+		namespace:            #Namespace & {_config: config}
+		controllerDeployment: #Deployment & {
 			_config:     config
 			_component:  "controller"
-			_strategy:   _config.strategy
-			_prometheus: _config.prometheus
+			_strategy:   _config.controller.strategy
+			_prometheus: _config.controller.prometheus
 		}
 		webhookDeployment: #Deployment & {
 			_config:    config
