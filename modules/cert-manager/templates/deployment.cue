@@ -8,7 +8,7 @@ import (
 #Deployment: appsv1.#Deployment & {
 	_config:      #Config
 	_component:   string
-	_strategy:    appsv1.#DeploymentStrategy
+	_strategy?:   appsv1.#DeploymentStrategy
 	_prometheus?: #Prometheus
 
 	_meta: timoniv1.#MetaComponent & {
@@ -24,7 +24,7 @@ import (
 	if _component == "controller" {
 		spec: #ControllerDeploymentSpec & {
 			_main_config:           _config
-			_deployment_component:  _component
+			_deployment_meta:       _meta
 			_deployment_strategy:   _strategy
 			_deployment_prometheus: _prometheus
 		}
@@ -32,19 +32,19 @@ import (
 
 	if _component == "webhook" {
 		spec: #WebhookDeploymentSpec & {
-			_config:     _config
-			_component:  _component
-			_strategy:   _strategy
-			_prometheus: _prometheus
+			_main_config:           _config
+			_deployment_meta:       _meta
+			_deployment_strategy:   _strategy
+			_deployment_prometheus: _prometheus
 		}
 	}
 
 	if _component == "cainjector" {
 		spec: #CAInjectorDeploymentSpec & {
-			_config:     _config
-			_component:  _component
-			_strategy:   _strategy
-			_prometheus: _prometheus
+			_main_config:           _config
+			_deployment_meta:       _meta
+			_deployment_strategy:   _strategy
+			_deployment_prometheus: _prometheus
 		}
 	}
 }

@@ -8,23 +8,19 @@ import (
 
 #ControllerDeploymentSpec: appsv1.#DeploymentSpec & {
 	_main_config:            #Config
-	_deployment_component:   string
-	_deployment_strategy:    appsv1.#DeploymentStrategy
+	_deployment_meta:        timoniv1.#MetaComponent
+	_deployment_strategy?:   appsv1.#DeploymentStrategy
 	_deployment_prometheus?: #Prometheus
-	_meta:                   timoniv1.#MetaComponent & {
-		#Meta:      _main_config.metadata
-		#Component: _deployment_component
-	}
 
 	replicas: _main_config.controller.replicas
-	selector: matchLabels: _meta.#LabelSelector
+	selector: matchLabels: _deployment_meta.#LabelSelector
 
 	if _deployment_strategy != _|_ {
 		strategy: _deployment_strategy
 	}
 
 	template: corev1.#PodTemplateSpec & {
-		metadata: labels: _meta.#LabelSelector
+		metadata: labels: _deployment_meta.#LabelSelector
 
 		if _main_config.controller.podLabels != _|_ {
 			metadata: labels: _main_config.controller.podLabels
@@ -69,14 +65,14 @@ import (
 				volumes: [
 					{
 						name: "config"
-						configMap: name: _meta.name
+						configMap: name: _deployment_meta.name
 					},
 				]
 			}
 
 			containers: [...corev1.#Container] & [
 					{
-					name: _meta.name
+					name: _deployment_meta.name
 
 					image:           _main_config.controller.image.reference
 					imagePullPolicy: _main_config.controller.imagePullPolicy
@@ -107,10 +103,10 @@ import (
 						protocol:      "TCP"
 					}]
 
-					args: [...string]
-					args: _main_config.controller.extraArgs
 					args: [
 						"--v=\(_main_config.logLevel)",
+						"--leader-election-namespace=\(_main_config.leaderElection.namespace)",
+						"--acme-http01-solver-image=\(_main_config.acmeSolver.image.reference)",
 
 						if _main_config.controller.config != _|_ {
 							"--config=/var/cert-manager/config/config.yaml"
@@ -124,8 +120,6 @@ import (
 							"--cluster-resource-namespace=$(POD_NAMESPACE)"
 						},
 
-						"--leader-election-namespace=\(_main_config.leaderElection.namespace)",
-
 						if _main_config.leaderElection.leaseDuration != _|_ {
 							"--leader-election-lease-duration=\(_main_config.leaderElection.leaseDuration)"
 						},
@@ -137,8 +131,6 @@ import (
 						if _main_config.leaderElection.retryPeriod != _|_ {
 							"--leader-election-retry-period=\(_main_config.leaderElection.retryPeriod)"
 						},
-
-						"--acme-http01-solver-image=\(_main_config.acmeSolver.image.reference)",
 
 						if _main_config.controller.ingressShim.defaultIssuerName != _|_ {
 							"--default-issuer-name=\(_main_config.leaderElection.defaultIssuerName)"
@@ -171,16 +163,22 @@ import (
 						if _main_config.controller.dns01RecursiveNameservers != _|_ {
 							"--dns01-recursive-nameservers=\(_main_config.controller.dns01RecursiveNameservers)"
 						},
+
+						if _main_config.controller.extraArgs != _|_ {
+							for a in _main_config.controller.extraArgs {a}
+						},
 					]
 
-					env: [...corev1.#EnvVar]
 					env: [
 						{
 							name: "POD_NAMESPACE"
 							valueFrom: fieldRef: fieldPath: "metadata.namespace"
 						},
+
+						if _main_config.controller.extraEnvs != _|_ {
+							for e in _main_config.controller.extraEnvs {e}
+						},
 					]
-					env: _main_config.controller.extraEnv
 
 					if _main_config.controller.proxy != _|_ {
 						env: [
@@ -248,6 +246,10 @@ import (
 
 			if _main_config.controller.podDNSConfig != _|_ {
 				dnsConfig: _main_config.controller.podDNSConfig
+			}
+
+			if _main_config.controller.volumes != _|_ {
+				volumes: _main_config.controller.volumes
 			}
 		}
 	}
