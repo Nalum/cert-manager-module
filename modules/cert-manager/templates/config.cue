@@ -16,6 +16,7 @@ import (
 
 	// Metadata (common to all resources)
 	metadata: timoniv1.#Metadata & {#Version: moduleVersion}
+	metadata: labels: "\(timoniv1.#StdLabelPartOf)": "cert-manager"
 
 	// Reference to one or more secrets to be used when pulling images
 	// ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
