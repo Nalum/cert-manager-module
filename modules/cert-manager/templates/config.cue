@@ -269,15 +269,15 @@ import (
 #Instance: {
 	config: #Config
 
-	//objects: {
-	//for name, crd in customresourcedefinition {
-	//"\(name)": crd
-	//"\(name)": metadata: labels: config.metadata.labels
-	//if config.metadata.annotations != _|_ {
-	//"\(name)": metadata: annotations: config.metadata.annotations
-	//}
-	//}
-	//}
+	objects: {
+		for name, crd in customresourcedefinition {
+			"\(name)": crd
+			"\(name)": metadata: labels: config.metadata.labels
+			if config.metadata.annotations != _|_ {
+				"\(name)": metadata: annotations: config.metadata.annotations
+			}
+		}
+	}
 
 	objects: {
 		namespace:            #Namespace & {_config: config}

@@ -33,16 +33,36 @@ gen: ## Print the CUE generated objects
 .PHONY: vet
 vet:
 	@cd modules/cert-manager
-	@timoni mod vet --namespace $(NAMESPACE)
+	@timoni mod vet --namespace $(NAMESPACE) --name $(NAME)
 
 .PHONY: ls
 ls: ## List the CUE generated objects
 	@cd modules/cert-manager
 	@cue cmd -t name=$(NAME) -t namespace=$(NAMESPACE) -t mv=v$(MV) -t kv=$(KV) ls
 
-.PHONY: gen-deploy
-gen-deploy: ## Print the deployment
-	@timoni -n $(NAMESPACE) build $(NAME) ./modules/cert-manager/ -f ./modules/cert-manager/debug_values.cue | yq e '. | select(.kind == "Deployment")'
+.PHONY: gen-files
+gen-files: ## Generate resources and write to files
+	@mkdir -p output
+	@timoni -n $(NAMESPACE) build $(NAME) ./modules/cert-manager > all.yaml
+	#@yq -e --yaml-output '. | select(.kind == "ClusterRole")' all.yaml > output/ClusterRole.yaml
+	#@yq -e --yaml-output '. | select(.kind == "ClusterRoleBinding")' all.yaml > output/ClusterRoleBinding.yaml
+	#@yq -e --yaml-output '. | select(.kind == "ConfigMap")' all.yaml > output/ConfigMap.yaml
+	@yq -e --yaml-output '. | select(.kind == "CustomResourceDefinition")' all.yaml > output/CustomResourceDefinition.yaml
+	@yq -e --yaml-output '. | select(.kind == "Deployment")' all.yaml > output/Deployment.yaml
+	@yq -e --yaml-output '. | select(.kind == "Job")' all.yaml > output/Job.yaml
+	@yq -e --yaml-output '. | select(.kind == "MutatingWebhookConfiguration")' all.yaml > output/MutatingWebhookConfiguration.yaml
+	@yq -e --yaml-output '. | select(.kind == "Namespace")' all.yaml > output/Namespace.yaml
+	@yq -e --yaml-output '. | select(.kind == "NetworkPolicy")' all.yaml > output/NetworkPolicy.yaml
+	#@yq -e --yaml-output '. | select(.kind == "PodDisruptionBudget")' all.yaml > output/PodDisruptionBudget.yaml
+	#@yq -e --yaml-output '. | select(.kind == "PodMonitor")' all.yaml > output/PodMonitor.yaml
+	#@yq -e --yaml-output '. | select(.kind == "PodSecurityPolicy")' all.yaml > output/PodSecurityPolicy.yaml
+	#@yq -e --yaml-output '. | select(.kind == "Role")' all.yaml > output/Role.yaml
+	#@yq -e --yaml-output '. | select(.kind == "RoleBinding")' all.yaml > output/RoleBinding.yaml
+	@yq -e --yaml-output '. | select(.kind == "Service")' all.yaml > output/Service.yaml
+	#@yq -e --yaml-output '. | select(.kind == "ServiceAccount")' all.yaml > output/ServiceAccount.yaml
+	#@yq -e --yaml-output '. | select(.kind == "ServiceMonitor")' all.yaml > output/ServiceMonitor.yaml
+	@yq -e --yaml-output '. | select(.kind == "ValidatingWebhookConfiguration")' all.yaml > output/ValidatingWebhookConfiguration.yaml
+	@rm all.yaml
 
 .PHONY: push-mod
 push-mod: ## Push the Timoni modules to GHCR
