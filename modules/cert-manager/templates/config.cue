@@ -294,7 +294,10 @@ import (
 		}
 		webhookMutatingWebhook:   #MutatingWebhook & {_config:   config}
 		webhookValidatingWebhook: #ValidatingWebhook & {_config: config}
-		webhookService:           #Service & {_config:           config}
+		webhookService:           #Service & {
+			_config:    config
+			_component: "webhook"
+		}
 	}
 
 	if config.caInjector != _|_ {
@@ -400,7 +403,10 @@ import (
 
 	if config.prometheus != _|_ && config.prometheus.serviceMonitor != _|_ {
 		objects: {
-			service:        #Service & {_config:        config}
+			service: #Service & {
+				_config:    config
+				_component: "controller"
+			}
 			serviceMonitor: #ServiceMonitor & {_config: config}
 		}
 	}
