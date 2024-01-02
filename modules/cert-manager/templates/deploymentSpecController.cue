@@ -20,7 +20,7 @@ import (
 	}
 
 	template: corev1.#PodTemplateSpec & {
-		metadata: labels: _deployment_meta.#LabelSelector
+		metadata: labels: _deployment_meta.labels
 
 		if _main_config.controller.podLabels != _|_ {
 			metadata: labels: _main_config.controller.podLabels
@@ -41,6 +41,10 @@ import (
 				serviceAccountName: _main_config.controller.serviceAccount.name
 			}
 
+			if _main_config.controller.serviceAccount == _|_ {
+				serviceAccountName: _deployment_meta.name
+			}
+
 			if _main_config.controller.automountServiceAccountToken != _|_ {
 				automountServiceAccountToken: _main_config.controller.automountServiceAccountToken
 			}
@@ -53,9 +57,7 @@ import (
 				priorityClassName: _main_config.priorityClass
 			}
 
-			if _main_config.controller.securityContext != _|_ {
-				securityContext: _main_config.controller.securityContext
-			}
+			securityContext: _main_config.controller.securityContext
 
 			if _main_config.controller.volumes != _|_ {
 				volumes: _main_config.controller.volumes

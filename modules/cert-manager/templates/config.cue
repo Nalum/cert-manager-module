@@ -40,10 +40,10 @@ import (
 	logLevel: *2 | int & >=0 & <=6
 
 	leaderElection: {
-		namespace:     *"kube-system" | string
-		leaseDuration: *"60s" | #Duration
-		renewDeadline: *"40s" | #Duration
-		retryPeriod:   *"15s" | #Duration
+		namespace:      *"kube-system" | string
+		leaseDuration?: *"60s" | #Duration
+		renewDeadline?: *"40s" | #Duration
+		retryPeriod?:   *"15s" | #Duration
 	}
 
 	controller: #Controller
@@ -117,12 +117,12 @@ import (
 	seccompProfile: type: *"RuntimeDefault" | string
 }
 
-#ContainerSecurityContext: corev1.#ContainerSecurityContext & {
+#ContainerSecurityContext: corev1.#SecurityContext & {
 	allowPrivilegeEscalation: *false | bool
-	capabilities: {
-		drop:                   *["ALL"] | [...string]
-		readOnlyRootFilesystem: *true | bool
-		runAsNonRoot:           *true | bool
+	readOnlyRootFilesystem:   *true | bool
+	runAsNonRoot:             *true | bool
+	capabilities:             corev1.#Capabilities & {
+		drop: *["ALL"] | null | [...string]
 	}
 }
 
@@ -132,12 +132,12 @@ import (
 }
 
 #CommonData: {
-	affinity?:                    corev1.#Affinity
-	automountServiceAccountToken: *true | bool
-	containerSecurityContext?:    #ContainerSecurityContext
-	deploymentAnnotations?:       timoniv1.#Annotations
-	deploymentLabels?:            timoniv1.#Labels
-	enableServiceLinks:           *false | bool
+	affinity?:                     corev1.#Affinity
+	automountServiceAccountToken?: *true | bool
+	containerSecurityContext:      #ContainerSecurityContext
+	deploymentAnnotations?:        timoniv1.#Annotations
+	deploymentLabels?:             timoniv1.#Labels
+	enableServiceLinks:            *false | bool
 	extraArgs?: [...string]
 	extraEnvs?: [...corev1.#EnvVar]
 	image!:               timoniv1.#Image
@@ -148,10 +148,10 @@ import (
 	podDisruptionBudget?: #PodDisruptionBudget
 	podLabels?:           timoniv1.#Labels
 	proxy?:               #Proxy
-	readynessProbe?:      corev1.#Probe
+	readinessProbe?:      corev1.#Probe
 	replicas:             *1 | int32
 	resources?:           #Resources
-	securityContext?:     #SecurityContext
+	securityContext:      #SecurityContext
 	serviceAccount?:      #ServiceAccount
 	serviceAnnotations?:  timoniv1.#Annotations
 	serviceLabels?:       timoniv1.#Labels
@@ -165,15 +165,15 @@ import (
 
 #Controller: {
 	#CommonData
-	clusterResourceNamespace?:     string
-	dns01RecursiveNameservers?:    string
-	dns01RecursiveNameserversOnly: *false | bool
-	enableCertificateOwnerRef:     *false | bool
-	featureGates?:                 string
-	maxConcurrentChallenges:       *60 | int
-	podDNSConfig?:                 corev1.#PodDNSConfig
-	podDNSPolicy:                  *"ClusterFirst" | "Default" | "ClusterFirstWithHostNet" | "None"
-	prometheus?:                   #Prometheus
+	clusterResourceNamespace?:      string
+	dns01RecursiveNameservers?:     string
+	dns01RecursiveNameserversOnly?: *false | bool
+	enableCertificateOwnerRef?:     *false | bool
+	featureGates?:                  string
+	maxConcurrentChallenges:        *60 | int
+	podDNSConfig?:                  corev1.#PodDNSConfig
+	podDNSPolicy?:                  *"ClusterFirst" | "Default" | "ClusterFirstWithHostNet" | "None"
+	prometheus?:                    #Prometheus
 
 	// Used to configure options for the controller pod.
 	// This allows setting options that'd usually be provided via flags.
@@ -217,6 +217,10 @@ import (
 	securePort:                                 *10250 | int
 	timeoutSeconds:                             *10 | int
 	validatingWebhookConfigurationAnnotations?: timoniv1.#Annotations
+
+	livenessProbe: {}
+
+	readinessProbe: {}
 
 	args: [...string]
 

@@ -19,7 +19,7 @@ import (
 		strategy: _deployment_strategy
 	}
 	template: corev1.#PodTemplateSpec & {
-		metadata: labels: _deployment_meta.#LabelSelector
+		metadata: labels: _deployment_meta.labels
 
 		if _main_config.caInjector.podLabels != _|_ {
 			metadata: labels: _main_config.caInjector.podLabels

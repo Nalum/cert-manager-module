@@ -9,13 +9,6 @@ package main
 values: {
 	version: "0.1.0"
 
-	controller: strategy: {
-		type: "RollingUpdate"
-		rollingUpdate: {
-			maxSurge: 2
-		}
-	}
-
 	controller: prometheus: {}
 
 	controller: image: {

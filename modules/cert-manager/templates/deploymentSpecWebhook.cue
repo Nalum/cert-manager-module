@@ -19,7 +19,7 @@ import (
 		strategy: _deployment_strategy
 	}
 	template: corev1.#PodTemplateSpec & {
-		metadata: labels: _deployment_meta.#LabelSelector
+		metadata: labels: _deployment_meta.labels
 
 		if _main_config.webhook.podLabels != _|_ {
 			metadata: labels: _main_config.webhook.podLabels
@@ -30,27 +30,26 @@ import (
 		}
 
 		spec: corev1.#PodSpec & {
+			enableServiceLinks: _main_config.webhook.enableServiceLinks
+			securityContext:    _main_config.webhook.securityContext
+
 			if _main_config.webhook.serviceAccount != _|_ {
 				serviceAccountName: _main_config.webhook.serviceAccount.name
+			}
+
+			if _main_config.webhook.serviceAccount == _|_ {
+				serviceAccountName: _deployment_meta.name
 			}
 
 			if _main_config.webhook.automountServiceAccountToken != _|_ {
 				automountServiceAccountToken: _main_config.webhook.automountServiceAccountToken
 			}
 
-			if _main_config.webhook.enableServiceLinks != _|_ {
-				enableServiceLinks: _main_config.webhook.enableServiceLinks
-			}
-
 			if _main_config.priorityClass != _|_ {
 				priorityClassName: _main_config.priorityClass
 			}
 
-			if _main_config.webhook.securityContext != _|_ {
-				securityContext: _main_config.webhook.securityContext
-			}
-
-			if _main_config.webhook.hostNetwork != _|_ {
+			if _main_config.webhook.hostNetwork != false {
 				hostNetwork: true
 				dnsPolicy:   "ClusterFirstWithHostNet"
 			}
@@ -66,11 +65,15 @@ import (
 						"--v=\(_main_config.logLevel)",
 
 						if _main_config.webhook.config != _|_ {
-							"--config=/var/cert-manager/config/config.yaml"
+							"--secure-port=\(_main_config.webhook.config.securePort)"
 						},
 
-						if _main_config.webhook.config.securePort != _|_ {
-							"--secure-port=\(_deployment_meta.webhook.securePort)"
+						if _main_config.webhook.config == _|_ {
+							"--secure-port=\(_main_config.webhook.securePort)"
+						},
+
+						if _main_config.webhook.config != _|_ {
+							"--config=/var/cert-manager/config/config.yaml"
 						},
 
 						if _main_config.webhook.featureGates != _|_ {
@@ -108,9 +111,14 @@ import (
 
 					ports: [
 						{
-							name:          "https"
-							protocol:      "TCP"
-							containerPort: *6443 | _main_config.webhook.config.securePort
+							name:     "https"
+							protocol: "TCP"
+							if _main_config.webhook.config != _|_ {
+								containerPort: _main_config.webhook.config.securePort
+							}
+							if _main_config.webhook.config == _|_ {
+								containerPort: _main_config.webhook.securePort
+							}
 						},
 						{
 							name:          "healthcheck"
@@ -126,11 +134,11 @@ import (
 								path:   "/livez"
 								scheme: "HTTP"
 							}
-							initialDelaySeconds: *10 | int
+							initialDelaySeconds: *60 | int
 							periodSeconds:       *10 | int
-							timeoutSeconds:      *15 | int
+							timeoutSeconds:      *1 | int
 							successThreshold:    *1 | int
-							failureThreshold:    *8 | int
+							failureThreshold:    *3 | int
 						}
 					}
 
@@ -141,11 +149,11 @@ import (
 								path:   "/healthz"
 								scheme: "HTTP"
 							}
-							initialDelaySeconds: *10 | int
-							periodSeconds:       *10 | int
-							timeoutSeconds:      *15 | int
+							initialDelaySeconds: *5 | int
+							periodSeconds:       *5 | int
+							timeoutSeconds:      *1 | int
 							successThreshold:    *1 | int
-							failureThreshold:    *8 | int
+							failureThreshold:    *3 | int
 						}
 					}
 
