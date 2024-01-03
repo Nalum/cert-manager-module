@@ -5,11 +5,13 @@ package main
 // Values used by debug_tool.cue.
 // Debug example 'cue cmd -t debug -t name=test -t namespace=test -t mv=1.0.0 -t kv=1.28.0 build'.
 values: {
-	version: "0.1.0"
-	metadata: labels: team:   "dev"
-	config: logging: format:  "json"
-	resources: requests: cpu: "100m"
-	ingressShim: defaultIssuerName: "dev"
+	version: "0.1.0-debug"
+
+	metadata: labels: team: "dev"
+
+	controller: config: logging: format:  "json"
+	controller: resources: requests: cpu: "100m"
+	controller: ingressShim: defaultIssuerName: "dev"
 
 	controller: strategy: {
 		type: "RollingUpdate"
@@ -18,7 +20,16 @@ values: {
 		}
 	}
 
-	controller: prometheus: {}
+	podSecurityPolicy: {}
+
+	controller: prometheus: serviceMonitor: {}
+
+	controller: serviceAccount: {}
+	webhook: serviceAccount: {}
+	caInjector: serviceAccount: {}
+	startupAPICheck: serviceAccount: {}
+
+	webhook: config: {}
 
 	controller: image: {
 		repository: "quay.io/jetstack/cert-manager-controller"
