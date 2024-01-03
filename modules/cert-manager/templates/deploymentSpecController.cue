@@ -128,16 +128,16 @@ import (
 							"--leader-election-retry-period=\(_main_config.leaderElection.retryPeriod)"
 						},
 
-						if _main_config.controller.ingressShim.defaultIssuerName != _|_ {
-							"--default-issuer-name=\(_main_config.leaderElection.defaultIssuerName)"
+						if _main_config.controller.ingressShim != _|_ && _main_config.controller.ingressShim.defaultIssuerName != _|_ {
+							"--default-issuer-name=\(_main_config.controller.ingressShim.defaultIssuerName)"
 						},
 
-						if _main_config.controller.ingressShim.defaultIssuerKind != _|_ {
-							"--default-issuer-kind=\(_main_config.leaderElection.defaultIssuerKind)"
+						if _main_config.controller.ingressShim != _|_ && _main_config.controller.ingressShim.defaultIssuerKind != _|_ {
+							"--default-issuer-kind=\(_main_config.controller.ingressShim.defaultIssuerKind)"
 						},
 
-						if _main_config.controller.ingressShim.defaultIssuerGroup != _|_ {
-							"--default-issuer-group=\(_main_config.leaderElection.defaultIssuerGroup)"
+						if _main_config.controller.ingressShim != _|_ && _main_config.controller.ingressShim.defaultIssuerGroup != _|_ {
+							"--default-issuer-group=\(_main_config.controller.ingressShim.defaultIssuerGroup)"
 						},
 
 						if _main_config.controller.featureGates != _|_ {
