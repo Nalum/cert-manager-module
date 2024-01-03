@@ -211,11 +211,8 @@ import (
 	securePort:                                 *10250 | int
 	timeoutSeconds:                             *10 | int
 	validatingWebhookConfigurationAnnotations?: timoniv1.#Annotations
-
 	livenessProbe: {}
-
 	readinessProbe: {}
-
 	args: [...string]
 
 	// Used to configure options for the webhook pod.
@@ -295,10 +292,6 @@ import (
 	}
 
 	if config.caInjector != _|_ {
-		if config.caInjector.config != _|_ {
-			objects: caInjectorConfigMap: #ConfigMap & {_config: config}
-		}
-
 		if config.caInjector.podDisruptionBudget != _|_ {
 			objects: caInjectorPodDisruptionBudget: #PodDisruptionBudget & {_config: config}
 		}
@@ -352,8 +345,11 @@ import (
 		}
 	}
 
-	if config.config != _|_ {
-		objects: controllerConfigMap: #ConfigMap & {_config: config}
+	if config.controller.config != _|_ {
+		objects: controllerConfigMap: #ConfigMap & {
+			_config:    config
+			_component: "controller"
+		}
 	}
 
 	if config.webhook.networkPolicy != _|_ {
@@ -543,7 +539,10 @@ import (
 	}
 
 	if config.webhook.config != _|_ {
-		objects: webhookConfigMap: #ConfigMap & {_config: config}
+		objects: webhookConfigMap: #ConfigMap & {
+			_config:    config
+			_component: "webhook"
+		}
 	}
 
 	if config.webhook.podDisruptionBudget != _|_ {
