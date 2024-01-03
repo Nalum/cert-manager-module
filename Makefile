@@ -44,8 +44,8 @@ ls: ## List the CUE generated objects
 gen-files: ## Generate resources and write to files
 	@mkdir -p output
 	@timoni -n $(NAMESPACE) build $(NAME) ./modules/cert-manager > all.yaml
-	#@yq -e --yaml-output '. | select(.kind == "ClusterRole")' all.yaml > output/ClusterRole.yaml
-	#@yq -e --yaml-output '. | select(.kind == "ClusterRoleBinding")' all.yaml > output/ClusterRoleBinding.yaml
+	@yq -e --yaml-output '. | select(.kind == "ClusterRole")' all.yaml > output/ClusterRole.yaml
+	@yq -e --yaml-output '. | select(.kind == "ClusterRoleBinding")' all.yaml > output/ClusterRoleBinding.yaml
 	#@yq -e --yaml-output '. | select(.kind == "ConfigMap")' all.yaml > output/ConfigMap.yaml
 	@yq -e --yaml-output '. | select(.kind == "CustomResourceDefinition")' all.yaml > output/CustomResourceDefinition.yaml
 	@yq -e --yaml-output '. | select(.kind == "Deployment")' all.yaml > output/Deployment.yaml
@@ -59,7 +59,7 @@ gen-files: ## Generate resources and write to files
 	#@yq -e --yaml-output '. | select(.kind == "Role")' all.yaml > output/Role.yaml
 	#@yq -e --yaml-output '. | select(.kind == "RoleBinding")' all.yaml > output/RoleBinding.yaml
 	@yq -e --yaml-output '. | select(.kind == "Service")' all.yaml > output/Service.yaml
-	#@yq -e --yaml-output '. | select(.kind == "ServiceAccount")' all.yaml > output/ServiceAccount.yaml
+	@yq -e --yaml-output '. | select(.kind == "ServiceAccount")' all.yaml > output/ServiceAccount.yaml
 	#@yq -e --yaml-output '. | select(.kind == "ServiceMonitor")' all.yaml > output/ServiceMonitor.yaml
 	@yq -e --yaml-output '. | select(.kind == "ValidatingWebhookConfiguration")' all.yaml > output/ValidatingWebhookConfiguration.yaml
 	@rm all.yaml

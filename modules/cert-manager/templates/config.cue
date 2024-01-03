@@ -73,7 +73,6 @@ import (
 #ImagePullPolicy: *corev1.#PullIfNotPresent | corev1.#enumPullPolicy
 
 #Prometheus: {
-	podMonitor?: {...}
 	serviceMonitor?: {
 		prometheusInstance: *"default" | string
 		targetPort:         *9402 | int
@@ -93,17 +92,7 @@ import (
 	noProxy:    string
 }
 
-#Resources: corev1.#ResourceRequirements & {
-	requests?: corev1.#ResourceList & {
-		cpu:    *"10m" | string
-		memory: *"32Mi" | string
-	}
-}
-
-#ServiceAccount: {
-	// The name of the service account to use.
-	// If not set and create is true, a name is generated using the fullname template
-	name?: string
+#ServiceAccountData: {
 	// Optional additional annotations to add to the controller's ServiceAccount
 	annotations?: timoniv1.#Annotations
 	// Optional additional labels to add to the webhook's ServiceAccount
@@ -150,13 +139,18 @@ import (
 	proxy?:               #Proxy
 	readinessProbe?:      corev1.#Probe
 	replicas:             *1 | int32
-	resources?:           #Resources
-	securityContext:      #SecurityContext
-	serviceAccount?:      #ServiceAccount
-	serviceAnnotations?:  timoniv1.#Annotations
-	serviceLabels?:       timoniv1.#Labels
-	serviceType:          *corev1.#ServiceTypeClusterIP | corev1.#enumServiceType
-	strategy?:            appsv1.#DeploymentStrategy
+	resources?:           timoniv1.#ResourceRequirements & {
+		requests?: timoniv1.#ResourceRequirement & {
+			cpu:    *"10m" | timoniv1.#CPUQuantity
+			memory: *"32Mi" | timoniv1.#MemoryQuantity
+		}
+	}
+	securityContext:     #SecurityContext
+	serviceAccount?:     #ServiceAccountData
+	serviceAnnotations?: timoniv1.#Annotations
+	serviceLabels?:      timoniv1.#Labels
+	serviceType:         *corev1.#ServiceTypeClusterIP | corev1.#enumServiceType
+	strategy?:           appsv1.#DeploymentStrategy
 	tolerations?: [ ...corev1.#Toleration]
 	topologySpreadConstraints?: [...corev1.#TopologySpreadConstraint]
 	volumeMounts?: [...corev1.#VolumeMount]
@@ -311,23 +305,44 @@ import (
 
 		if config.podSecurityPolicy != _|_ {
 			objects: {
-				caInjectorPSPClusterRole:        #ClusterRole & {_config:        config}
-				caInjectorPSPClusterRoleBinding: #ClusterRoleBinding & {_config: config}
-				caInjectorPSP:                   #PodSecurityPolicy & {_config:  config}
+				caInjectorPSPClusterRole: #ClusterRole & {
+					_config:    config
+					_component: "cainjector"
+				}
+				caInjectorPSPClusterRoleBinding: #ClusterRoleBinding & {
+					_config:    config
+					_component: "cainjector"
+				}
+				caInjectorPSP: #PodSecurityPolicy & {_config: config}
 			}
 		}
 
 		if config.rbac != _|_ {
 			objects: {
-				caInjectorClusterRole:        #ClusterRole & {_config:        config}
-				caInjectorClusterRoleBinding: #ClusterRoleBinding & {_config: config}
-				caInjectorRole:               #Role & {_config:               config}
-				caInjectorRoleBinding:        #RoleBinding & {_config:        config}
+				caInjectorClusterRole: #ClusterRole & {
+					_config:    config
+					_component: "cainjector"
+				}
+				caInjectorClusterRoleBinding: #ClusterRoleBinding & {
+					_config:    config
+					_component: "cainjector"
+				}
+				caInjectorRole: #Role & {
+					_config:    config
+					_component: "cainjector"
+				}
+				caInjectorRoleBinding: #RoleBinding & {
+					_config:    config
+					_component: "cainjector"
+				}
 			}
 		}
 
 		if config.caInjector.serviceAccount != _|_ {
-			objects: caInjectorServiceAccount: #ServiceAccount & {_config: config}
+			objects: caInjectorServiceAccount: #ServiceAccount & {
+				_config:    config
+				_component: "cainjector"
+			}
 		}
 
 		objects: caInjectorDeployment: #Deployment & {
@@ -352,19 +367,27 @@ import (
 		objects: podDisruptionBudget: #PodDisruptionBudget & {_config: config}
 	}
 
-	if config.prometheus != _|_ && config.prometheus.podMonitor != _|_ {
-		objects: podMonitor: #PodMonitor & {_config: config}
-	}
-
 	if config.podSecurityPolicy != _|_ {
 		objects: {
-			pspClusterRole:        #ClusterRole & {_config:        config}
-			pspClusterRoleBinding: #ClusterRoleBinding & {_config: config}
-			podSecurityPolicy:     #PodSecurityPolicy & {_config:  config}
+			controllerPSPClusterRole: #ClusterRole & {
+				_config:    config
+				_component: "controller"
+			}
+			controllerPSPClusterRoleBinding: #ClusterRoleBinding & {
+				_config:    config
+				_component: "controller"
+			}
+			podSecurityPolicy: #PodSecurityPolicy & {_config: config}
 
-			webhookPSPClusterRole:        #ClusterRole & {_config:        config}
-			webhookPSPClusterRoleBinding: #ClusterRoleBinding & {_config: config}
-			webhookPSP:                   #PodSecurityPolicy & {_config:  config}
+			webhookPSPClusterRole: #ClusterRole & {
+				_config:    config
+				_component: "webhook"
+			}
+			webhookPSPClusterRoleBinding: #ClusterRoleBinding & {
+				_config:    config
+				_component: "webhook"
+			}
+			webhookPSP: #PodSecurityPolicy & {_config: config}
 		}
 	}
 
@@ -373,35 +396,104 @@ import (
 			leaderElectionRole:        #Role & {_config:        config}
 			leaderElectionRoleBinding: #RoleBinding & {_config: config}
 
-			clusterViewClusterRole: #ClusterRole & {_config: config}
-			viewClusterRole:        #ClusterRole & {_config: config}
-			editClusterRole:        #ClusterRole & {_config: config}
+			clusterViewClusterRole: #ClusterRole & {
+				_config:    config
+				_component: "cluster-view"
+			}
+			viewClusterRole: #ClusterRole & {
+				_config:    config
+				_component: "view"
+			}
+			editClusterRole: #ClusterRole & {
+				_config:    config
+				_component: "edit"
+			}
 
-			controllerIssuersClusterRole:                           #ClusterRole & {_config:        config}
-			controllerClusterIssuersClusterRole:                    #ClusterRole & {_config:        config}
-			controllerCertificatesClusterRole:                      #ClusterRole & {_config:        config}
-			controllerOrdersClusterRole:                            #ClusterRole & {_config:        config}
-			controllerChallengesClusterRole:                        #ClusterRole & {_config:        config}
-			controllerIngressShimClusterRole:                       #ClusterRole & {_config:        config}
-			controllerApproveClusterRole:                           #ClusterRole & {_config:        config}
-			controllerCertificateSigningRequestsClusterRole:        #ClusterRole & {_config:        config}
-			controllerIssuersClusterRoleBinding:                    #ClusterRoleBinding & {_config: config}
-			controllerClusterIssuersClusterRoleBinding:             #ClusterRoleBinding & {_config: config}
-			controllerCertificatesClusterRoleBinding:               #ClusterRoleBinding & {_config: config}
-			controllerOrdersClusterRoleBinding:                     #ClusterRoleBinding & {_config: config}
-			controllerChallengesClusterRoleBinding:                 #ClusterRoleBinding & {_config: config}
-			controllerIngressShimClusterRoleBinding:                #ClusterRoleBinding & {_config: config}
-			controllerApproveClusterRoleBinding:                    #ClusterRoleBinding & {_config: config}
-			controllerCertificateSigningRequestsClusterRoleBinding: #ClusterRoleBinding & {_config: config}
+			controllerIssuersClusterRole: #ClusterRole & {
+				_config:    config
+				_component: "controller-issuers"
+			}
+			controllerClusterIssuersClusterRole: #ClusterRole & {
+				_config:    config
+				_component: "controller-cluster-issuer"
+			}
+			controllerCertificatesClusterRole: #ClusterRole & {
+				_config:    config
+				_component: "controller-certificates"
+			}
+			controllerOrdersClusterRole: #ClusterRole & {
+				_config:    config
+				_component: "controller-orders"
+			}
+			controllerChallengesClusterRole: #ClusterRole & {
+				_config:    config
+				_component: "controller-challenges"
+			}
+			controllerIngressShimClusterRole: #ClusterRole & {
+				_config:    config
+				_component: "controller-ingress-shim"
+			}
+			controllerApproveClusterRole: #ClusterRole & {
+				_config:    config
+				_component: "controller-approve"
+			}
+			controllerCertificateSigningRequestsClusterRole: #ClusterRole & {
+				_config:    config
+				_component: "controller-csr"
+			}
+			controllerIssuersClusterRoleBinding: #ClusterRoleBinding & {
+				_config:    config
+				_component: "controller-issuers"
+			}
+			controllerClusterIssuersClusterRoleBinding: #ClusterRoleBinding & {
+				_config:    config
+				_component: "controller-cluster-issuers"
+			}
+			controllerCertificatesClusterRoleBinding: #ClusterRoleBinding & {
+				_config:    config
+				_component: "controller-certificates"
+			}
+			controllerOrdersClusterRoleBinding: #ClusterRoleBinding & {
+				_config:    config
+				_component: "controller-orders"
+			}
+			controllerChallengesClusterRoleBinding: #ClusterRoleBinding & {
+				_config:    config
+				_component: "controller-challenges"
+			}
+			controllerIngressShimClusterRoleBinding: #ClusterRoleBinding & {
+				_config:    config
+				_component: "controller-ingress-shim"
+			}
+			controllerApproveClusterRoleBinding: #ClusterRoleBinding & {
+				_config:    config
+				_component: "controller-approve"
+			}
+			controllerCertificateSigningRequestsClusterRoleBinding: #ClusterRoleBinding & {
+				_config:    config
+				_component: "controller-csr"
+			}
 
-			webhookRole:               #Role & {_config:               config}
-			webhookRoleBinding:        #RoleBinding & {_config:        config}
-			webhookClusterRole:        #ClusterRole & {_config:        config}
-			webhookClusterRoleBinding: #ClusterRoleBinding & {_config: config}
+			webhookRole: #Role & {
+				_config:    config
+				_component: "webhook"
+			}
+			webhookRoleBinding: #RoleBinding & {
+				_config:    config
+				_component: "webhoook"
+			}
+			webhookClusterRole: #ClusterRole & {
+				_config:    config
+				_component: "webhoook"
+			}
+			webhookClusterRoleBinding: #ClusterRoleBinding & {
+				_config:    config
+				_component: "webhoook"
+			}
 		}
 	}
 
-	if config.prometheus != _|_ && config.prometheus.serviceMonitor != _|_ {
+	if config.controller.prometheus != _|_ && config.controller.prometheus.serviceMonitor != _|_ {
 		objects: {
 			service: #Service & {
 				_config:    config
@@ -411,8 +503,11 @@ import (
 		}
 	}
 
-	if config.serviceAccount != _|_ {
-		objects: serviceAccount: #ServiceAccount & {_config: config}
+	if config.controller.serviceAccount != _|_ {
+		objects: controllerServiceAccount: #ServiceAccount & {
+			_config:    config
+			_component: "controller"
+		}
 	}
 
 	if config.startupAPICheck != _|_ {
@@ -420,9 +515,15 @@ import (
 
 		if config.podSecurityPolicy != _|_ {
 			objects: {
-				startupAPICheckPSPClusterRole:        #ClusterRole & {_config:        config}
-				startupAPICheckPSPClusterRoleBinding: #ClusterRoleBinding & {_config: config}
-				startupAPICheckPSP:                   #PodSecurityPolicy & {_config:  config}
+				startupAPICheckPSPClusterRole: #ClusterRole & {
+					_config:    config
+					_component: "startup-api-check"
+				}
+				startupAPICheckPSPClusterRoleBinding: #ClusterRoleBinding & {
+					_config:    config
+					_component: "startup-api-check"
+				}
+				startupAPICheckPSP: #PodSecurityPolicy & {_config: config}
 			}
 		}
 
@@ -434,7 +535,10 @@ import (
 		}
 
 		if config.startupAPICheck.serviceAccount != _|_ {
-			objects: startupAPICheckServiceAccount: #ServiceAccount & {_config: config}
+			objects: startupAPICheckServiceAccount: #ServiceAccount & {
+				_config:    config
+				_component: "startupapicheck"
+			}
 		}
 	}
 
@@ -447,6 +551,9 @@ import (
 	}
 
 	if config.webhook.serviceAccount != _|_ {
-		objects: webhookServiceAccount: #ServiceAccount & {_config: config}
+		objects: webhookServiceAccount: #ServiceAccount & {
+			_config:    config
+			_component: "webhook"
+		}
 	}
 }

@@ -22,6 +22,14 @@ import (
 	metadata: _meta
 
 	if _component == "controller" {
+		if _config.controller.deploymentLabels != _|_ {
+			metadata: labels: _config.controller.deploymentLabels
+		}
+
+		if _config.controller.deploymentAnnotations != _|_ {
+			metadata: annotations: _config.controller.deploymentAnnotations
+		}
+
 		spec: #ControllerDeploymentSpec & {
 			_main_config:           _config
 			_deployment_meta:       _meta
@@ -31,20 +39,34 @@ import (
 	}
 
 	if _component == "webhook" {
+		if _config.webhook.deploymentLabels != _|_ {
+			metadata: labels: _config.webhook.deploymentLabels
+		}
+
+		if _config.webhook.deploymentAnnotations != _|_ {
+			metadata: annotations: _config.webhook.deploymentAnnotations
+		}
+
 		spec: #WebhookDeploymentSpec & {
-			_main_config:           _config
-			_deployment_meta:       _meta
-			_deployment_strategy:   _strategy
-			_deployment_prometheus: _prometheus
+			_main_config:         _config
+			_deployment_meta:     _meta
+			_deployment_strategy: _strategy
 		}
 	}
 
 	if _component == "cainjector" {
+		if _config.caInjector.deploymentLabels != _|_ {
+			metadata: labels: _config.caInjector.deploymentLabels
+		}
+
+		if _config.caInjector.deploymentAnnotations != _|_ {
+			metadata: annotations: _config.caInjector.deploymentAnnotations
+		}
+
 		spec: #CAInjectorDeploymentSpec & {
-			_main_config:           _config
-			_deployment_meta:       _meta
-			_deployment_strategy:   _strategy
-			_deployment_prometheus: _prometheus
+			_main_config:         _config
+			_deployment_meta:     _meta
+			_deployment_strategy: _strategy
 		}
 	}
 }

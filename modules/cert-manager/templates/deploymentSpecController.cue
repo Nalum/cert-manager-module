@@ -37,13 +37,7 @@ import (
 		}
 
 		spec: corev1.#PodSpec & {
-			if _main_config.controller.serviceAccount != _|_ {
-				serviceAccountName: _main_config.controller.serviceAccount.name
-			}
-
-			if _main_config.controller.serviceAccount == _|_ {
-				serviceAccountName: _deployment_meta.name
-			}
+			serviceAccountName: _deployment_meta.name
 
 			if _main_config.controller.automountServiceAccountToken != _|_ {
 				automountServiceAccountToken: _main_config.controller.automountServiceAccountToken

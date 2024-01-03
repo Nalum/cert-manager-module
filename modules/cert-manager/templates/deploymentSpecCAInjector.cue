@@ -7,10 +7,9 @@ import (
 )
 
 #CAInjectorDeploymentSpec: appsv1.#DeploymentSpec & {
-	_main_config:            #Config
-	_deployment_meta:        timoniv1.#MetaComponent
-	_deployment_strategy?:   appsv1.#DeploymentStrategy
-	_deployment_prometheus?: #Prometheus
+	_main_config:          #Config
+	_deployment_meta:      timoniv1.#MetaComponent
+	_deployment_strategy?: appsv1.#DeploymentStrategy
 
 	replicas: _main_config.caInjector.replicas
 	selector: matchLabels: _deployment_meta.#LabelSelector
@@ -30,13 +29,7 @@ import (
 		}
 
 		spec: corev1.#PodSpec & {
-			if _main_config.caInjector.serviceAccount != _|_ {
-				serviceAccountName: _main_config.caInjector.serviceAccount.name
-			}
-
-			if _main_config.caInjector.serviceAccount == _|_ {
-				serviceAccountName: _deployment_meta.name
-			}
+			serviceAccountName: _deployment_meta.name
 
 			if _main_config.caInjector.automountServiceAccountToken != _|_ {
 				automountServiceAccountToken: _main_config.caInjector.automountServiceAccountToken
