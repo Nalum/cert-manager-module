@@ -46,7 +46,7 @@ gen-files: ## Generate resources and write to files
 	@timoni -n $(NAMESPACE) build $(NAME) ./modules/cert-manager > all.yaml
 	@yq -e --yaml-output '. | select(.kind == "ClusterRole")' all.yaml > output/ClusterRole.yaml
 	@yq -e --yaml-output '. | select(.kind == "ClusterRoleBinding")' all.yaml > output/ClusterRoleBinding.yaml
-	#@yq -e --yaml-output '. | select(.kind == "ConfigMap")' all.yaml > output/ConfigMap.yaml
+	@yq -e --yaml-output '. | select(.kind == "ConfigMap")' all.yaml > output/ConfigMap.yaml
 	@yq -e --yaml-output '. | select(.kind == "CustomResourceDefinition")' all.yaml > output/CustomResourceDefinition.yaml
 	@yq -e --yaml-output '. | select(.kind == "Deployment")' all.yaml > output/Deployment.yaml
 	@yq -e --yaml-output '. | select(.kind == "Job")' all.yaml > output/Job.yaml
