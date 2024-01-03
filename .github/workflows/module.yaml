@@ -1,11 +1,6 @@
 name: module
 
-on:
-  workflow_dispatch:
-    inputs:
-      version:
-        description: 'RC version'
-        required: true
+on: push
 
 permissions:
   contents: read
@@ -21,32 +16,3 @@ jobs:
     - name: Vet module
       run: |
         timoni mod vet --namespace cert-manager --name cert-manager ./modules/cert-manager
-  #push-module:
-    #runs-on: ubuntu-latest
-    #needs:
-    #- vet-module
-    #permissions:
-      #id-token: write
-      #packages: write
-    #steps:
-    #- name: Checkout
-      #uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
-    #- name: Setup Cosign
-      #uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
-    #- name: Setup Timoni
-      #uses: ./actions/setup
-    #- name: Login to GHCR
-      #uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
-      #with:
-        #registry: ghcr.io
-        #username: ${{ github.actor }}
-        #password: ${{ secrets.GITHUB_TOKEN }}
-    #- name: Push Cert-Manager Module
-      #run: |
-        #timoni artifact push oci://ghcr.io/${{ github.repository_owner }}/modules/cert-manager \
-        #-f ./modules/cert-manager -t ${{ github.event.inputs.version }} -t latest \
-        #-a 'org.opencontainers.image.licenses=Apache-2.0' \
-        #-a 'org.opencontainers.image.source=https://github.com/${{ github.repository_owner }}/cert-manager-module' \
-        #-a 'org.opencontainers.image.description=A timoni.sh module for Cert-Manager' \
-        #-a 'org.opencontainers.image.documentation=https://github.com/${{ github.repository_owner }}/cert-manager-module' \
-        #--sign cosign
