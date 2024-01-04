@@ -6,17 +6,17 @@ import (
 )
 
 #ValidatingWebhook: admissionregistrationv1.#ValidatingWebhookConfiguration & {
-	_config: #Config
+	#config: #Config
 
-	_meta: timoniv1.#MetaComponent & {
-		#Meta:      _config.metadata
+	#meta: timoniv1.#MetaComponent & {
+		#Meta:      #config.metadata
 		#Component: "webhook"
 	}
 
 	apiVersion: "admissionregistration.k8s.io/v1"
 	kind:       "ValidatingWebhookConfiguration"
-	metadata:   _meta
-	metadata: annotations: "cert-manager.io/inject-ca-from-secret": "\(_meta.namespace)/\(_meta.name)-ca"
+	metadata:   #meta
+	metadata: annotations: "cert-manager.io/inject-ca-from-secret": "\(#meta.namespace)/\(#meta.name)-ca"
 
 	webhooks: [{
 		name: "webhook.cert-manager.io"
@@ -50,17 +50,17 @@ import (
 		// Equivalent matchPolicy ensures that non-v1 resource requests are sent to
 		// this webhook (after the resources have been converted to v1).
 		matchPolicy:    "Equivalent"
-		timeoutSeconds: _config.webhook.timeoutSeconds
+		timeoutSeconds: #config.webhook.timeoutSeconds
 		failurePolicy:  "Fail"
 		sideEffects:    "None"
 		clientConfig: {
-			if _config.webhook.url.host != _|_ {
-				url: "https://\(_config.webhook.url.host)/validate"
+			if #config.webhook.url.host != _|_ {
+				url: "https://\(#config.webhook.url.host)/validate"
 			}
-			if _config.webhook.url.host == _|_ {
+			if #config.webhook.url.host == _|_ {
 				service: {
-					name:      _meta.name
-					namespace: _meta.namespace
+					name:      #meta.name
+					namespace: #meta.namespace
 					path:      "/validate"
 				}
 			}

@@ -5,17 +5,17 @@ import (
 )
 
 #Role: rbacv1.#Role & {
-	_config: #Config
+	#config: #Config
 
 	apiVersion: "rbac.authorization.k8s.io/v1"
 	kind:       "Role"
 	metadata: {
-		name:      "\(_config.metadata.name):leaderelection"
-		namespace: _config.metadata.namespace
-		labels:    _config.metadata.labels
+		name:      "\(#config.metadata.name):leaderelection"
+		namespace: #config.metadata.namespace
+		labels:    #config.metadata.labels
 
-		if _config.metadata.annotations != _|_ {
-			annotations: _config.metadata.annotations
+		if #config.metadata.annotations != _|_ {
+			annotations: #config.metadata.annotations
 		}
 	}
 	rules: [{
@@ -31,17 +31,17 @@ import (
 }
 
 #LeaderElectionRole: rbacv1.#Role & {
-	_config: #Config
+	#config: #Config
 
 	apiVersion: "rbac.authorization.k8s.io/v1"
 	kind:       "Role"
 	metadata: {
-		name:      "\(_config.metadata.name):leaderelection"
-		namespace: _config.metadata.namespace
-		labels:    _config.metadata.labels
+		name:      "\(#config.metadata.name):leaderelection"
+		namespace: #config.metadata.namespace
+		labels:    #config.metadata.labels
 
-		if _config.metadata.annotations != _|_ {
-			annotations: _config.metadata.annotations
+		if #config.metadata.annotations != _|_ {
+			annotations: #config.metadata.annotations
 		}
 	}
 	rules: [{

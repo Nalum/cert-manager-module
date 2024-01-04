@@ -6,67 +6,67 @@ import (
 )
 
 #ServiceAccount: corev1.#ServiceAccount & {
-	_config:    #Config
-	_component: string
+	#config:    #Config
+	#component: string
 
-	_meta: timoniv1.#MetaComponent & {
-		#Meta:      _config.metadata
-		#Component: _component
+	#meta: timoniv1.#MetaComponent & {
+		#Meta:      #config.metadata
+		#Component: #component
 	}
 
 	apiVersion: "v1"
 	kind:       "ServiceAccount"
-	metadata:   _meta
+	metadata:   #meta
 
-	if _config.imagePullSecrets != _|_ {
-		imagePullSecrets: _config.imagePullSecrets
+	if #config.imagePullSecrets != _|_ {
+		imagePullSecrets: #config.imagePullSecrets
 	}
 
-	if _component == "controller" {
-		if _config.controller.serviceAccount.labels != _|_ {
-			metadata: labels: _config.controller.serviceAccount.labels
+	if #component == "controller" {
+		if #config.controller.serviceAccount.labels != _|_ {
+			metadata: labels: #config.controller.serviceAccount.labels
 		}
 
-		if _config.controller.serviceAccount.annotations != _|_ {
-			metadata: annotations: _config.controller.serviceAccount.annotations
+		if #config.controller.serviceAccount.annotations != _|_ {
+			metadata: annotations: #config.controller.serviceAccount.annotations
 		}
 
-		automountServiceAccountToken: _config.controller.serviceAccount.automountServiceAccountToken
+		automountServiceAccountToken: #config.controller.serviceAccount.automountServiceAccountToken
 	}
 
-	if _component == "webhook" {
-		if _config.webhook.serviceAccount.labels != _|_ {
-			metadata: labels: _config.webhook.serviceAccount.labels
+	if #component == "webhook" {
+		if #config.webhook.serviceAccount.labels != _|_ {
+			metadata: labels: #config.webhook.serviceAccount.labels
 		}
 
-		if _config.webhook.serviceAccount.annotations != _|_ {
-			metadata: annotations: _config.webhook.serviceAccount.annotations
+		if #config.webhook.serviceAccount.annotations != _|_ {
+			metadata: annotations: #config.webhook.serviceAccount.annotations
 		}
 
-		automountServiceAccountToken: _config.webhook.serviceAccount.automountServiceAccountToken
+		automountServiceAccountToken: #config.webhook.serviceAccount.automountServiceAccountToken
 	}
 
-	if _component == "cainjector" {
-		if _config.caInjector.serviceAccount.labels != _|_ {
-			metadata: labels: _config.caInjector.serviceAccount.labels
+	if #component == "cainjector" {
+		if #config.caInjector.serviceAccount.labels != _|_ {
+			metadata: labels: #config.caInjector.serviceAccount.labels
 		}
 
-		if _config.caInjector.serviceAccount.annotations != _|_ {
-			metadata: annotations: _config.caInjector.serviceAccount.annotations
+		if #config.caInjector.serviceAccount.annotations != _|_ {
+			metadata: annotations: #config.caInjector.serviceAccount.annotations
 		}
 
-		automountServiceAccountToken: _config.caInjector.serviceAccount.automountServiceAccountToken
+		automountServiceAccountToken: #config.caInjector.serviceAccount.automountServiceAccountToken
 	}
 
-	if _component == "startupapicheck" {
-		if _config.startupAPICheck.serviceAccount.labels != _|_ {
-			metadata: labels: _config.startupAPICheck.serviceAccount.labels
+	if #component == "startupapicheck" {
+		if #config.startupAPICheck.serviceAccount.labels != _|_ {
+			metadata: labels: #config.startupAPICheck.serviceAccount.labels
 		}
 
-		if _config.startupAPICheck.serviceAccount.annotations != _|_ {
-			metadata: annotations: _config.startupAPICheck.serviceAccount.annotations
+		if #config.startupAPICheck.serviceAccount.annotations != _|_ {
+			metadata: annotations: #config.startupAPICheck.serviceAccount.annotations
 		}
 
-		automountServiceAccountToken: _config.startupAPICheck.serviceAccount.automountServiceAccountToken
+		automountServiceAccountToken: #config.startupAPICheck.serviceAccount.automountServiceAccountToken
 	}
 }

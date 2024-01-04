@@ -5,8 +5,8 @@ import (
 )
 
 #NetworkPolicy: networkingv1.#NetworkPolicy & {
-	_config:    #Config
+	#config:    #Config
 	apiVersion: "v1"
 	kind:       "NetworkPolicy"
-	metadata:   _config.metadata
+	metadata:   #config.metadata
 }

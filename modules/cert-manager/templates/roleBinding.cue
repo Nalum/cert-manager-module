@@ -5,55 +5,55 @@ import (
 )
 
 #RoleBinding: rbacv1.#RoleBinding & {
-	_config: #Config
+	#config: #Config
 
 	apiVersion: "rbac.authorization.k8s.io/v1"
 	kind:       "RoleBinding"
 	metadata: {
-		name:      "\(_config.metadata.name):leaderelection"
-		namespace: _config.metadata.namespace
-		labels:    _config.metadata.labels
+		name:      "\(#config.metadata.name):leaderelection"
+		namespace: #config.metadata.namespace
+		labels:    #config.metadata.labels
 
-		if _config.metadata.annotations != _|_ {
-			annotations: _config.metadata.annotations
+		if #config.metadata.annotations != _|_ {
+			annotations: #config.metadata.annotations
 		}
 	}
 	roleRef: {
 		apiGroup: "rbac.authorization.k8s.io"
 		kind:     "Role"
-		name:     "\(_config.metadata.name):leaderelection"
+		name:     "\(#config.metadata.name):leaderelection"
 	}
 	subjects: [{
 		apiGroup:  ""
 		kind:      "ServiceAccount"
-		name:      "\(_config.metadata.name)-controller"
-		namespace: "\(_config.metadata.namespace)"
+		name:      "\(#config.metadata.name)-controller"
+		namespace: "\(#config.metadata.namespace)"
 	}]
 }
 
 #LeaderElectionRoleBinding: rbacv1.#RoleBinding & {
-	_config: #Config
+	#config: #Config
 
 	apiVersion: "rbac.authorization.k8s.io/v1"
 	kind:       "RoleBinding"
 	metadata: {
-		name:      "\(_config.metadata.name):leaderelection"
-		namespace: _config.metadata.namespace
-		labels:    _config.metadata.labels
+		name:      "\(#config.metadata.name):leaderelection"
+		namespace: #config.metadata.namespace
+		labels:    #config.metadata.labels
 
-		if _config.metadata.annotations != _|_ {
-			annotations: _config.metadata.annotations
+		if #config.metadata.annotations != _|_ {
+			annotations: #config.metadata.annotations
 		}
 	}
 	roleRef: {
 		apiGroup: "rbac.authorization.k8s.io"
 		kind:     "Role"
-		name:     "\(_config.metadata.name):leaderelection"
+		name:     "\(#config.metadata.name):leaderelection"
 	}
 	subjects: [{
 		apiGroup:  ""
 		kind:      "ServiceAccount"
-		name:      "\(_config.metadata.name)-controller"
-		namespace: "\(_config.metadata.namespace)"
+		name:      "\(#config.metadata.name)-controller"
+		namespace: "\(#config.metadata.namespace)"
 	}]
 }

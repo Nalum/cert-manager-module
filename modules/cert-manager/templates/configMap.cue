@@ -7,25 +7,25 @@ import (
 )
 
 #ConfigMap: corev1.#ConfigMap & {
-	_config:    #Config
-	_component: string
+	#config:    #Config
+	#component: string
 
-	_meta: timoniv1.#MetaComponent & {
-		#Meta:      _config.metadata
-		#Component: _component
+	#meta: timoniv1.#MetaComponent & {
+		#Meta:      #config.metadata
+		#Component: #component
 	}
 
 	apiVersion: "v1"
 	kind:       "ConfigMap"
-	metadata:   _meta
+	metadata:   #meta
 
 	data: {
-		if _component == "controller" {
-			"config.yaml": yaml.Marshal(_config.controller.config)
+		if #component == "controller" {
+			"config.yaml": yaml.Marshal(#config.controller.config)
 		}
 
-		if _component == "webhook" {
-			"config.yaml": yaml.Marshal(_config.webhook.config)
+		if #component == "webhook" {
+			"config.yaml": yaml.Marshal(#config.webhook.config)
 		}
 	}
 }

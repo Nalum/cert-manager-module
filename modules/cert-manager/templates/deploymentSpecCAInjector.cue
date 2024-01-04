@@ -7,70 +7,70 @@ import (
 )
 
 #CAInjectorDeploymentSpec: appsv1.#DeploymentSpec & {
-	_main_config:          #Config
-	_deployment_meta:      timoniv1.#MetaComponent
-	_deployment_strategy?: appsv1.#DeploymentStrategy
+	#main_config:          #Config
+	#deployment_meta:      timoniv1.#MetaComponent
+	#deployment_strategy?: appsv1.#DeploymentStrategy
 
-	replicas: _main_config.caInjector.replicas
-	selector: matchLabels: _deployment_meta.#LabelSelector
+	replicas: #main_config.caInjector.replicas
+	selector: matchLabels: #deployment_meta.#LabelSelector
 
-	if _deployment_strategy != _|_ {
-		strategy: _deployment_strategy
+	if #deployment_strategy != _|_ {
+		strategy: #deployment_strategy
 	}
 	template: corev1.#PodTemplateSpec & {
-		metadata: labels: _deployment_meta.labels
+		metadata: labels: #deployment_meta.labels
 
-		if _main_config.caInjector.podLabels != _|_ {
-			metadata: labels: _main_config.caInjector.podLabels
+		if #main_config.caInjector.podLabels != _|_ {
+			metadata: labels: #main_config.caInjector.podLabels
 		}
 
-		if _main_config.caInjector.podAnnotations != _|_ {
-			metadata: annotations: _main_config.caInjector.podAnnotations
+		if #main_config.caInjector.podAnnotations != _|_ {
+			metadata: annotations: #main_config.caInjector.podAnnotations
 		}
 
 		spec: corev1.#PodSpec & {
-			serviceAccountName: _deployment_meta.name
+			serviceAccountName: #deployment_meta.name
 
-			if _main_config.caInjector.automountServiceAccountToken != _|_ {
-				automountServiceAccountToken: _main_config.caInjector.automountServiceAccountToken
+			if #main_config.caInjector.automountServiceAccountToken != _|_ {
+				automountServiceAccountToken: #main_config.caInjector.automountServiceAccountToken
 			}
 
-			if _main_config.caInjector.enableServiceLinks != _|_ {
-				enableServiceLinks: _main_config.caInjector.enableServiceLinks
+			if #main_config.caInjector.enableServiceLinks != _|_ {
+				enableServiceLinks: #main_config.caInjector.enableServiceLinks
 			}
 
-			if _main_config.priorityClass != _|_ {
-				priorityClassName: _main_config.priorityClass
+			if #main_config.priorityClass != _|_ {
+				priorityClassName: #main_config.priorityClass
 			}
 
-			if _main_config.caInjector.securityContext != _|_ {
-				securityContext: _main_config.caInjector.securityContext
+			if #main_config.caInjector.securityContext != _|_ {
+				securityContext: #main_config.caInjector.securityContext
 			}
 
 			containers: [...corev1.#Container] & [
 					{
-					name:            _deployment_meta.name
-					image:           _main_config.caInjector.image.reference
-					imagePullPolicy: _main_config.caInjector.imagePullPolicy
+					name:            #deployment_meta.name
+					image:           #main_config.caInjector.image.reference
+					imagePullPolicy: #main_config.caInjector.imagePullPolicy
 
 					args: [
-						"--v=\(_main_config.logLevel)",
-						"--leader-election-namespace=\(_main_config.leaderElection.namespace)",
+						"--v=\(#main_config.logLevel)",
+						"--leader-election-namespace=\(#main_config.leaderElection.namespace)",
 
-						if _main_config.leaderElection.leaseDuration != _|_ {
-							"--leader-election-lease-duration=\(_main_config.leaderElection.leaseDuration)"
+						if #main_config.leaderElection.leaseDuration != _|_ {
+							"--leader-election-lease-duration=\(#main_config.leaderElection.leaseDuration)"
 						},
 
-						if _main_config.leaderElection.renewDeadline != _|_ {
-							"--leader-election-renew-deadline=\(_main_config.leaderElection.renewDeadline)"
+						if #main_config.leaderElection.renewDeadline != _|_ {
+							"--leader-election-renew-deadline=\(#main_config.leaderElection.renewDeadline)"
 						},
 
-						if _main_config.leaderElection.retryPeriod != _|_ {
-							"--leader-election-retry-period=\(_main_config.leaderElection.retryPeriod)"
+						if #main_config.leaderElection.retryPeriod != _|_ {
+							"--leader-election-retry-period=\(#main_config.leaderElection.retryPeriod)"
 						},
 
-						if _main_config.caInjector.extraArgs != _|_ {
-							for a in _main_config.caInjector.extraArgs {a}
+						if #main_config.caInjector.extraArgs != _|_ {
+							for a in #main_config.caInjector.extraArgs {a}
 						},
 					]
 
@@ -80,43 +80,43 @@ import (
 							valueFrom: fieldRef: fieldPath: "metadata.namespace"
 						},
 
-						if _main_config.caInjector.extraEnvs != _|_ {
-							for e in _main_config.caInjector.extraEnvs {e}
+						if #main_config.caInjector.extraEnvs != _|_ {
+							for e in #main_config.caInjector.extraEnvs {e}
 						},
 					]
 
-					if _main_config.caInjector.containerSecurityContext != _|_ {
-						securityContext: _main_config.caInjector.containerSecurityContext
+					if #main_config.caInjector.containerSecurityContext != _|_ {
+						securityContext: #main_config.caInjector.containerSecurityContext
 					}
 
-					if _main_config.caInjector.resources != _|_ {
-						resources: _main_config.caInjector.resources
+					if #main_config.caInjector.resources != _|_ {
+						resources: #main_config.caInjector.resources
 					}
 
-					if _main_config.caInjector.volumeMounts != _|_ {
-						volumeMounts: _main_config.caInjector.volumeMounts
+					if #main_config.caInjector.volumeMounts != _|_ {
+						volumeMounts: #main_config.caInjector.volumeMounts
 					}
 				},
 			]
 
-			if _main_config.caInjector.nodeSelector != _|_ {
-				nodeSelector: _main_config.caInjector.nodeSelector
+			if #main_config.caInjector.nodeSelector != _|_ {
+				nodeSelector: #main_config.caInjector.nodeSelector
 			}
 
-			if _main_config.caInjector.affinity != _|_ {
-				affinity: _main_config.caInjector.affinity
+			if #main_config.caInjector.affinity != _|_ {
+				affinity: #main_config.caInjector.affinity
 			}
 
-			if _main_config.caInjector.tolerations != _|_ {
-				tolerations: _main_config.caInjector.tolerations
+			if #main_config.caInjector.tolerations != _|_ {
+				tolerations: #main_config.caInjector.tolerations
 			}
 
-			if _main_config.caInjector.topologySpreadConstraints != _|_ {
-				topologySpreadConstraints: _main_config.caInjector.topologySpreadConstraints
+			if #main_config.caInjector.topologySpreadConstraints != _|_ {
+				topologySpreadConstraints: #main_config.caInjector.topologySpreadConstraints
 			}
 
-			if _main_config.caInjector.volumes != _|_ {
-				volumes: _main_config.caInjector.volumes
+			if #main_config.caInjector.volumes != _|_ {
+				volumes: #main_config.caInjector.volumes
 			}
 		}
 	}

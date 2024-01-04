@@ -6,67 +6,67 @@ import (
 )
 
 #Service: corev1.#Service & {
-	_config:    #Config
-	_component: string
+	#config:    #Config
+	#component: string
 
-	_meta: timoniv1.#MetaComponent & {
-		#Meta:      _config.metadata
-		#Component: _component
+	#meta: timoniv1.#MetaComponent & {
+		#Meta:      #config.metadata
+		#Component: #component
 	}
 
 	apiVersion: "v1"
 	kind:       "Service"
-	metadata:   _meta
+	metadata:   #meta
 
-	if _component == "controller" {
-		if _config.controller.serviceLabels != _|_ {
-			metadata: labels: _config.controller.serviceLabels
+	if #component == "controller" {
+		if #config.controller.serviceLabels != _|_ {
+			metadata: labels: #config.controller.serviceLabels
 		}
-		if _config.controller.serviceAnnotations != _|_ {
-			metadata: annotations: _config.controller.serviceAnnotations
+		if #config.controller.serviceAnnotations != _|_ {
+			metadata: annotations: #config.controller.serviceAnnotations
 		}
 		spec: #ServiceSpecController & {
-			_main_config:  _config
-			_service_meta: _meta
+			#main_config:  #config
+			#service_meta: #meta
 		}
 	}
 
-	if _component == "webhook" {
-		if _config.webhook.serviceLabels != _|_ {
-			metadata: labels: _config.webhook.serviceLabels
+	if #component == "webhook" {
+		if #config.webhook.serviceLabels != _|_ {
+			metadata: labels: #config.webhook.serviceLabels
 		}
-		if _config.webhook.serviceAnnotations != _|_ {
-			metadata: annotations: _config.webhook.serviceAnnotations
+		if #config.webhook.serviceAnnotations != _|_ {
+			metadata: annotations: #config.webhook.serviceAnnotations
 		}
 		spec: #ServiceSpecWebhook & {
-			_main_config:  _config
-			_service_meta: _meta
+			#main_config:  #config
+			#service_meta: #meta
 		}
 	}
 }
 
 #ServiceSpecController: {
-	_main_config:  #Config
-	_service_meta: timoniv1.#MetaComponent
+	#main_config:  #Config
+	#service_meta: timoniv1.#MetaComponent
 
 	type: "ClusterIP"
 	ports: [{
 		protocol:   "TCP"
 		port:       9402
 		name:       "tcp-prometheus-servicemonitor"
-		targetPort: "{{ _main_config.prometheus.servicemonitor.targetPort }}"
+		targetPort: "{{ #main_config.prometheus.servicemonitor.targetPort }}"
 	}]
-	selector: _service_meta.#LabelSelector
+	selector: #service_meta.#LabelSelector
 }
 
 #ServiceSpecWebhook: {
-	_main_config:  #Config
-	_service_meta: timoniv1.#MetaComponent
+	#main_config:  #Config
+	#service_meta: timoniv1.#MetaComponent
 
-	type: _main_config.webhook.serviceType
+	type: #main_config.webhook.serviceType
 
-	if _main_config.webhook.loadBalancerIP != _|_ {
-		loadBalancerIP: _main_config.webhook.loadBalancerIP
+	if #main_config.webhook.loadBalancerIP != _|_ {
+		loadBalancerIP: #main_config.webhook.loadBalancerIP
 	}
 
 	ports: [{
@@ -75,5 +75,5 @@ import (
 		name:       "https"
 		targetPort: "https"
 	}]
-	selector: _service_meta.#LabelSelector
+	selector: #service_meta.#LabelSelector
 }

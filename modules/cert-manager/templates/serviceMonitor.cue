@@ -5,8 +5,8 @@ import (
 )
 
 #ServiceMonitor: appsv1.#Deployment & {
-	_config:    #Config
+	#config:    #Config
 	apiVersion: "v1"
 	kind:       "ServiceMonitor"
-	metadata:   _config.metadata
+	metadata:   #config.metadata
 }

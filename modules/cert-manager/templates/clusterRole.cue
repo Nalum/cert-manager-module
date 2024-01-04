@@ -6,27 +6,27 @@ import (
 )
 
 #ClusterRole: rbacv1.#ClusterRole & {
-	_config:    #Config
-	_component: string
+	#config:    #Config
+	#component: string
 
-	_meta: timoniv1.#MetaComponent & {
-		#Meta:      _config.metadata
-		#Component: _component
+	#meta: timoniv1.#MetaComponent & {
+		#Meta:      #config.metadata
+		#Component: #component
 	}
 
 	apiVersion: "v1"
 	kind:       "ClusterRole"
-	metadata: name:   "\(_meta.name)-psp"
-	metadata: labels: _meta.labels
+	metadata: name:   "\(#meta.name)-psp"
+	metadata: labels: #meta.labels
 
-	if _meta.annotations != _|_ {
-		metadata: annotations: _meta.annotations
+	if #meta.annotations != _|_ {
+		metadata: annotations: #meta.annotations
 	}
 
 	rules: [{
 		apiGroups: ["policy"]
 		resources: ["podsecuritypolicies"]
 		verbs: ["use"]
-		resourceNames: [_meta.name]
+		resourceNames: [#meta.name]
 	}]
 }

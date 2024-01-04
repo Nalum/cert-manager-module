@@ -6,93 +6,93 @@ import (
 )
 
 #StartupAPICheckJob: batchv1.#Job & {
-	_config: #Config
+	#config: #Config
 
-	_meta: timoniv1.#MetaComponent & {
-		#Meta:      _config.metadata
+	#meta: timoniv1.#MetaComponent & {
+		#Meta:      #config.metadata
 		#Component: "startupapicheck"
 	}
 
 	apiVersion: "batch/v1"
 	kind:       "Job"
-	metadata:   _meta
+	metadata:   #meta
 
-	if _config.startupAPICheck.jobAnnotations != _|_ {
-		metadata: annotations: _config.startupAPICheck.jobAnnotations
+	if #config.startupAPICheck.jobAnnotations != _|_ {
+		metadata: annotations: #config.startupAPICheck.jobAnnotations
 	}
 
 	spec: {
-		backoffLimit: _config.startupAPICheck.backoffLimit
+		backoffLimit: #config.startupAPICheck.backoffLimit
 		template: {
 			metadata: {
-				labels: _meta.labels
+				labels: #meta.labels
 
-				if _config.startupAPICheck.podLabels != _|_ {
-					labels: _config.startupAPICheck.podLabels
+				if #config.startupAPICheck.podLabels != _|_ {
+					labels: #config.startupAPICheck.podLabels
 				}
 
-				if _config.startupAPICheck.podAnnotations != _|_ {
-					annotations: _config.startupAPICheck.podAnnotations
+				if #config.startupAPICheck.podAnnotations != _|_ {
+					annotations: #config.startupAPICheck.podAnnotations
 				}
 			}
 
 			spec: {
 				restartPolicy:      "OnFailure"
-				serviceAccountName: _meta.name
-				enableServiceLinks: _config.startupAPICheck.enableServiceLinks
+				serviceAccountName: #meta.name
+				enableServiceLinks: #config.startupAPICheck.enableServiceLinks
 
-				if _config.startupAPICheck.automountServiceAccountToken != _|_ {
-					automountServiceAccountToken: _config.startupAPICheck.automountServiceAccountToken
+				if #config.startupAPICheck.automountServiceAccountToken != _|_ {
+					automountServiceAccountToken: #config.startupAPICheck.automountServiceAccountToken
 				}
 
-				if _config.priorityClassName != _|_ {
-					priorityClassName: _config.priorityClassName
+				if #config.priorityClassName != _|_ {
+					priorityClassName: #config.priorityClassName
 				}
 
-				if _config.startupAPICheck.securityContext != _|_ {
-					securityContext: _config.startupAPICheck.securityContext
+				if #config.startupAPICheck.securityContext != _|_ {
+					securityContext: #config.startupAPICheck.securityContext
 				}
 
 				containers: [{
-					name:            _meta.name
-					image:           _config.startupAPICheck.image.reference
-					imagePullPolicy: _config.startupAPICheck.imagePullPolicy
+					name:            #meta.name
+					image:           #config.startupAPICheck.image.reference
+					imagePullPolicy: #config.startupAPICheck.imagePullPolicy
 					args: [
 						"check",
 						"api",
-						"--wait=\(_config.startupAPICheck.timeout)",
+						"--wait=\(#config.startupAPICheck.timeout)",
 					]
-					if _config.startupAPICheck.extraArgs != _|_ {
-						args: _config.startupAPICheck.extraArgs
+					if #config.startupAPICheck.extraArgs != _|_ {
+						args: #config.startupAPICheck.extraArgs
 					}
 
-					if _config.startupAPICheck.containerSecurityContext != _|_ {
-						securityContext: _config.startupAPICheck.containerSecurityContext
+					if #config.startupAPICheck.containerSecurityContext != _|_ {
+						securityContext: #config.startupAPICheck.containerSecurityContext
 					}
 
-					if _config.startupAPICheck.resources != _|_ {
-						resources: _config.startupAPICheck.resources
+					if #config.startupAPICheck.resources != _|_ {
+						resources: #config.startupAPICheck.resources
 					}
 
-					if _config.startupAPICheck.volumeMounts != _|_ {
-						volumeMounts: _config.startupAPICheck.volumeMounts
+					if #config.startupAPICheck.volumeMounts != _|_ {
+						volumeMounts: #config.startupAPICheck.volumeMounts
 					}
 				}]
 
-				if _config.startupAPICheck.nodeSelector != _|_ {
-					nodeSelector: _config.startupAPICheck.nodeSelector
+				if #config.startupAPICheck.nodeSelector != _|_ {
+					nodeSelector: #config.startupAPICheck.nodeSelector
 				}
 
-				if _config.startupAPICheck.affinity != _|_ {
-					affinity: _config.startupAPICheck.affinity
+				if #config.startupAPICheck.affinity != _|_ {
+					affinity: #config.startupAPICheck.affinity
 				}
 
-				if _config.startupAPICheck.tolerations != _|_ {
-					tolerations: _config.startupAPICheck.tolerations
+				if #config.startupAPICheck.tolerations != _|_ {
+					tolerations: #config.startupAPICheck.tolerations
 				}
 
-				if _config.startupAPICheck.volumes != _|_ {
-					volumes: _config.startupAPICheck.volumes
+				if #config.startupAPICheck.volumes != _|_ {
+					volumes: #config.startupAPICheck.volumes
 				}
 			}
 		}
