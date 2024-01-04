@@ -7,7 +7,7 @@ A [timoni.sh](http://timoni.sh) module for deploying cert-manager to Kubernetes 
 To create an instance using the default values:
 
 ```shell
-timoni -n default apply cert-manager oci://<container-registry-url>
+timoni -n cert-manager apply cert-manager oci://<container-registry-url>
 ```
 
 To change the [default configuration](#configuration),
@@ -22,7 +22,7 @@ values: {}
 And apply the values with:
 
 ```shell
-timoni -n default apply cert-manager oci://<container-registry-url> \
+timoni -n cert-manager apply cert-manager oci://<container-registry-url> \
 --values ./my-values.cue
 ```
 
@@ -31,7 +31,7 @@ timoni -n default apply cert-manager oci://<container-registry-url> \
 To uninstall an instance and delete all its Kubernetes resources:
 
 ```shell
-timoni -n default delete cert-manager
+timoni -n cert-manager delete cert-manager
 ```
 
 ## Configuration
