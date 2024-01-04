@@ -40,12 +40,12 @@ timoni -n default delete cert-manager
 
 | Key                          | Required        | Type                                    | Default                    | Description                                                                                                                                  |
 |------------------------------|-----------------|-----------------------------------------|----------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
-| `imagePullSecrets?` | `false` | `[...corev1.LocalObjectReference]` | `_|_` | List of image pull secrets to supply to the resources being deployed |
-| `priorityClassName` | `false` | `string` | `_|_` | The name of the kubernetes priority class to apply to resources |
-| `rbac` | `false` | `struct` | `_|_` | Setup the Cluster RBAC roles and bindings |
+| `imagePullSecrets?` | `false` | `[...corev1.LocalObjectReference]` | `_\|_` | List of image pull secrets to supply to the resources being deployed |
+| `priorityClassName` | `false` | `string` | `_\|_` | The name of the kubernetes priority class to apply to resources |
+| `rbac` | `false` | `struct` | `_\|_` | Setup the Cluster RBAC roles and bindings |
 | `rbac.aggregateClusterRoles` | `false` | `bool` | `true` | Aggregate ClusterRoles to Kubernetes default user-facing roles. Ref: https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles |
-| `podSecurityPolicy` | `false` | `struct` | `_|_` | Pod Security Policy |
-| `podSecurityPolicy.useAppArmor | `false` | `bool` | `true` | |
+| `podSecurityPolicy` | `false` | `struct` | `_\|_` | Pod Security Policy |
+| `podSecurityPolicy.useAppArmor` | `false` | `bool` | `true` | |
 | `logLevel` | `false` | `int` | `2` | Logging verbosity |
 | `leaderElection` | `false` | `struct` | `struct` | Holds the required configuration for the leader election |
 | `leaderElection.namespace` | `false` | `string` | `kube-system` | The namespace used to hold the leader election lease |
@@ -56,7 +56,7 @@ timoni -n default delete cert-manager
 | `webhook` | `true` | `#Webhook` | `#Webhook` | The configuration of the cert-manager webhook |
 | `caInjector` | `true` | `#CAInjector` | `#CAInjector` | The configuration of the cert-manager cainjector |
 | `acmeSolver` | `false` | `struct` | `struct` | The configuration for the ACME Solver container |
-| `acmeSolver.image` | `true` | `timoniv1.#Image` | `_|_` | Holds the configuration for pulling the ACME Solver container |
+| `acmeSolver.image` | `true` | `timoniv1.#Image` | `_\|_` | Holds the configuration for pulling the ACME Solver container |
 | `acmeSolver.imagePullPolicy` | `false` | `#ImagePullPolicy` | `PullIfNotPresent` | Instruction on how to treat pulling the container |
 | `startupAPICheck` | `false` | `#StartupAPICheck` | `#StartupAPICheck` | The configuration of the cert-manager startup api check job |
 
