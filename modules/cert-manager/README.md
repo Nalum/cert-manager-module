@@ -40,7 +40,7 @@ timoni -n cert-manager delete cert-manager
 
 | Key                          | Required        | Type                                    | Default                    | Description                                                                                                                                  |
 |------------------------------|-----------------|-----------------------------------------|----------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
-| `imagePullSecrets` | `false` | `[...corev1.LocalObjectReference]` | `_\|_` | List of image pull secrets to supply to the resources being deployed |
+| `imagePullSecrets` | `false` | `[...corev1.#LocalObjectReference]` | `_\|_` | List of image pull secrets to supply to the resources being deployed |
 | `priorityClassName` | `false` | `string` | `_\|_` | The name of the kubernetes priority class to apply to resources |
 | `rbac` | `false` | `struct` | `_\|_` | Setup the Cluster RBAC roles and bindings |
 | `rbac.aggregateClusterRoles` | `false` | `bool` | `true` | Aggregate ClusterRoles to Kubernetes default user-facing roles. Ref: https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles |

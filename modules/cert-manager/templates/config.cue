@@ -20,7 +20,7 @@ import (
 
 	// Reference to one or more secrets to be used when pulling images
 	// ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-	imagePullSecrets?: [...corev1.LocalObjectReference]
+	imagePullSecrets?: [...corev1.#LocalObjectReference]
 
 	// Optional priority class to be used for the cert-manager pods
 	priorityClassName?: string
