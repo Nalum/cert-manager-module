@@ -389,8 +389,8 @@ import (
 
 	if config.rbac != _|_ {
 		objects: {
-			leaderElectionRole:        #Role & {_config:        config}
-			leaderElectionRoleBinding: #RoleBinding & {_config: config}
+			leaderElectionRole:        #LeaderElectionRole & {_config:        config}
+			leaderElectionRoleBinding: #LeaderElectionRoleBinding & {_config: config}
 
 			clusterViewClusterRole: #ClusterRole & {
 				_config:    config
@@ -507,7 +507,7 @@ import (
 	}
 
 	if config.startupAPICheck != _|_ {
-		objects: startupAPICheckJob: #Job & {_config: config}
+		objects: startupAPICheckJob: #StartupAPICheckJob & {_config: config}
 
 		if config.podSecurityPolicy != _|_ {
 			objects: {
