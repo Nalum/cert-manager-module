@@ -63,7 +63,7 @@ gen-debug-files: ## Generate resources and write to files
 	@yq --yaml-output '. | select(.kind == "PodDisruptionBudget")' all.yaml > output/PodDisruptionBudget.yaml
 	#@yq --yaml-output '. | select(.kind == "PodSecurityPolicy")' all.yaml > output/PodSecurityPolicy.yaml
 	@yq --yaml-output '. | select(.kind == "Role")' all.yaml > output/Role.yaml
-	#@yq --yaml-output '. | select(.kind == "RoleBinding")' all.yaml > output/RoleBinding.yaml
+	@yq --yaml-output '. | select(.kind == "RoleBinding")' all.yaml > output/RoleBinding.yaml
 	@yq --yaml-output '. | select(.kind == "Service")' all.yaml > output/Service.yaml
 	@yq --yaml-output '. | select(.kind == "ServiceAccount")' all.yaml > output/ServiceAccount.yaml
 	#@yq --yaml-output '. | select(.kind == "ServiceMonitor")' all.yaml > output/ServiceMonitor.yaml

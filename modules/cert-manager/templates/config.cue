@@ -404,8 +404,14 @@ import (
 
 	if config.rbac != _|_ {
 		objects: {
-			leaderElectionRole:        #LeaderElectionRole & {#config:        config}
-			leaderElectionRoleBinding: #LeaderElectionRoleBinding & {#config: config}
+			controllerRole: #Role & {
+				#config:    config
+				#component: "controller"
+			}
+			controllerRoleBinding: #RoleBinding & {
+				#config:    config
+				#component: "controller"
+			}
 
 			clusterViewClusterRole: #ClusterRole & {
 				#config:    config
@@ -491,15 +497,15 @@ import (
 			}
 			webhookRoleBinding: #RoleBinding & {
 				#config:    config
-				#component: "webhoook"
+				#component: "webhook"
 			}
 			webhookClusterRole: #ClusterRole & {
 				#config:    config
-				#component: "webhoook"
+				#component: "webhook"
 			}
 			webhookClusterRoleBinding: #ClusterRoleBinding & {
 				#config:    config
-				#component: "webhoook"
+				#component: "webhook"
 			}
 		}
 	}
@@ -543,8 +549,14 @@ import (
 
 		if config.rbac != _|_ {
 			objects: {
-				startupAPICheckRole:        #Role & {#config:        config}
-				startupAPICheckRoleBinding: #RoleBinding & {#config: config}
+				startupAPICheckRole: #Role & {
+					#config:    config
+					#component: "startupapicheck"
+				}
+				startupAPICheckRoleBinding: #RoleBinding & {
+					#config:    config
+					#component: "startupapicheck"
+				}
 			}
 		}
 

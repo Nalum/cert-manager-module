@@ -2,58 +2,61 @@ package templates
 
 import (
 	rbacv1 "k8s.io/api/rbac/v1"
+	timoniv1 "timoni.sh/core/v1alpha1"
 )
 
 #RoleBinding: rbacv1.#RoleBinding & {
-	#config: #Config
+	#config:    #Config
+	#component: string
+
+	#meta: timoniv1.#MetaComponent & {
+		#Meta:      #config.metadata
+		#Component: #component
+	}
 
 	apiVersion: "rbac.authorization.k8s.io/v1"
 	kind:       "RoleBinding"
 	metadata: {
-		name:      "\(#config.metadata.name):leaderelection"
-		namespace: #config.metadata.namespace
-		labels:    #config.metadata.labels
+		if #component == "controller" || #component == "cainjector" {
+			name: "\(#meta.name):leaderelection"
+		}
 
-		if #config.metadata.annotations != _|_ {
-			annotations: #config.metadata.annotations
+		if #component == "startupapicheck" {
+			name: "\(#meta.name):create-cert"
+		}
+
+		if #component == "webhook" {
+			name: "\(#meta.name):dynamic-serving"
+		}
+
+		namespace: #meta.namespace
+		labels:    #meta.labels
+
+		if #meta.annotations != _|_ {
+			annotations: #meta.annotations
 		}
 	}
+
 	roleRef: {
 		apiGroup: "rbac.authorization.k8s.io"
 		kind:     "Role"
-		name:     "\(#config.metadata.name):leaderelection"
-	}
-	subjects: [{
-		apiGroup:  ""
-		kind:      "ServiceAccount"
-		name:      "\(#config.metadata.name)-controller"
-		namespace: "\(#config.metadata.namespace)"
-	}]
-}
+		if #component == "controller" || #component == "cainjector" {
+			name: "\(#meta.name):leaderelection"
+		}
 
-#LeaderElectionRoleBinding: rbacv1.#RoleBinding & {
-	#config: #Config
+		if #component == "webhook" {
+			name: "\(#meta.name):dynamic-serving"
+		}
 
-	apiVersion: "rbac.authorization.k8s.io/v1"
-	kind:       "RoleBinding"
-	metadata: {
-		name:      "\(#config.metadata.name):leaderelection"
-		namespace: #config.metadata.namespace
-		labels:    #config.metadata.labels
-
-		if #config.metadata.annotations != _|_ {
-			annotations: #config.metadata.annotations
+		if #component == "startupapicheck" {
+			name: "\(#meta.name):create-cert"
 		}
 	}
-	roleRef: {
-		apiGroup: "rbac.authorization.k8s.io"
-		kind:     "Role"
-		name:     "\(#config.metadata.name):leaderelection"
-	}
+
 	subjects: [{
 		apiGroup:  ""
 		kind:      "ServiceAccount"
-		name:      "\(#config.metadata.name)-controller"
-		namespace: "\(#config.metadata.namespace)"
+		name:      #meta.name
+		namespace: #meta.namespace
 	}]
 }
