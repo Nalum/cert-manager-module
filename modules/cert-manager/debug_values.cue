@@ -9,7 +9,9 @@ values: {
 	metadata: labels: team:                                     "dev"
 	metadata: annotations: "cert-manager.io/timoni.sh/testing": "true"
 	rbac: {}
-	podSecurityPolicy: {}
+	podSecurityAdmission: {
+		mode: "audit"
+	}
 
 	controller: {
 		config: logging: format:  "json"

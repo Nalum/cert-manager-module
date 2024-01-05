@@ -14,9 +14,7 @@ import (
 		#Component: #component
 	}
 
-	apiVersion: "monitoring.coreos.com/v1"
-	kind:       "ServiceMonitor"
-	metadata:   #meta
+	metadata: #meta
 	metadata: labels: prometheus: #config.controller.prometheus.serviceMonitor.prometheusInstance
 
 	if #config.controller.prometheus.serviceMonitor.annotations != _|_ {

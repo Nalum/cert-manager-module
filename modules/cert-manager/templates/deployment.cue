@@ -18,8 +18,7 @@ import (
 
 	apiVersion: "apps/v1"
 	kind:       "Deployment"
-
-	metadata: #meta
+	metadata:   #meta
 
 	if #component == "controller" {
 		if #config.controller.deploymentLabels != _|_ {

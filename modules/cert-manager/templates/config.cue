@@ -31,11 +31,10 @@ import (
 		aggregateClusterRoles: *true | bool
 	}
 
-	// Pod Security Policy
-	podSecurityPolicy?: {
-		useAppArmor: *true | bool
+	podSecurityAdmission: {
+		mode:  "audit" | "warn" | *"enforce"
+		level: "privileged" | "baseline" | *"restricted"
 	}
-
 	// Logging verbosity
 	logLevel: *2 | int & >=0 & <=6
 
@@ -309,10 +308,6 @@ import (
 					#config:    config
 					#component: "cainjector"
 				}
-				//caInjectorPodSecurityPolicy: #PodSecurityPolicy & {
-				//#config:    config
-				//#component: "cainjector"
-				//}
 			}
 		}
 
@@ -360,8 +355,14 @@ import (
 
 	if config.webhook.networkPolicy != _|_ {
 		objects: {
-			networkPolicyEgress:   #NetworkPolicy & {#config: config}
-			networkPolicyWebhooks: #NetworkPolicy & {#config: config}
+			webhookNetworkPolicyEgress: #NetworkPolicyAllowEgress & {
+				#config:    config
+				#component: "webhook"
+			}
+			webhookNetworkPolicyIngress: #NetworkPolicyAllowIngress & {
+				#config:    config
+				#component: "webhook"
+			}
 		}
 	}
 
@@ -382,10 +383,6 @@ import (
 				#config:    config
 				#component: "controller"
 			}
-			//controllerPodSecurityPolicy: #PodSecurityPolicy & {
-			//#config:    config
-			//#component: "controller"
-			//}
 
 			webhookPSPClusterRole: #ClusterRole & {
 				#config:    config
@@ -395,10 +392,6 @@ import (
 				#config:    config
 				#component: "webhook"
 			}
-			//webhookPodSecurityPolicy: #PodSecurityPolicy & {
-			//#config:    config
-			//#component: "webhook"
-			//}
 		}
 	}
 
@@ -543,10 +536,6 @@ import (
 					#config:    config
 					#component: "startup-api-check"
 				}
-				//startupAPICheckPodSecurityPolicy: #PodSecurityPolicy & {
-				//#config:    config
-				//#component: "startupapicheck"
-				//}
 			}
 		}
 

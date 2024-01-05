@@ -9,18 +9,37 @@ package main
 values: {
 	version: "0.1.0"
 
-	controller: prometheus: {}
-
-	controller: image: {
-		repository: "quay.io/jetstack/cert-manager-controller"
-		tag:        "v1.13.2"
-		digest:     "sha256:9c67cf8c92d8693f9b726bec79c2a84d2cebeb217af6947355601dec4acfa966"
+	controller: {
+		prometheus: {}
+		image: {
+			repository: "quay.io/jetstack/cert-manager-controller"
+			tag:        "v1.13.2"
+			digest:     "sha256:9c67cf8c92d8693f9b726bec79c2a84d2cebeb217af6947355601dec4acfa966"
+		}
 	}
 
-	webhook: image: {
-		repository: "quay.io/jetstack/cert-manager-webhook"
-		tag:        "v1.13.2"
-		digest:     "sha256:0a9470447ebf1d3ff1c172e19268be12dc26125ff83320d456f6826c677c0ed2"
+	webhook: {
+		image: {
+			repository: "quay.io/jetstack/cert-manager-webhook"
+			tag:        "v1.13.2"
+			digest:     "sha256:0a9470447ebf1d3ff1c172e19268be12dc26125ff83320d456f6826c677c0ed2"
+		}
+
+		networkPolicy: {
+			ingress: [{from: [{ipBlock: cidr: "0.0.0.0/0"}]}]
+			egress: [
+				{
+					ports: [
+						{port: 80, protocol:   "TCP"},
+						{port: 443, protocol:  "TCP"},
+						{port: 53, protocol:   "TCP"},
+						{port: 53, protocol:   "UDP"},
+						{port: 6443, protocol: "TCP"},
+					]
+					to: [{ipBlock: cidr: "0.0.0.0/0"}]
+				},
+			]
+		}
 	}
 
 	caInjector: image: {
@@ -39,21 +58,5 @@ values: {
 		repository: "quay.io/jetstack/cert-manager-ctl"
 		tag:        "v1.13.2"
 		digest:     "sha256:4d9fce2c050eaadabedac997d9bd4a003341e9172c3f48fae299d94fa5f03435"
-	}
-
-	webhook: networkPolicy: {
-		ingress: [{from: [{ipBlock: cidr: "0.0.0.0/0"}]}]
-		egress: [
-			{
-				ports: [
-					{port: 80, protocol:   "TCP"},
-					{port: 443, protocol:  "TCP"},
-					{port: 53, protocol:   "TCP"},
-					{port: 53, protocol:   "UDP"},
-					{port: 6443, protocol: "TCP"},
-				]
-				to: [{ipBlock: cidr: "0.0.0.0/0"}]
-			},
-		]
 	}
 }
