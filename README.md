@@ -10,7 +10,7 @@ Example commands, where `NAME=cert-manager` and `NAMESPACE=cert-manager`. `--deb
 will force timoni to use the `debug_values.cue` file in the module:
 
 ```sh
-$ timoni mod vet ./modules/cert-manager --debug --namespace $(NAMESPACE) --name $(NAME)
+$ timoni mod vet ./modules/cert-manager --debug --namespace $NAMESPACE --name $NAME
 8:41PM INF vetting with debug values
 8:41PM INF Namespace/cert-manager valid resource
 8:41PM INF Deployment/cert-manager/cert-manager-controller valid resource
@@ -81,7 +81,7 @@ $ timoni mod vet ./modules/cert-manager --debug --namespace $(NAMESPACE) --name 
 Without `--debug` it will use the `values.cue` file in the module:
 
 ```sh
-$ timoni mod vet ./modules/cert-manager --namespace $(NAMESPACE) --name $(NAME)
+$ timoni mod vet ./modules/cert-manager --namespace $NAMESPACE --name $NAME
 8:41PM INF vetting with default values
 8:41PM INF Namespace/cert-manager valid resource
 8:41PM INF Deployment/cert-manager/cert-manager-controller valid resource
@@ -109,11 +109,11 @@ $ timoni mod vet ./modules/cert-manager --namespace $(NAMESPACE) --name $(NAME)
 
 Build the module and output the yaml to `stdout`, providing a values file with `-f`:
 ```sh
-$ timoni -n $(NAMESPACE) build $(NAME) ./modules/cert-manager -f ./modules/cert-manager/debug_values.cue
+$ timoni -n $NAMESPACE build $NAME ./modules/cert-manager -f ./modules/cert-manager/debug_values.cue
 ```
 
 This uses the `values.cue` as we do not provide a values file:
 
 ```sh
-$ timoni -n $(NAMESPACE) build $(NAME) ./modules/cert-manager
+$ timoni -n $NAMESPACE build $NAME ./modules/cert-manager
 ```
