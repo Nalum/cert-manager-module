@@ -66,7 +66,7 @@ gen-debug-files: ## Generate resources and write to files
 	@yq --yaml-output '. | select(.kind == "RoleBinding")' all.yaml > output/RoleBinding.yaml
 	@yq --yaml-output '. | select(.kind == "Service")' all.yaml > output/Service.yaml
 	@yq --yaml-output '. | select(.kind == "ServiceAccount")' all.yaml > output/ServiceAccount.yaml
-	#@yq --yaml-output '. | select(.kind == "ServiceMonitor")' all.yaml > output/ServiceMonitor.yaml
+	@yq --yaml-output '. | select(.kind == "ServiceMonitor")' all.yaml > output/ServiceMonitor.yaml
 	@yq --yaml-output '. | select(.kind == "ValidatingWebhookConfiguration")' all.yaml > output/ValidatingWebhookConfiguration.yaml
 	@rm all.yaml
 

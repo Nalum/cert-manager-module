@@ -75,7 +75,7 @@ import (
 #Prometheus: {
 	serviceMonitor?: {
 		prometheusInstance: *"default" | string
-		targetPort:         *9402 | int
+		targetPort:         *"http-metrics" | int | string
 		path:               *"/metrics" | string
 		interval:           *"60s" | #Duration
 		scrapeTimeout:      *"30s" | #Duration
@@ -516,7 +516,10 @@ import (
 				#config:    config
 				#component: "controller"
 			}
-			serviceMonitor: #ServiceMonitor & {#config: config}
+			serviceMonitor: #ServiceMonitor & {
+				#config:    config
+				#component: "controller"
+			}
 		}
 	}
 
