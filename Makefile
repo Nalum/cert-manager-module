@@ -3,20 +3,17 @@
 .ONESHELL:
 .SHELLFLAGS += -e
 
-VERSION:=$(shell grep 'version:' modules/cert-manager/values.cue | awk '{ print $$2}' | tr -d '"')
-DEBUG_VERSION:=$(shell grep 'version:' modules/cert-manager/debug_values.cue | awk '{ print $$2}' | tr -d '"')
 ORG:="nalum"
 REPO:="cert-manager-bundle"
 CERT_MANAGER_VERSION:=1.13.2
 MV:=1.13.2
-KV:=1.28.0
+KV:=1.29.0
 NAME:="cert-manager"
 NAMESPACE:="cert-manager"
 
 .PHONY: help
 help:  ## Display this help menu
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_0-9-]+:.*?##/ { printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
-	@echo "$(VERSION)"
 
 .PHONY: tools
 tools: ## Install cue, kind, kubectl, Timoni and FLux CLIs
@@ -50,7 +47,7 @@ ls: ## List the CUE generated objects
 .PHONY: gen-debug-files
 gen-debug-files: ## Generate resources and write to files
 	@mkdir -p output
-	@timoni -n $(NAMESPACE) build $(NAME) ./modules/cert-manager -f ./modules/cert-manager/debug_values.cue -v=$(DEBUG_VERSION) > all.yaml
+	@timoni -n $(NAMESPACE) build $(NAME) ./modules/cert-manager -f ./modules/cert-manager/debug_values.cue > all.yaml
 	@yq --yaml-output '. | select(.kind == "ClusterRole")' all.yaml > output/ClusterRole.yaml
 	@yq --yaml-output '. | select(.kind == "ClusterRoleBinding")' all.yaml > output/ClusterRoleBinding.yaml
 	@yq --yaml-output '. | select(.kind == "ConfigMap")' all.yaml > output/ConfigMap.yaml
@@ -72,7 +69,7 @@ gen-debug-files: ## Generate resources and write to files
 .PHONY: gen-files
 gen-files: ## Generate resources and write to files
 	@mkdir -p output
-	@timoni -n $(NAMESPACE) build $(NAME) ./modules/cert-manager -v=$(VERSION) > all.yaml
+	@timoni -n $(NAMESPACE) build $(NAME) ./modules/cert-manager > all.yaml
 	@yq --yaml-output '. | select(.kind == "ClusterRole")' all.yaml > output/ClusterRole.yaml
 	@yq --yaml-output '. | select(.kind == "ClusterRoleBinding")' all.yaml > output/ClusterRoleBinding.yaml
 	@yq --yaml-output '. | select(.kind == "ConfigMap")' all.yaml > output/ConfigMap.yaml
@@ -90,23 +87,6 @@ gen-files: ## Generate resources and write to files
 	@yq --yaml-output '. | select(.kind == "ServiceMonitor")' all.yaml > output/ServiceMonitor.yaml
 	@yq --yaml-output '. | select(.kind == "ValidatingWebhookConfiguration")' all.yaml > output/ValidatingWebhookConfiguration.yaml
 	@rm all.yaml
-
-.PHONY: push-mod
-push-mod: ## Push the Timoni modules to GHCR
-	@timoni mod push ./modules/cert-manager oci://ghcr.io/$(ORG)/modules/cert-manager -v=$(VERSION:v%=%) --latest \
-		--sign cosign \
-		-a 'org.opencontainers.image.source=https://github.com/$(ORG)/$(REPO)'  \
-		-a 'org.opencontainers.image.licenses=Apache-2.0' \
-		-a 'org.opencontainers.image.description=A timoni.sh module for deploying Cert-Manager.' \
-		-a 'org.opencontainers.image.documentation=https://github.com/$(ORG)/$(REPO)/blob/main/README.md'
-
-.PHONY: push-manifests
-push-manifests: ## Build and push the Cert-Manager manifests to GHCR
-	@timoni -n $(NAMESPACE) build $(NAME) ./modules/cert-manager | flux push artifact \
-		oci://ghcr.io/$(ORG)/manifests/cert-manager:$(VERSION) \
-		--source=https://github.com/cert-manager/cert-manager \
-		--revision=$(VERSION) \
-		-f-
 
 .PHONY: import-crds
 import-crds: ## Update Cert-Manager API CUE definitions
