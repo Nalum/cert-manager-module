@@ -59,14 +59,14 @@ import (
 	}
 
 	if #component == "startupapicheck" {
-		if #config.startupAPICheck.serviceAccount.labels != _|_ {
-			metadata: labels: #config.startupAPICheck.serviceAccount.labels
+		if #config.test.startupAPICheck.serviceAccount.labels != _|_ {
+			metadata: labels: #config.test.startupAPICheck.serviceAccount.labels
 		}
 
-		if #config.startupAPICheck.serviceAccount.annotations != _|_ {
-			metadata: annotations: #config.startupAPICheck.serviceAccount.annotations
+		if #config.test.startupAPICheck.serviceAccount.annotations != _|_ {
+			metadata: annotations: #config.test.startupAPICheck.serviceAccount.annotations
 		}
 
-		automountServiceAccountToken: #config.startupAPICheck.serviceAccount.automountServiceAccountToken
+		automountServiceAccountToken: #config.test.startupAPICheck.serviceAccount.automountServiceAccountToken
 	}
 }

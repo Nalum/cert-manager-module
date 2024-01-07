@@ -9,10 +9,16 @@ import (
 
 // Config defines the schema and defaults for the Instance values.
 #Config: {
-	// Runtime version info
+	// The kubeVersion is a required field, set at apply-time
+	// via timoni.cue by querying the user's Kubernetes API.
+	kubeVersion!: string
+	// Using the kubeVersion you can enforce a minimum Kubernetes minor version.
+	// By default, the minimum Kubernetes version is set to 1.20.
+	clusterVersion: timoniv1.#SemVer & {#Version: kubeVersion, #Minimum: "1.25.0"}
+
+	// The moduleVersion is set from the user-supplied module version.
+	// This field is used for the `app.kubernetes.io/version` label.
 	moduleVersion!: string
-	kubeVersion!:   string
-	version!:       string
 
 	// Metadata (common to all resources)
 	metadata: timoniv1.#Metadata & {#Version: moduleVersion}
@@ -56,15 +62,9 @@ import (
 		imagePullPolicy: #ImagePullPolicy
 	}
 
-	// TODO: turn this into a Timoni Test
-	// This startupapicheck is a Helm post-install hook that waits for the webhook
-	// endpoints to become available.
-	// The check is implemented using a Kubernetes Job- if you are injecting mesh
-	// sidecar proxies into cert-manager pods, you probably want to ensure that they
-	// are not injected into this Job's pod. Otherwise the installation may time out
-	// due to the Job never being completed because the sidecar proxy does not exit.
-	// See https://github.com/cert-manager/cert-manager/pull/4414 for context.
-	startupAPICheck?: #StartupAPICheck
+	test?: {
+		startupAPICheck: #StartupAPICheck
+	}
 }
 
 #Duration:        string & =~"^[+-]?((\\d+h)?(\\d+m)?(\\d+s)?(\\d+ms)?(\\d+(us|µs))?(\\d+ns)?)$"
@@ -116,7 +116,7 @@ import (
 
 #PodDisruptionBudgetData: {
 	minAvailable:   *1 | int | #Percent
-	maxUnavailable: *1 | int | #Percent
+	maxUnavailable: *0 | int | #Percent
 }
 
 #CommonData: {
@@ -529,30 +529,6 @@ import (
 		}
 	}
 
-	if config.startupAPICheck != _|_ {
-		objects: startupAPICheckJob: #StartupAPICheckJob & {#config: config}
-
-		if config.rbac != _|_ {
-			objects: {
-				startupAPICheckRole: #Role & {
-					#config:    config
-					#component: "startupapicheck"
-				}
-				startupAPICheckRoleBinding: #RoleBinding & {
-					#config:    config
-					#component: "startupapicheck"
-				}
-			}
-		}
-
-		if config.startupAPICheck.serviceAccount != _|_ {
-			objects: startupAPICheckServiceAccount: #ServiceAccount & {
-				#config:    config
-				#component: "startupapicheck"
-			}
-		}
-	}
-
 	if config.webhook.config != _|_ {
 		objects: webhookConfigMap: #ConfigMap & {
 			#config:    config
@@ -571,6 +547,30 @@ import (
 		objects: webhookServiceAccount: #ServiceAccount & {
 			#config:    config
 			#component: "webhook"
+		}
+	}
+
+	if config.test != _|_ {
+		tests: startupAPICheckJob: #StartupAPICheckJob & {#config: config}
+
+		if config.rbac != _|_ {
+			tests: {
+				startupAPICheckRole: #Role & {
+					#config:    config
+					#component: "startupapicheck"
+				}
+				startupAPICheckRoleBinding: #RoleBinding & {
+					#config:    config
+					#component: "startupapicheck"
+				}
+			}
+		}
+
+		if config.test.startupAPICheck.serviceAccount != _|_ {
+			tests: startupAPICheckServiceAccount: #ServiceAccount & {
+				#config:    config
+				#component: "startupapicheck"
+			}
 		}
 	}
 }
