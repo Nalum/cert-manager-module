@@ -298,19 +298,6 @@ import (
 			}
 		}
 
-		if config.podSecurityPolicy != _|_ {
-			objects: {
-				caInjectorPSPClusterRole: #ClusterRole & {
-					#config:    config
-					#component: "cainjector"
-				}
-				caInjectorPSPClusterRoleBinding: #ClusterRoleBinding & {
-					#config:    config
-					#component: "cainjector"
-				}
-			}
-		}
-
 		if config.rbac != _|_ {
 			objects: {
 				caInjectorClusterRole: #ClusterRole & {
@@ -373,28 +360,6 @@ import (
 		}
 	}
 
-	if config.podSecurityPolicy != _|_ {
-		objects: {
-			controllerPSPClusterRole: #ClusterRole & {
-				#config:    config
-				#component: "controller"
-			}
-			controllerPSPClusterRoleBinding: #ClusterRoleBinding & {
-				#config:    config
-				#component: "controller"
-			}
-
-			webhookPSPClusterRole: #ClusterRole & {
-				#config:    config
-				#component: "webhook"
-			}
-			webhookPSPClusterRoleBinding: #ClusterRoleBinding & {
-				#config:    config
-				#component: "webhook"
-			}
-		}
-	}
-
 	if config.rbac != _|_ {
 		objects: {
 			controllerRole: #Role & {
@@ -406,82 +371,121 @@ import (
 				#component: "controller"
 			}
 
-			clusterViewClusterRole: #ClusterRole & {
-				#config:    config
-				#component: "cluster-view"
+			if config.rbac.aggregateClusterRoles {
+				controllerClusterViewClusterRole: #ClusterRole & {
+					#config:    config
+					#component: "controller"
+					#role:      "cluster-view"
+					#aggregate: config.rbac.aggregateClusterRoles == true
+					#aggregateTo: {
+						reader: true
+					}
+				}
 			}
-			viewClusterRole: #ClusterRole & {
+
+			controllerViewClusterRole: #ClusterRole & {
 				#config:    config
-				#component: "view"
+				#component: "controller"
+				#role:      "view"
+				#aggregate: config.rbac.aggregateClusterRoles == true
+				#aggregateTo: {
+					reader: true
+					view:   true
+					edit:   true
+					admin:  true
+				}
 			}
-			editClusterRole: #ClusterRole & {
+			controllerEditClusterRole: #ClusterRole & {
 				#config:    config
-				#component: "edit"
+				#component: "controller"
+				#role:      "edit"
+				#aggregate: config.rbac.aggregateClusterRoles == true
+				#aggregateTo: {
+					edit:  true
+					admin: true
+				}
 			}
 
 			controllerIssuersClusterRole: #ClusterRole & {
 				#config:    config
-				#component: "controller-issuers"
+				#component: "controller"
+				#role:      "issuers"
 			}
 			controllerClusterIssuersClusterRole: #ClusterRole & {
 				#config:    config
-				#component: "controller-cluster-issuer"
+				#component: "controller"
+				#role:      "clusterissuers"
 			}
 			controllerCertificatesClusterRole: #ClusterRole & {
 				#config:    config
-				#component: "controller-certificates"
+				#component: "controller"
+				#role:      "certificates"
 			}
 			controllerOrdersClusterRole: #ClusterRole & {
 				#config:    config
-				#component: "controller-orders"
+				#component: "controller"
+				#role:      "orders"
 			}
 			controllerChallengesClusterRole: #ClusterRole & {
 				#config:    config
-				#component: "controller-challenges"
+				#component: "controller"
+				#role:      "challenges"
 			}
 			controllerIngressShimClusterRole: #ClusterRole & {
 				#config:    config
-				#component: "controller-ingress-shim"
+				#component: "controller"
+				#role:      "ingress-shim"
 			}
 			controllerApproveClusterRole: #ClusterRole & {
 				#config:    config
-				#component: "controller-approve"
+				#component: "controller"
+				#role:      "approve:cert-manager-io"
 			}
 			controllerCertificateSigningRequestsClusterRole: #ClusterRole & {
 				#config:    config
-				#component: "controller-csr"
+				#component: "controller"
+				#role:      "certificatesigningrequests"
 			}
+
 			controllerIssuersClusterRoleBinding: #ClusterRoleBinding & {
 				#config:    config
-				#component: "controller-issuers"
+				#component: "controller"
+				#role:      "issuers"
 			}
 			controllerClusterIssuersClusterRoleBinding: #ClusterRoleBinding & {
 				#config:    config
-				#component: "controller-cluster-issuers"
+				#component: "controller"
+				#role:      "clusterissuers"
 			}
 			controllerCertificatesClusterRoleBinding: #ClusterRoleBinding & {
 				#config:    config
-				#component: "controller-certificates"
+				#component: "controller"
+				#role:      "certificates"
 			}
 			controllerOrdersClusterRoleBinding: #ClusterRoleBinding & {
 				#config:    config
-				#component: "controller-orders"
+				#component: "controller"
+				#role:      "orders"
 			}
 			controllerChallengesClusterRoleBinding: #ClusterRoleBinding & {
 				#config:    config
-				#component: "controller-challenges"
+				#component: "controller"
+				#role:      "challenges"
 			}
 			controllerIngressShimClusterRoleBinding: #ClusterRoleBinding & {
 				#config:    config
-				#component: "controller-ingress-shim"
+				#component: "controller"
+				#role:      "ingress-shim"
 			}
 			controllerApproveClusterRoleBinding: #ClusterRoleBinding & {
 				#config:    config
-				#component: "controller-approve"
+				#component: "controller"
+				#role:      "approve:cert-manager-io"
 			}
 			controllerCertificateSigningRequestsClusterRoleBinding: #ClusterRoleBinding & {
 				#config:    config
-				#component: "controller-csr"
+				#component: "controller"
+				#role:      "certificatesigningrequests"
 			}
 
 			webhookRole: #Role & {
@@ -495,10 +499,12 @@ import (
 			webhookClusterRole: #ClusterRole & {
 				#config:    config
 				#component: "webhook"
+				#role:      "subjectaccessreviews"
 			}
 			webhookClusterRoleBinding: #ClusterRoleBinding & {
 				#config:    config
 				#component: "webhook"
+				#role:      "subjectaccessreviews"
 			}
 		}
 	}
@@ -525,19 +531,6 @@ import (
 
 	if config.startupAPICheck != _|_ {
 		objects: startupAPICheckJob: #StartupAPICheckJob & {#config: config}
-
-		if config.podSecurityPolicy != _|_ {
-			objects: {
-				startupAPICheckPSPClusterRole: #ClusterRole & {
-					#config:    config
-					#component: "startup-api-check"
-				}
-				startupAPICheckPSPClusterRoleBinding: #ClusterRoleBinding & {
-					#config:    config
-					#component: "startup-api-check"
-				}
-			}
-		}
 
 		if config.rbac != _|_ {
 			objects: {

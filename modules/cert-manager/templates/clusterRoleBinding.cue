@@ -8,6 +8,7 @@ import (
 #ClusterRoleBinding: rbacv1.#ClusterRoleBinding & {
 	#config:    #Config
 	#component: string
+	#role?:     string
 
 	#meta: timoniv1.#MetaComponent & {
 		#Meta:      #config.metadata
@@ -16,7 +17,15 @@ import (
 
 	apiVersion: "v1"
 	kind:       "ClusterRoleBinding"
-	metadata: name:   "\(#meta.name)-psp"
+
+	if #role != _|_ {
+		metadata: name: "\(#meta.name)-\(#role)"
+	}
+
+	if #role == _|_ {
+		metadata: name: "\(#meta.name)"
+	}
+
 	metadata: labels: #meta.labels
 
 	if #meta.annotations != _|_ {
@@ -26,7 +35,14 @@ import (
 	roleRef: {
 		apiGroup: "rbac.authorization.k8s.io"
 		kind:     "ClusterRole"
-		name:     "\(#meta.name)-psp"
+
+		if #role != _|_ {
+			name: "\(#meta.name)-\(#role)"
+		}
+
+		if #role == _|_ {
+			name: "\(#meta.name)"
+		}
 	}
 	subjects: [{
 		kind:      "ServiceAccount"
