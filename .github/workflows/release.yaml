@@ -20,7 +20,7 @@ jobs:
       - name: Setup Cosign
         uses: sigstore/cosign-installer@9614fae9e5c5eddabb09f90a270fcb487c9f7149 # v3.3.0
       - name: Setup Timoni
-        uses: ./actions/setup
+        uses: stefanprodan/timoni/actions/setup@main
       - name: Login to GHCR
         uses: docker/login-action@343f7c4344506bcbf9b4de18042ae17996df046d # v3.0.0
         with:
