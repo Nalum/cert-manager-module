@@ -8,7 +8,7 @@ import (
 #MutatingWebhook: admissionregistrationv1.#MutatingWebhookConfiguration & {
 	#config: #Config
 
-	#meta: timoniv1.#MetaComponent & {
+	#meta: timoniv1.#MetaClusterComponent & {
 		#Meta:      #config.metadata
 		#Component: "webhook"
 	}
@@ -16,7 +16,7 @@ import (
 	apiVersion: "admissionregistration.k8s.io/v1"
 	kind:       "MutatingWebhookConfiguration"
 	metadata:   #meta
-	metadata: annotations: "cert-manager.io/inject-ca-from-secret": "\(#meta.namespace)/\(#meta.name)-ca"
+	metadata: annotations: "cert-manager.io/inject-ca-from-secret": "\(#config.metadata.namespace)/\(#meta.name)-ca"
 
 	webhooks: [{
 		name: "webhook.cert-manager.io"
@@ -52,7 +52,7 @@ import (
 			if #config.webhook.url.host == _|_ {
 				service: {
 					name:      #meta.name
-					namespace: #meta.namespace
+					namespace: #config.metadata.namespace
 					path:      "/mutate"
 				}
 			}
