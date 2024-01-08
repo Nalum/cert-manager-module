@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 jobs:
-  kubernetes-1.25:
+  kubernetes-1-25:
     runs-on: ubuntu-latest
     services:
       registry:
@@ -62,7 +62,7 @@ jobs:
       - name: Uninstall module
         run: |
           timoni -n test delete cert-manager --wait
-  kubernetes-1.26:
+  kubernetes-1-26:
     runs-on: ubuntu-latest
     services:
       registry:
@@ -113,7 +113,7 @@ jobs:
       - name: Uninstall module
         run: |
           timoni -n test delete cert-manager --wait
-  kubernetes-1.27:
+  kubernetes-1-27:
     runs-on: ubuntu-latest
     services:
       registry:
@@ -164,7 +164,7 @@ jobs:
       - name: Uninstall module
         run: |
           timoni -n test delete cert-manager --wait
-  kubernetes-1.28:
+  kubernetes-1-28:
     runs-on: ubuntu-latest
     services:
       registry:
@@ -215,7 +215,7 @@ jobs:
       - name: Uninstall module
         run: |
           timoni -n test delete cert-manager --wait
-  kubernetes-1.29:
+  kubernetes-1-29:
     runs-on: ubuntu-latest
     services:
       registry:
