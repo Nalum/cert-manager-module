@@ -115,8 +115,8 @@ import (
 }
 
 #PodDisruptionBudgetData: {
-	minAvailable:   *1 | int | #Percent
-	maxUnavailable: *0 | int | #Percent
+	minAvailable?:   *1 | int | #Percent
+	maxUnavailable?: *0 | int | #Percent
 }
 
 #CommonData: {

@@ -22,26 +22,35 @@ import (
 		selector: matchLabels: #meta.#LabelSelector
 
 		if #component == "controller" {
-
 			if #config.controller.podDisruptionBudget != _|_ {
-				minAvailable:   #config.controller.podDisruptionBudget.minAvailable
-				maxUnavailable: #config.controller.podDisruptionBudget.maxUnavailable
+				if #config.controller.podDisruptionBudget.minAvailable != _|_ {
+					minAvailable: #config.controller.podDisruptionBudget.minAvailable
+				}
+				if #config.controller.podDisruptionBudget.maxUnavailable != _|_ {
+					maxUnavailable: #config.controller.podDisruptionBudget.maxUnavailable
+				}
 			}
 		}
 
 		if #component == "webhook" {
-
 			if #config.webhook.podDisruptionBudget != _|_ {
-				minAvailable:   #config.webhook.podDisruptionBudget.minAvailable
-				maxUnavailable: #config.webhook.podDisruptionBudget.maxUnavailable
+				if #config.webhook.podDisruptionBudget.minAvailable != _|_ {
+					minAvailable: #config.webhook.podDisruptionBudget.minAvailable
+				}
+				if #config.webhook.podDisruptionBudget.maxUnavailable != _|_ {
+					maxUnavailable: #config.webhook.podDisruptionBudget.maxUnavailable
+				}
 			}
 		}
 
 		if #component == "cainjector" {
-
 			if #config.caInjector.podDisruptionBudget != _|_ {
-				minAvailable:   #config.caInjector.podDisruptionBudget.minAvailable
-				maxUnavailable: #config.caInjector.podDisruptionBudget.maxUnavailable
+				if #config.caInjector.podDisruptionBudget.minAvailable != _|_ {
+					minAvailable: #config.caInjector.podDisruptionBudget.minAvailable
+				}
+				if #config.caInjector.podDisruptionBudget.maxUnavailable != _|_ {
+					maxUnavailable: #config.caInjector.podDisruptionBudget.maxUnavailable
+				}
 			}
 		}
 	}

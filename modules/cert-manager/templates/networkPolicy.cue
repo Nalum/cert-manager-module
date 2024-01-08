@@ -14,7 +14,7 @@ import (
 		#Component: #component
 	}
 
-	apiVersion: "v1"
+	apiVersion: "networking.k8s.io/v1"
 	kind:       "NetworkPolicy"
 	metadata: name:      "\(#meta.name)-allow-egress"
 	metadata: namespace: #meta.namespace
@@ -46,7 +46,7 @@ import (
 		#Component: #component
 	}
 
-	apiVersion: "v1"
+	apiVersion: "networking.k8s.io/v1"
 	kind:       "NetworkPolicy"
 	metadata: name:      "\(#meta.name)-allow-ingress"
 	metadata: namespace: #meta.namespace

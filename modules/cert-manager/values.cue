@@ -9,10 +9,13 @@ package main
 values: {
 	rbac: {}
 
+	podSecurityAdmission: mode: "audit"
+
 	controller: {
 		prometheus: {}
-		serviceAccount: {}
-		podDisruptionBudget: {}
+		serviceAccount: automountServiceAccountToken: true
+		automountServiceAccountToken: true
+		podDisruptionBudget: minAvailable: 1
 
 		image: {
 			repository: "quay.io/jetstack/cert-manager-controller"
@@ -22,8 +25,9 @@ values: {
 	}
 
 	webhook: {
-		serviceAccount: {}
-		podDisruptionBudget: {}
+		serviceAccount: automountServiceAccountToken: true
+		automountServiceAccountToken: true
+		podDisruptionBudget: minAvailable: 1
 
 		image: {
 			repository: "quay.io/jetstack/cert-manager-webhook"
@@ -49,8 +53,9 @@ values: {
 	}
 
 	caInjector: {
-		serviceAccount: {}
-		podDisruptionBudget: {}
+		serviceAccount: automountServiceAccountToken: true
+		automountServiceAccountToken: true
+		podDisruptionBudget: minAvailable: 1
 
 		image: {
 			repository: "quay.io/jetstack/cert-manager-cainjector"

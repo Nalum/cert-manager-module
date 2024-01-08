@@ -29,8 +29,15 @@ import (
 			name: "\(#meta.name):dynamic-serving"
 		}
 
-		namespace: #meta.namespace
-		labels:    #meta.labels
+		if #component == "controller" || #component == "cainjector" {
+			namespace: #config.leaderElection.namespace
+		}
+
+		if #component == "webhook" || #component == "startupapicheck" {
+			namespace: #meta.namespace
+		}
+
+		labels: #meta.labels
 
 		if #meta.annotations != _|_ {
 			annotations: #meta.annotations
