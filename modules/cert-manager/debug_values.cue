@@ -13,9 +13,10 @@ values: {
 		config: logging: format:  "json"
 		resources: requests: cpu: "100m"
 		ingressShim: defaultIssuerName: "dev"
-		prometheus: serviceMonitor: {}
-		serviceAccount: {}
-		podDisruptionBudget: {}
+		prometheus: {}
+		serviceAccount: automountServiceAccountToken: true
+		automountServiceAccountToken: true
+		podDisruptionBudget: minAvailable: 1
 
 		strategy: {
 			type: "RollingUpdate"
@@ -33,8 +34,9 @@ values: {
 
 	webhook: {
 		config: {}
-		serviceAccount: {}
-		podDisruptionBudget: {}
+		serviceAccount: automountServiceAccountToken: true
+		automountServiceAccountToken: true
+		podDisruptionBudget: minAvailable: 1
 
 		image: {
 			repository: "quay.io/jetstack/cert-manager-webhook"
@@ -60,8 +62,9 @@ values: {
 	}
 
 	caInjector: {
-		serviceAccount: {}
-		podDisruptionBudget: {}
+		serviceAccount: automountServiceAccountToken: true
+		automountServiceAccountToken: true
+		podDisruptionBudget: minAvailable: 1
 
 		image: {
 			repository: "quay.io/jetstack/cert-manager-cainjector"
