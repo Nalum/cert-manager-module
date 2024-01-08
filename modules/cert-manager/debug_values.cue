@@ -5,17 +5,18 @@ package main
 // Values used by debug_tool.cue.
 // Debug example 'cue cmd -t debug -t name=test -t namespace=test -t mv=1.0.0 -t kv=1.28.0 build'.
 values: {
-	metadata: labels: team:                                     "dev"
-	metadata: annotations: "cert-manager.io/timoni.sh/testing": "true"
+	metadata: labels: team:                                  "dev"
+	metadata: annotations: "cert-manager.timoni.sh/testing": "true"
 	rbac: {}
 
 	controller: {
 		config: logging: format:  "json"
 		resources: requests: cpu: "100m"
 		ingressShim: defaultIssuerName: "dev"
-		prometheus: serviceMonitor: {}
-		serviceAccount: {}
-		podDisruptionBudget: {}
+		prometheus: {}
+		serviceAccount: automountServiceAccountToken: true
+		automountServiceAccountToken: true
+		podDisruptionBudget: minAvailable: 1
 
 		strategy: {
 			type: "RollingUpdate"
@@ -33,8 +34,9 @@ values: {
 
 	webhook: {
 		config: {}
-		serviceAccount: {}
-		podDisruptionBudget: {}
+		serviceAccount: automountServiceAccountToken: true
+		automountServiceAccountToken: true
+		podDisruptionBudget: minAvailable: 1
 
 		image: {
 			repository: "quay.io/jetstack/cert-manager-webhook"
@@ -60,8 +62,9 @@ values: {
 	}
 
 	caInjector: {
-		serviceAccount: {}
-		podDisruptionBudget: {}
+		serviceAccount: automountServiceAccountToken: true
+		automountServiceAccountToken: true
+		podDisruptionBudget: minAvailable: 1
 
 		image: {
 			repository: "quay.io/jetstack/cert-manager-cainjector"
