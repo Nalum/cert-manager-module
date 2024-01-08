@@ -81,7 +81,7 @@ import (
 		labels?:            timoniv1.#Labels
 		annotations?:       timoniv1.#Annotations
 		honorLabels:        *false | bool
-		endpointAdditionalProperties: {[ string]: string}
+		endpointAdditionalProperties?: {[ string]: string}
 	}
 }
 

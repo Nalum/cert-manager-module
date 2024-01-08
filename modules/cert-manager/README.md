@@ -92,25 +92,64 @@ timoni -n cert-manager delete cert-manager
 
 | Key                          | Required        | Type                                    | Default                    | Description                                                                                                                                  |
 |------------------------------|-----------------|-----------------------------------------|----------------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
-| `imagePullSecrets` | `false` | `[...corev1.#LocalObjectReference]` | `_\|_` | List of image pull secrets to supply to the resources being deployed |
-| `priorityClassName` | `false` | `string` | `_\|_` | The name of the kubernetes priority class to apply to resources |
-| `rbac` | `false` | `struct` | `_\|_` | Setup the Cluster RBAC roles and bindings |
-| `rbac.aggregateClusterRoles` | `false` | `bool` | `true` | Aggregate ClusterRoles to Kubernetes default user-facing roles. Ref: https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles |
-| `podSecurityPolicy` | `false` | `struct` | `_\|_` | Pod Security Policy |
-| `podSecurityPolicy.useAppArmor` | `false` | `bool` | `true` | |
-| `logLevel` | `false` | `int` | `2` | Logging verbosity |
-| `leaderElection` | `false` | `struct` | `struct` | Holds the required configuration for the leader election |
-| `leaderElection.namespace` | `false` | `string` | `kube-system` | The namespace used to hold the leader election lease |
-| `leaderElection.leaseDuration` | `false` | `#Duration` | `60s` | The duration the lease is held |
-| `leaderElection.renewDeadline` | `false` | `#Duration` | `40s` | The deadline duration for renewal |
-| `leaderElection.retryPeriod` | `false` | `#Duration` | `15s` | The duration for the retry period |
-| `controller` | `true` | `#Controller` | `#Controller` | The configuration of the cert-manager controller |
-| `webhook` | `true` | `#Webhook` | `#Webhook` | The configuration of the cert-manager webhook |
-| `caInjector` | `true` | `#CAInjector` | `#CAInjector` | The configuration of the cert-manager cainjector |
-| `acmeSolver` | `false` | `struct` | `struct` | The configuration for the ACME Solver container |
-| `acmeSolver.image` | `true` | `timoniv1.#Image` | `_\|_` | Holds the configuration for pulling the ACME Solver container |
-| `acmeSolver.imagePullPolicy` | `false` | `#ImagePullPolicy` | `PullIfNotPresent` | Instruction on how to treat pulling the container |
-| `startupAPICheck` | `false` | `#StartupAPICheck` | `#StartupAPICheck` | The configuration of the cert-manager startup api check job |
+| `acmeSolver: image:` | `true` | `timoniv1.#Image` | `_\|_` | Holds the configuration for pulling the ACME Solver container |
+| `acmeSolver: imagePullPolicy:` | `false` | `string` | `PullIfNotPresent` | Instruction on how to treat pulling the container |
+| `caInjector:` | `false` | `struct` | `_\|_` | The configuration of the cert-manager cainjector |
+| `caInjector: config:` | `false` | `{[string]: string}` | `_\|_` | |
+| `caInjecotr: args:` | `false` | `[string]` | `_\|_` | |
+| `controller:` | `true` | `string` | `_\|_` | |
+| `controller: clusterResourceNamespace:` | `false | `string` | `_\|_` | |
+| `controller: config:` | `false` | `struct` | `_\|_` | |
+| `controller: dns01RecursiveNameservers:` | `false` | `string` | `_\|_` | |
+| `controller: dns01RecursiveNameserversOnly:` | `false` | `bool` | `false` | |
+| `controller: enableCertificateOwnerRef:` | `false` | `bool` | `false` | |
+| `controller: featureGates:` | `false` | `string` | `_\|_` | |
+| `controller: ingressShim:` | `false` | `struct` | `_\|_` | |
+| `controller: ingressShim: defaultIssuerGroup:` | `false` | `string` | `_\|_` | |
+| `controller: ingressShim: defaultIssuerKind:` | `false` | `string` | `ClusterIssuer` | |
+| `controller: ingressShim: defaultIssuerName:` | `false` | `string` | `_\|_` | |
+| `controller: maxConcurrentChallenges:` | `false` | `int` | `60` | |
+| `controller: podDNSConfig:` | `false` | `corev1.#PodDNSConfig` | `_\|_` | |
+| `controller: podDNSPolicy:` | `false` | `string` | `ClusterFirst` | |
+| `controller: prometheus:` | `false | `struct` | `_\|_` | |
+| `controller: prometheus: serviceMonitor: annotations?:` | `false` | `timoniv1.#Annotations` | `_\|_` | |
+| `controller: prometheus: serviceMonitor: endpointAdditionalProperties:` | `false` | `{[ string]: string}` | `_\|_` | |
+| `controller: prometheus: serviceMonitor: honorLabels:` | `false` | `bool` | `false` | |
+| `controller: prometheus: serviceMonitor: interval:` | `false` | `string` | `60s` | |
+| `controller: prometheus: serviceMonitor: labels:` | `false` | `timoniv1.#Labels` | `_\|_` | |
+| `controller: prometheus: serviceMonitor: path:` | `false` | `string` | `/metrics` | |
+| `controller: prometheus: serviceMonitor: prometheusInstance:` | `false` | `string` | `default` | |
+| `controller: prometheus: serviceMonitor: scrapeTimeout:` | `false` | `string` | `30s` | |
+| `controller: prometheus: serviceMonitor: targetPort:` | `false` | `string`/`int` | `http-metrics` | |
+| `controller: prometheus: serviceMonitor:` | `false` | `struct` | `_\|_` | |
+| `imagePullSecrets:` | `false` | `[corev1.#LocalObjectReference]` | `_\|_` | List of image pull secrets to supply to the resources being deployed |
+| `leaderElection:` | `false` | `struct` | `struct` | Holds the required configuration for the leader election |
+| `leaderElection: leaseDuration:` | `false` | `#Duration` | `60s` | The duration the lease is held |
+| `leaderElection: namespace:` | `false` | `string` | `kube-system` | The namespace used to hold the leader election lease |
+| `leaderElection: renewDeadline:` | `false` | `#Duration` | `40s` | The deadline duration for renewal |
+| `leaderElection: retryPeriod:` | `false` | `#Duration` | `15s` | The duration for the retry period |
+| `logLevel:` | `false` | `int` | `2` | Logging verbosity |
+| `podSecurityAdmission:` | `false` | `struct` | | Pod Security Admission |
+| `podSecurityAdmission: mode:` | `false` | `string` | `enforce` | |
+| `podSecurityAdmission: level:` | `false` | `string` | `restricted` | |
+| `priorityClassName:` | `false` | `string` | `_\|_` | The name of the kubernetes priority class to apply to resources |
+| `rbac: aggregateClusterRoles:` | `false` | `bool` | `true` | Aggregate ClusterRoles to Kubernetes default user-facing roles. Ref: https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles |
+| `rbac:` | `false` | `struct` | `_\|_` | Setup the Cluster RBAC roles and bindings |
+| `webhook:` | `true` | `#Webhook` | `#Webhook` | The configuration of the cert-manager webhook |
+| `webhook: args:` | `false` | `[string]` | `_\|_` | |
+| `webhook: config:` | `false` | `struct` | `_\|_` | |
+| `webhook: config: apiVersion:` | `false` | `string` | `webhook.config.cert-manager.io/v1alpha1` | |
+| `webhook: config: kind:` | `false` | `string` | `WebhookConfiguration` | |
+| `webhook: config: securePort:` | `false` | `int` | `10250` | |
+| `webhook: featureGates:` | `false` | `string` | `_\|_` | |
+| `webhook: hostNetwork:` | `false` | `bool` | `_\|_` | |
+| `webhook: loadBalancerIP:` | `false` | `string` | `_\|_` | |
+| `webhook: mutatingWebhookConfigurationAnnotations:` | `false` | `timoniv1.#Annotations` | `_\|_` | |
+| `webhook: networkPolicy:` | `false` | `networkingv1.#NetworkPolicySpec` | `_\|_` | |
+| `webhook: securePort:` | `false` | `int` | `10250` | |
+| `webhook: timeoutSeconds:` | `false` | `int` | `10` | |
+| `webhook: url: host?:` | `false` | `string` | `_\|_` | |
+| `webhook: validatingWebhookConfigurationAnnotations:` | `false` | `timoniv1.#Annotations` | `_\|_` | |
 
 #### Recommended values
 
