@@ -183,13 +183,13 @@ import (
 		kubernetesAPIQPS:          *9000 | int
 		kubernetesAPIBurst:        *9000 | int
 		numberOfConcurrentWorkers: *200 | int
-		featureGates: {
-			additionalCertificateOutputFormats:               *true | bool
-			experimentalCertificateSigningRequestControllers: *true | bool
-			experimentalGatewayAPISupport:                    *true | bool
-			serverSideApply:                                  *true | bool
-			literalCertificateSubject:                        *true | bool
-			useCertificateRequestBasicConstraints:            *true | bool
+		featureGates?: {
+			AdditionalCertificateOutputFormats:               *true | bool
+			ExperimentalCertificateSigningRequestControllers: *true | bool
+			ExperimentalGatewayAPISupport:                    *true | bool
+			ServerSideApply:                                  *true | bool
+			LiteralCertificateSubject:                        *true | bool
+			UseCertificateRequestBasicConstraints:            *true | bool
 		}
 	}
 
