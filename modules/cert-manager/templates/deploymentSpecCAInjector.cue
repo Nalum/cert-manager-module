@@ -50,7 +50,7 @@ import (
 			}
 
 			containers: [...corev1.#Container] & [
-					{
+				{
 					name:            #deployment_meta.name
 					image:           #main_config.caInjector.image.reference
 					imagePullPolicy: #main_config.caInjector.image.pullPolicy

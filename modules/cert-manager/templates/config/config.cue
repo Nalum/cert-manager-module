@@ -96,7 +96,7 @@ import (
 	allowPrivilegeEscalation: *false | bool
 	readOnlyRootFilesystem:   *true | bool
 	runAsNonRoot:             *true | bool
-	capabilities:             corev1.#Capabilities & {
+	capabilities: corev1.#Capabilities & {
 		drop: *["ALL"] | null | [...string]
 	}
 }

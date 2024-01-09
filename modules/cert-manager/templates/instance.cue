@@ -19,7 +19,7 @@ import (
 	}
 
 	objects: {
-		namespace:            #Namespace & {#config: config}
+		namespace: #Namespace & {#config: config}
 		controllerDeployment: #Deployment & {
 			#config:     config
 			#component:  "controller"
@@ -31,9 +31,9 @@ import (
 			#component: "webhook"
 			#strategy:  #config.webhook.strategy
 		}
-		webhookMutatingWebhook:   #MutatingWebhook & {#config:   config}
+		webhookMutatingWebhook: #MutatingWebhook & {#config: config}
 		webhookValidatingWebhook: #ValidatingWebhook & {#config: config}
-		webhookService:           #Service & {
+		webhookService: #Service & {
 			#config:    config
 			#component: "webhook"
 		}

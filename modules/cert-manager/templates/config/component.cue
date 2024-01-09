@@ -46,9 +46,9 @@ import (
 		type:         *corev1.#ServiceTypeClusterIP | corev1.#enumServiceType
 	}
 
-	strategy?:    appsv1.#DeploymentStrategy
+	strategy?: appsv1.#DeploymentStrategy
 	tolerations?: [...corev1.#Toleration] | [
-			{
+		{
 			key:      "node-restriction.kubernetes.io/reserved-for"
 			operator: "Equal"
 			value:    "platform"

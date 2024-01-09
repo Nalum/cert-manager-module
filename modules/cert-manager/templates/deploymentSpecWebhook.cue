@@ -49,7 +49,7 @@ import (
 			}
 
 			containers: [...corev1.#Container] & [
-					{
+				{
 					name: #deployment_meta.name
 
 					image:           #main_config.webhook.image.reference
