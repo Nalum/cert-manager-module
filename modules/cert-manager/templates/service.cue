@@ -3,10 +3,12 @@ package templates
 import (
 	corev1 "k8s.io/api/core/v1"
 	timoniv1 "timoni.sh/core/v1alpha1"
+
+	cfg "timoni.sh/cert-manager/templates/config"
 )
 
 #Service: corev1.#Service & {
-	#config:    #Config
+	#config:    cfg.#Config
 	#component: string
 
 	#meta: timoniv1.#MetaComponent & {
@@ -46,7 +48,7 @@ import (
 }
 
 #ServiceSpecController: {
-	#main_config:  #Config
+	#main_config:  cfg.#Config
 	#service_meta: timoniv1.#MetaComponent
 
 	type: "ClusterIP"
@@ -60,7 +62,7 @@ import (
 }
 
 #ServiceSpecWebhook: {
-	#main_config:  #Config
+	#main_config:  cfg.#Config
 	#service_meta: timoniv1.#MetaComponent
 
 	type: #main_config.webhook.serviceType

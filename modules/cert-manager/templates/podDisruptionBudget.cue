@@ -3,10 +3,12 @@ package templates
 import (
 	policyv1 "k8s.io/api/policy/v1"
 	timoniv1 "timoni.sh/core/v1alpha1"
+
+	cfg "timoni.sh/cert-manager/templates/config"
 )
 
 #PodDisruptionBudget: policyv1.#PodDisruptionBudget & {
-	#config:    #Config
+	#config:    cfg.#Config
 	#component: string
 
 	#meta: timoniv1.#MetaComponent & {

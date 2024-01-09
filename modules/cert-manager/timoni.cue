@@ -8,13 +8,14 @@ import (
 	"strconv"
 	"strings"
 
+	cfg "timoni.sh/cert-manager/templates/config"
 	templates "timoni.sh/cert-manager/templates"
 )
 
 // Define the schema for the user-supplied values.
 // At runtime, Timoni injects the supplied values
 // and validates them according to the Config schema.
-values: templates.#Config
+values: cfg.#Config
 
 // Define how Timoni should build, validate and
 // apply the Kubernetes resources.
@@ -45,5 +46,5 @@ timoni: {
 
 	// Pass Kubernetes resources outputted by the instance
 	// to Timoni's multi-step apply.
-	apply: app: [ for obj in instance.objects {obj}]
+	apply: app: [for obj in instance.objects {obj}]
 }

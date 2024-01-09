@@ -7,7 +7,9 @@ package main
 values: {
 	metadata: labels: team:                                  "dev"
 	metadata: annotations: "cert-manager.timoni.sh/testing": "true"
-	rbac: {}
+	rbac: {
+		aggregateClusterRoles: false
+	}
 
 	controller: {
 		config: logging: format:  "json"

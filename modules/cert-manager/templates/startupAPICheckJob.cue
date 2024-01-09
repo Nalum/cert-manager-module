@@ -3,10 +3,12 @@ package templates
 import (
 	batchv1 "k8s.io/api/batch/v1"
 	timoniv1 "timoni.sh/core/v1alpha1"
+
+	cfg "timoni.sh/cert-manager/templates/config"
 )
 
 #StartupAPICheckJob: batchv1.#Job & {
-	#config: #Config
+	#config: cfg.#Config
 
 	#meta: timoniv1.#MetaComponent & {
 		#Meta:      #config.metadata

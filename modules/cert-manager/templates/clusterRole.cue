@@ -3,10 +3,12 @@ package templates
 import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	timoniv1 "timoni.sh/core/v1alpha1"
+
+	cfg "timoni.sh/cert-manager/templates/config"
 )
 
 #ClusterRole: rbacv1.#ClusterRole & {
-	#config:    #Config
+	#config:    cfg.#Config
 	#component: string
 	#role?:     string
 	#aggregate: *false | bool
@@ -244,8 +246,8 @@ import (
 				resources: ["ingresses"]
 				verbs: ["get", "list", "watch", "create", "delete", "update"]
 			}, {
-				apiGroups: [ "gateway.networking.k8s.io"]
-				resources: [ "httproutes"]
+				apiGroups: ["gateway.networking.k8s.io"]
+				resources: ["httproutes"]
 				verbs: ["get", "list", "watch", "create", "delete", "update"]
 			}, {
 				// We require the ability to specify a custom hostname when we are creating

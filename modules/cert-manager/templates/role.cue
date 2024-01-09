@@ -3,10 +3,12 @@ package templates
 import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	timoniv1 "timoni.sh/core/v1alpha1"
+
+	cfg "timoni.sh/cert-manager/templates/config"
 )
 
 #Role: rbacv1.#Role & {
-	#config:    #Config
+	#config:    cfg.#Config
 	#component: string
 
 	#meta: timoniv1.#MetaComponent & {

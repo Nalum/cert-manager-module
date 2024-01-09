@@ -3,10 +3,12 @@ package templates
 import (
 	admissionregistrationv1 "k8s.io/api/admissionregistration/v1"
 	timoniv1 "timoni.sh/core/v1alpha1"
+
+	cfg "timoni.sh/cert-manager/templates/config"
 )
 
 #ValidatingWebhook: admissionregistrationv1.#ValidatingWebhookConfiguration & {
-	#config: #Config
+	#config: cfg.#Config
 
 	#meta: timoniv1.#MetaClusterComponent & {
 		#Meta:      #config.metadata
