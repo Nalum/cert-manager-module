@@ -15,8 +15,8 @@ import (
 	featureGates?:                  string
 	maxConcurrentChallenges:        *60 | int
 	podDNSConfig?:                  corev1.#PodDNSConfig
-	podDNSPolicy?:                  *"ClusterFirst" | "Default" | "ClusterFirstWithHostNet" | "None"
-	prometheus?:                    #Prometheus
+	podDNSPolicy:                   *"ClusterFirst" | "Default" | "ClusterFirstWithHostNet" | "None"
+	monitoring:                     #Monitoring
 
 	// Used to configure options for the controller pod.
 	// This allows setting options that'd usually be provided via flags.
@@ -114,13 +114,11 @@ import (
 	#Component
 	backoffLimit:    *4 | int
 	jobAnnotations?: timoniv1.#Annotations
-	rbac: annotations?: timoniv1.#Annotations
 
 	// Timeout for 'kubectl check api' command
 	timeout: *"1m" | #Duration
 }
 
 #ACMESolver: {
-	image!:          timoniv1.#Image
-	imagePullPolicy: #ImagePullPolicy
+	image!: timoniv1.#Image
 }

@@ -17,29 +17,29 @@ import (
 	}
 
 	metadata: #meta
-	metadata: labels: prometheus: #config.controller.prometheus.serviceMonitor.prometheusInstance
+	metadata: labels: prometheus: #config.controller.monitoring.serviceMonitor.prometheusInstance
 
-	if #config.controller.prometheus.serviceMonitor.annotations != _|_ {
-		metadata: annotations: #config.controller.prometheus.serviceMonitor.annotations
+	if #config.controller.monitoring.serviceMonitor.annotations != _|_ {
+		metadata: annotations: #config.controller.monitoring.serviceMonitor.annotations
 	}
 
 	spec: {
 		jobLabel: #config.metadata.name
 		selector: matchLabels: #meta.#LabelSelector
 
-		if #config.controller.prometheus.serviceMonitor.namespace != _|_ {
+		if #config.controller.monitoring.serviceMonitor.namespace != _|_ {
 			namespaceSelector: matchNames: [#meta.namespace]
 		}
 
 		endpoints: [{
-			targetPort:    #config.controller.prometheus.serviceMonitor.targetPort
-			path:          #config.controller.prometheus.serviceMonitor.path
-			interval:      #config.controller.prometheus.serviceMonitor.interval
-			scrapeTimeout: #config.controller.prometheus.serviceMonitor.scrapeTimeout
-			honorLabels:   #config.controller.prometheus.serviceMonitor.honorLabels
+			targetPort:    #config.controller.monitoring.serviceMonitor.targetPort
+			path:          #config.controller.monitoring.serviceMonitor.path
+			interval:      #config.controller.monitoring.serviceMonitor.interval
+			scrapeTimeout: #config.controller.monitoring.serviceMonitor.scrapeTimeout
+			honorLabels:   #config.controller.monitoring.serviceMonitor.honorLabels
 
-			if #config.controller.prometheus.serviceMonitor.endpointAdditionalProperties != _|_ {
-				for k, v in #config.controller.prometheus.serviceMonitor.endpointAdditionalProperties {
+			if #config.controller.monitoring.serviceMonitor.endpointAdditionalProperties != _|_ {
+				for k, v in #config.controller.monitoring.serviceMonitor.endpointAdditionalProperties {
 					"\(k)": v
 				}
 			}

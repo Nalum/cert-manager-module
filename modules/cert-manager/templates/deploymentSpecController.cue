@@ -12,7 +12,7 @@ import (
 	#main_config:            cfg.#Config
 	#deployment_meta:        timoniv1.#MetaComponent
 	#deployment_strategy?:   appsv1.#DeploymentStrategy
-	#deployment_prometheus?: cfg.#Prometheus
+	#deployment_monitoring?: cfg.#Monitoring
 
 	replicas: #main_config.controller.replicas
 	selector: matchLabels: #deployment_meta.#LabelSelector
@@ -32,7 +32,7 @@ import (
 			metadata: annotations: #main_config.controller.podAnnotations
 		}
 
-		if #deployment_prometheus != _|_ && #deployment_prometheus.serviceMonitor == _|_ {
+		if #deployment_monitoring != _|_ && #deployment_monitoring.serviceMonitor == _|_ {
 			metadata: annotations: "prometheus.io/path":   "/metrics"
 			metadata: annotations: "prometheus.io/scrape": "true"
 			metadata: annotations: "prometheus.io/port":   "9402"
@@ -69,11 +69,11 @@ import (
 			}
 
 			containers: [...corev1.#Container] & [
-				{
+					{
 					name: #deployment_meta.name
 
 					image:           #main_config.controller.image.reference
-					imagePullPolicy: #main_config.controller.imagePullPolicy
+					imagePullPolicy: #main_config.controller.image.pullPolicy
 
 					if #main_config.controller.containerSecurityContext != _|_ {
 						securityContext: #main_config.controller.containerSecurityContext

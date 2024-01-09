@@ -49,11 +49,11 @@ import (
 			}
 
 			containers: [...corev1.#Container] & [
-				{
+					{
 					name: #deployment_meta.name
 
 					image:           #main_config.webhook.image.reference
-					imagePullPolicy: #main_config.webhook.imagePullPolicy
+					imagePullPolicy: #main_config.webhook.image.pullPolicy
 
 					args: [
 						"--v=\(#main_config.logLevel)",

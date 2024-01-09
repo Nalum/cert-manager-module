@@ -58,7 +58,7 @@ import (
 				containers: [{
 					name:            #meta.name
 					image:           #config.test.startupAPICheck.image.reference
-					imagePullPolicy: #config.test.startupAPICheck.imagePullPolicy
+					imagePullPolicy: #config.test.startupAPICheck.image.pullPolicy
 					args: [
 						"check",
 						"api",

@@ -11,7 +11,7 @@ import (
 	#config:      cfg.#Config
 	#component:   string
 	#strategy?:   appsv1.#DeploymentStrategy
-	#prometheus?: cfg.#Prometheus
+	#monitoring?: cfg.#Monitoring
 
 	#meta: timoniv1.#MetaComponent & {
 		#Meta:      #config.metadata
@@ -35,7 +35,7 @@ import (
 			#main_config:           #config
 			#deployment_meta:       #meta
 			#deployment_strategy:   #strategy
-			#deployment_prometheus: #prometheus
+			#deployment_prometheus: #monitoring
 		}
 	}
 

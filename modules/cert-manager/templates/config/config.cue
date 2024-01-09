@@ -12,7 +12,7 @@ import (
 	kubeVersion!: string
 	// Using the kubeVersion you can enforce a minimum Kubernetes minor version.
 	// By default, the minimum Kubernetes version is set to 1.20.
-	clusterVersion: timoniv1.#SemVer & {#Version: kubeVersion, #Minimum: "1.25.0"}
+	clusterVersion: timoniv1.#SemVer & {#Version: kubeVersion, #Minimum: "1.27.0"}
 
 	// The moduleVersion is set from the user-supplied module version.
 	// This field is used for the `app.kubernetes.io/version` label.
@@ -29,8 +29,12 @@ import (
 	// Optional priority class to be used for the cert-manager pods
 	priorityClassName?: string
 
+	// Logging verbosity
+	logLevel: *2 | int & >=0 & <=6
+
 	// Setup the Cluster RBAC roles and bindings
 	rbac: {
+		enabled: *true | bool
 		// Aggregate ClusterRoles to Kubernetes default user-facing roles. Ref: https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles
 		aggregateClusterRoles: *true | bool
 	}
@@ -39,8 +43,6 @@ import (
 		mode:  "audit" | "warn" | *"enforce"
 		level: "privileged" | "baseline" | *"restricted"
 	}
-	// Logging verbosity
-	logLevel: *2 | int & >=0 & <=6
 
 	leaderElection: {
 		namespace:      *"kube-system" | string
@@ -50,24 +52,23 @@ import (
 	}
 
 	controller: #Controller
-
-	webhook: #Webhook
-
+	webhook:    #Webhook
 	caInjector: #CAInjector
-
 	acmeSolver: #ACMESolver
 
-	test?: {
+	test: {
+		enabled:         *true | bool
 		startupAPICheck: #StartupAPICheck
 	}
 }
 
-#Duration:        string & =~"^[+-]?((\\d+h)?(\\d+m)?(\\d+s)?(\\d+ms)?(\\d+(us|µs))?(\\d+ns)?)$"
-#Percent:         string & =~"^(100|[1-9]?[0-9])%$"
-#ImagePullPolicy: *corev1.#PullIfNotPresent | corev1.#enumPullPolicy
+#Duration: string & =~"^[+-]?((\\d+h)?(\\d+m)?(\\d+s)?(\\d+ms)?(\\d+(us|µs))?(\\d+ns)?)$"
+#Percent:  string & =~"^(100|[1-9][0-9]?)%$"
 
-#Prometheus: {
-	serviceMonitor?: {
+#Monitoring: {
+	enabled: *false | bool
+	serviceMonitor: {
+		enabled:            *false | bool
 		prometheusInstance: *"default" | string
 		targetPort:         *"http-metrics" | int | string
 		path:               *"/metrics" | string
@@ -81,9 +82,9 @@ import (
 }
 
 #Proxy: {
-	httpProxy:  string
-	httpsProxy: string
-	noProxy:    string
+	httpProxy!:  string
+	httpsProxy!: string
+	noProxy!:    string
 }
 
 #SecurityContext: {
@@ -95,7 +96,7 @@ import (
 	allowPrivilegeEscalation: *false | bool
 	readOnlyRootFilesystem:   *true | bool
 	runAsNonRoot:             *true | bool
-	capabilities: corev1.#Capabilities & {
+	capabilities:             corev1.#Capabilities & {
 		drop: *["ALL"] | null | [...string]
 	}
 }
