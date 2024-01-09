@@ -40,7 +40,7 @@ import (
 	}
 
 	if config.caInjector != _|_ {
-		if config.caInjector.podDisruptionBudget != _|_ {
+		if config.caInjector.podDisruptionBudget.enabled {
 			objects: caInjectorPodDisruptionBudget: #PodDisruptionBudget & {
 				#config:    config
 				#component: "cainjector"
@@ -100,7 +100,7 @@ import (
 		}
 	}
 
-	if config.controller.podDisruptionBudget != _|_ {
+	if config.controller.podDisruptionBudget.enabled {
 		objects: controllerPodDisruptionBudget: #PodDisruptionBudget & {
 			#config:    config
 			#component: "controller"
@@ -281,7 +281,7 @@ import (
 		}
 	}
 
-	if config.webhook.podDisruptionBudget != _|_ {
+	if config.webhook.podDisruptionBudget.enabled {
 		objects: webhookPodDisruptionBudget: #PodDisruptionBudget & {
 			#config:    config
 			#component: "webhook"
