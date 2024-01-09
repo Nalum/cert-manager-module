@@ -2,10 +2,12 @@ package templates
 
 import (
 	corev1 "k8s.io/api/core/v1"
+
+	cfg "timoni.sh/cert-manager/templates/config"
 )
 
 #Namespace: corev1.#Namespace & {
-	#config: #Config
+	#config: cfg.#Config
 
 	apiVersion: "v1"
 	kind:       "Namespace"

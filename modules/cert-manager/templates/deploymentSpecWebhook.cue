@@ -4,10 +4,12 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	timoniv1 "timoni.sh/core/v1alpha1"
+
+	cfg "timoni.sh/cert-manager/templates/config"
 )
 
 #WebhookDeploymentSpec: appsv1.#DeploymentSpec & {
-	#main_config:          #Config
+	#main_config:          cfg.#Config
 	#deployment_meta:      timoniv1.#MetaComponent
 	#deployment_strategy?: appsv1.#DeploymentStrategy
 
@@ -47,7 +49,7 @@ import (
 			}
 
 			containers: [...corev1.#Container] & [
-					{
+				{
 					name: #deployment_meta.name
 
 					image:           #main_config.webhook.image.reference

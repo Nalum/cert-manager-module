@@ -3,10 +3,12 @@ package templates
 import (
 	networkingv1 "k8s.io/api/networking/v1"
 	timoniv1 "timoni.sh/core/v1alpha1"
+
+	cfg "timoni.sh/cert-manager/templates/config"
 )
 
 #NetworkPolicyAllowEgress: networkingv1.#NetworkPolicy & {
-	#config:    #Config
+	#config:    cfg.#Config
 	#component: string
 
 	#meta: timoniv1.#MetaComponent & {
@@ -38,7 +40,7 @@ import (
 }
 
 #NetworkPolicyAllowIngress: networkingv1.#NetworkPolicy & {
-	#config:    #Config
+	#config:    cfg.#Config
 	#component: string
 
 	#meta: timoniv1.#MetaComponent & {

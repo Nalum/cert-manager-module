@@ -3,13 +3,15 @@ package templates
 import (
 	appsv1 "k8s.io/api/apps/v1"
 	timoniv1 "timoni.sh/core/v1alpha1"
+
+	cfg "timoni.sh/cert-manager/templates/config"
 )
 
 #Deployment: appsv1.#Deployment & {
-	#config:      #Config
+	#config:      cfg.#Config
 	#component:   string
 	#strategy?:   appsv1.#DeploymentStrategy
-	#prometheus?: #Prometheus
+	#prometheus?: cfg.#Prometheus
 
 	#meta: timoniv1.#MetaComponent & {
 		#Meta:      #config.metadata
