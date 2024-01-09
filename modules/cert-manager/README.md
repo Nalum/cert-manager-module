@@ -107,8 +107,36 @@ timoni -n cert-manager delete cert-manager
 
 #### Recommended values
 
-Comply with the restricted [Kubernetes pod security standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/):
+By default this module is configured for a production deployment and should comply with the restricted
+[Kubernetes pod security standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/),
+for deploying in a non production manner the below configuration should suffice:
 
 ```cue
-values: {}
+values: {
+    logLevel: 4
+
+    controller: automountServiceAccountToken: true
+    controller: replicas: 1
+    controller: serviceAccount: automountServiceAccountToken: true
+    controller: volumes: []
+    controller: volumeMounts: []
+
+    caInjector: automountServiceAccountToken: true
+    caInjector: replicas: 1
+    caInjector: serviceAccount: automountServiceAccountToken: true
+    caInjector: volumes: []
+    caInjector: volumeMounts: []
+
+    webhook: automountServiceAccountToken: true
+    webhook: replicas: 1
+    webhook: serviceAccount: automountServiceAccountToken: true
+    webhook: volumes: []
+    webhook: volumeMounts: []
+
+    startupAPICheck: automountServiceAccountToken: true
+    startupAPICheck: replicas: 1
+    startupAPICheck: serviceAccount: automountServiceAccountToken: true
+    startupAPICheck: volumes: []
+    startupAPICheck: volumeMounts: []
+}
 ```

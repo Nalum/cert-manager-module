@@ -179,7 +179,7 @@ import (
 								}
 							},
 							if #main_config.webhook.volumeMounts != _|_ {
-								#main_config.webhook.volumeMounts
+								for k, v in #main_config.webhook.volumeMounts {v}
 							},
 						]
 					}
@@ -211,7 +211,7 @@ import (
 						}
 					},
 					if #main_config.webhook.volumes != _|_ {
-						#main_config.webhook.volumes
+						for k, v in #main_config.webhook.volumes {v}
 					},
 				]
 			}

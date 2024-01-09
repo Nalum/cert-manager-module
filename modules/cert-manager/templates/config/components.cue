@@ -8,6 +8,7 @@ import (
 
 #Controller: {
 	#Component
+	replicas:                       *2 | int32
 	clusterResourceNamespace?:      string
 	dns01RecursiveNameservers?:     string
 	dns01RecursiveNameserversOnly?: *false | bool
@@ -52,6 +53,7 @@ import (
 
 #Webhook: {
 	#Component
+	replicas:                                   *3 | int32
 	featureGates?:                              string
 	hostNetwork:                                *false | bool
 	loadBalancerIP?:                            string
@@ -105,8 +107,8 @@ import (
 
 #CAInjector: {
 	#Component
+	replicas: *2 | int32
 	config?: {[string]: string}
-
 	args: [...string]
 }
 

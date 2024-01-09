@@ -55,15 +55,18 @@ import (
 
 			securityContext: #main_config.controller.securityContext
 
-			if #main_config.controller.volumes != _|_ {
-				volumes: #main_config.controller.volumes
-			}
-
-			if #main_config.controller.config != _|_ {
+			if #main_config.controller.volumes != _|_ || #main_config.controller.config != _|_ {
 				volumes: [
-					{
-						name: "config"
-						configMap: name: #deployment_meta.name
+					if #main_config.controller.config != _|_ {
+						{
+							name: "config"
+							configMap: name: #deployment_meta.name
+						}
+					},
+					if #main_config.controller.volumes != _|_ {
+						for k, v in #main_config.controller.volumes {
+							v
+						}
 					},
 				]
 			}
@@ -86,7 +89,7 @@ import (
 								mountPath: "/var/cert-manager/config"
 							},
 							if #main_config.controller.volumeMounts != _|_ {
-								#main_config.controller.volumeMounts
+								for k, v in #main_config.controller.volumeMounts {v}
 							},
 						]
 					}
@@ -244,10 +247,6 @@ import (
 
 			if #main_config.controller.podDNSConfig != _|_ {
 				dnsConfig: #main_config.controller.podDNSConfig
-			}
-
-			if #main_config.controller.volumes != _|_ {
-				volumes: #main_config.controller.volumes
 			}
 		}
 	}
