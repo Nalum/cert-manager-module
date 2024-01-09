@@ -18,8 +18,7 @@ import (
 	image!:        timoniv1.#Image
 	livenessProbe: corev1.#Probe
 	nodeSelector:  timoniv1.#Labels
-	nodeSelector: "kubernetes.io/os":                            "linux"
-	nodeSelector: "node-restriction.kubernetes.io/reserved-for": "platform"
+	nodeSelector: "kubernetes.io/os": "linux"
 	podAnnotations?:     timoniv1.#Annotations
 	podDisruptionBudget: #PodDisruptionBudgetData
 	podLabels?:          timoniv1.#Labels
