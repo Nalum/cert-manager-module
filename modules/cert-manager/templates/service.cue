@@ -22,10 +22,10 @@ import (
 
 	if #component == "controller" {
 		if #config.controller.serviceLabels != _|_ {
-			metadata: labels: #config.controller.serviceLabels
+			metadata: labels: #config.controller.service.labels
 		}
 		if #config.controller.serviceAnnotations != _|_ {
-			metadata: annotations: #config.controller.serviceAnnotations
+			metadata: annotations: #config.controller.service.annotations
 		}
 		spec: #ServiceSpecController & {
 			#main_config:  #config
@@ -35,10 +35,10 @@ import (
 
 	if #component == "webhook" {
 		if #config.webhook.serviceLabels != _|_ {
-			metadata: labels: #config.webhook.serviceLabels
+			metadata: labels: #config.webhook.service.labels
 		}
 		if #config.webhook.serviceAnnotations != _|_ {
-			metadata: annotations: #config.webhook.serviceAnnotations
+			metadata: annotations: #config.webhook.service.annotations
 		}
 		spec: #ServiceSpecWebhook & {
 			#main_config:  #config
@@ -65,7 +65,7 @@ import (
 	#main_config:  cfg.#Config
 	#service_meta: timoniv1.#MetaComponent
 
-	type: #main_config.webhook.serviceType
+	type: #main_config.webhook.service.type
 
 	if #main_config.webhook.loadBalancerIP != _|_ {
 		loadBalancerIP: #main_config.webhook.loadBalancerIP

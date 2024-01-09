@@ -102,6 +102,7 @@ import (
 }
 
 #PodDisruptionBudgetData: {
+	enabled:         *false | bool
 	minAvailable?:   *1 | int | #Percent
 	maxUnavailable?: *0 | int | #Percent
 }
