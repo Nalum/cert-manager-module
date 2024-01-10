@@ -12,9 +12,16 @@ import (
 	#main_config:            cfg.#Config
 	#deployment_meta:        timoniv1.#MetaComponent
 	#deployment_strategy?:   appsv1.#DeploymentStrategy
-	#deployment_prometheus?: cfg.#Prometheus
+	#deployment_monitoring?: cfg.#Monitoring
 
-	replicas: #main_config.controller.replicas
+	if #main_config.highAvailability.enabled {
+		replicas: #main_config.highAvailability.controllerReplicas
+	}
+
+	if !#main_config.highAvailability.enabled {
+		replicas: #main_config.controller.replicas
+	}
+
 	selector: matchLabels: #deployment_meta.#LabelSelector
 
 	if #deployment_strategy != _|_ {
@@ -32,7 +39,7 @@ import (
 			metadata: annotations: #main_config.controller.podAnnotations
 		}
 
-		if #deployment_prometheus != _|_ && #deployment_prometheus.serviceMonitor == _|_ {
+		if #deployment_monitoring != _|_ && #deployment_monitoring.serviceMonitor == _|_ {
 			metadata: annotations: "prometheus.io/path":   "/metrics"
 			metadata: annotations: "prometheus.io/scrape": "true"
 			metadata: annotations: "prometheus.io/port":   "9402"
@@ -55,15 +62,18 @@ import (
 
 			securityContext: #main_config.controller.securityContext
 
-			if #main_config.controller.volumes != _|_ {
-				volumes: #main_config.controller.volumes
-			}
-
-			if #main_config.controller.config != _|_ {
+			if #main_config.controller.volumes != _|_ || #main_config.controller.config != _|_ {
 				volumes: [
-					{
-						name: "config"
-						configMap: name: #deployment_meta.name
+					if #main_config.controller.config != _|_ {
+						{
+							name: "config"
+							configMap: name: #deployment_meta.name
+						}
+					},
+					if #main_config.controller.volumes != _|_ {
+						for k, v in #main_config.controller.volumes {
+							v
+						}
 					},
 				]
 			}
@@ -73,7 +83,7 @@ import (
 					name: #deployment_meta.name
 
 					image:           #main_config.controller.image.reference
-					imagePullPolicy: #main_config.controller.imagePullPolicy
+					imagePullPolicy: #main_config.controller.image.pullPolicy
 
 					if #main_config.controller.containerSecurityContext != _|_ {
 						securityContext: #main_config.controller.containerSecurityContext
@@ -86,7 +96,7 @@ import (
 								mountPath: "/var/cert-manager/config"
 							},
 							if #main_config.controller.volumeMounts != _|_ {
-								#main_config.controller.volumeMounts
+								for k, v in #main_config.controller.volumeMounts {v}
 							},
 						]
 					}
@@ -244,10 +254,6 @@ import (
 
 			if #main_config.controller.podDNSConfig != _|_ {
 				dnsConfig: #main_config.controller.podDNSConfig
-			}
-
-			if #main_config.controller.volumes != _|_ {
-				volumes: #main_config.controller.volumes
 			}
 		}
 	}

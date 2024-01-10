@@ -47,4 +47,9 @@ timoni: {
 	// Pass Kubernetes resources outputted by the instance
 	// to Timoni's multi-step apply.
 	apply: app: [for obj in instance.objects {obj}]
+
+	// Conditionally run tests after an install or upgrade.
+	if instance.config.test.enabled {
+		apply: test: [for obj in instance.tests {obj}]
+	}
 }

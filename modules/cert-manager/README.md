@@ -7,7 +7,7 @@ A [timoni.sh](http://timoni.sh) module for deploying cert-manager to Kubernetes 
 To create an instance using the default values:
 
 ```shell
-timoni -n cert-manager apply cert-manager oci://<container-registry-url>
+timoni -n cert-manager apply cert-manager oci://ghcr.io/nalum/timoni/cert-manager
 ```
 
 To change the [default configuration](#configuration),
@@ -18,63 +18,17 @@ For example, create a file `my-values.cue` with the following content:
 ```cue
 values: {
     controller: {
-        prometheus: {}
-
-        image: {
-            repository: "quay.io/jetstack/cert-manager-controller"
-            tag:        "v1.13.2"
-            digest:     "sha256:9c67cf8c92d8693f9b726bec79c2a84d2cebeb217af6947355601dec4acfa966"
-        }
+        prometheus: enabled: true
     }
 
-    webhook: {
-        image: {
-            repository: "quay.io/jetstack/cert-manager-webhook"
-            tag:        "v1.13.2"
-            digest:     "sha256:0a9470447ebf1d3ff1c172e19268be12dc26125ff83320d456f6826c677c0ed2"
-        }
-
-        networkPolicy: {
-            ingress: [{from: [{ipBlock: cidr: "0.0.0.0/0"}]}]
-            egress: [
-                {
-                    ports: [
-                        {port: 80, protocol:   "TCP"},
-                        {port: 443, protocol:  "TCP"},
-                        {port: 53, protocol:   "TCP"},
-                        {port: 53, protocol:   "UDP"},
-                        {port: 6443, protocol: "TCP"},
-                    ]
-                    to: [{ipBlock: cidr: "0.0.0.0/0"}]
-                },
-            ]
-        }
-    }
-
-    caInjector: image: {
-        repository: "quay.io/jetstack/cert-manager-cainjector"
-        tag:        "v1.13.2"
-        digest:     "sha256:858fee0c4af069d0e87c08fd0943f0091434e05f945d222875fc1f3d36c41616"
-    }
-
-    acmeSolver: image: {
-        repository: "quay.io/jetstack/cert-manager-acmesolver"
-        tag:        "v1.13.2"
-        digest:     "sha256:7057fd605f530ab2198ebdf1cb486818cce20682632be37c90522a09b95271b1"
-    }
-
-    startupAPICheck: image: {
-        repository: "quay.io/jetstack/cert-manager-ctl"
-        tag:        "v1.13.2"
-        digest:     "sha256:4d9fce2c050eaadabedac997d9bd4a003341e9172c3f48fae299d94fa5f03435"
-    }
+    test: enabled: true
 }
 ```
 
 And apply the values with:
 
 ```shell
-timoni -n cert-manager apply cert-manager oci://<container-registry-url> \
+timoni -n cert-manager apply cert-manager oci://<ghcr.io/nalum/timoni/cert-manager \
 --values ./my-values.cue
 ```
 
@@ -153,8 +107,36 @@ timoni -n cert-manager delete cert-manager
 
 #### Recommended values
 
-Comply with the restricted [Kubernetes pod security standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/):
+By default this module is configured for a production deployment and should comply with the restricted
+[Kubernetes pod security standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/),
+for deploying in a non production manner the below configuration should suffice:
 
 ```cue
-values: {}
+values: {
+    logLevel: 4
+
+    controller: automountServiceAccountToken: true
+    controller: replicas: 1
+    controller: serviceAccount: automountServiceAccountToken: true
+    controller: volumes: []
+    controller: volumeMounts: []
+
+    caInjector: automountServiceAccountToken: true
+    caInjector: replicas: 1
+    caInjector: serviceAccount: automountServiceAccountToken: true
+    caInjector: volumes: []
+    caInjector: volumeMounts: []
+
+    webhook: automountServiceAccountToken: true
+    webhook: replicas: 1
+    webhook: serviceAccount: automountServiceAccountToken: true
+    webhook: volumes: []
+    webhook: volumeMounts: []
+
+    startupAPICheck: automountServiceAccountToken: true
+    startupAPICheck: replicas: 1
+    startupAPICheck: serviceAccount: automountServiceAccountToken: true
+    startupAPICheck: volumes: []
+    startupAPICheck: volumeMounts: []
+}
 ```

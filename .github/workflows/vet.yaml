@@ -1,4 +1,4 @@
-name: module
+name: vet
 
 on:
   pull_request:
@@ -20,6 +20,13 @@ jobs:
     - name: Vet Module
       run: |
         timoni mod vet --namespace cert-manager --name cert-manager ./modules/cert-manager
+  vet-debug-module:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Setup Timoni
+      uses: stefanprodan/timoni/actions/setup@main
     - name: Debug Vet Module
       run: |
         timoni mod vet --debug --namespace cert-manager --name cert-manager ./modules/cert-manager

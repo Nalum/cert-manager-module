@@ -13,12 +13,20 @@ import (
 	#deployment_meta:      timoniv1.#MetaComponent
 	#deployment_strategy?: appsv1.#DeploymentStrategy
 
-	replicas: #main_config.webhook.replicas
+	if #main_config.highAvailability.enabled {
+		replicas: #main_config.highAvailability.webhookReplicas
+	}
+
+	if !#main_config.highAvailability.enabled {
+		replicas: #main_config.webhook.replicas
+	}
+
 	selector: matchLabels: #deployment_meta.#LabelSelector
 
 	if #deployment_strategy != _|_ {
 		strategy: #deployment_strategy
 	}
+
 	template: corev1.#PodTemplateSpec & {
 		metadata: labels: #deployment_meta.labels
 
@@ -53,7 +61,7 @@ import (
 					name: #deployment_meta.name
 
 					image:           #main_config.webhook.image.reference
-					imagePullPolicy: #main_config.webhook.imagePullPolicy
+					imagePullPolicy: #main_config.webhook.image.pullPolicy
 
 					args: [
 						"--v=\(#main_config.logLevel)",
@@ -179,7 +187,7 @@ import (
 								}
 							},
 							if #main_config.webhook.volumeMounts != _|_ {
-								#main_config.webhook.volumeMounts
+								for k, v in #main_config.webhook.volumeMounts {v}
 							},
 						]
 					}
@@ -211,7 +219,7 @@ import (
 						}
 					},
 					if #main_config.webhook.volumes != _|_ {
-						#main_config.webhook.volumes
+						for k, v in #main_config.webhook.volumes {v}
 					},
 				]
 			}

@@ -24,7 +24,7 @@ import (
 			#config:     config
 			#component:  "controller"
 			#strategy:   #config.controller.strategy
-			#prometheus: #config.controller.prometheus
+			#monitoring: #config.controller.monitoring
 		}
 		webhookDeployment: #Deployment & {
 			#config:    config
@@ -40,14 +40,14 @@ import (
 	}
 
 	if config.caInjector != _|_ {
-		if config.caInjector.podDisruptionBudget != _|_ {
+		if config.caInjector.podDisruptionBudget.enabled {
 			objects: caInjectorPodDisruptionBudget: #PodDisruptionBudget & {
 				#config:    config
 				#component: "cainjector"
 			}
 		}
 
-		if config.rbac != _|_ {
+		if config.rbac.enabled {
 			objects: {
 				caInjectorClusterRole: #ClusterRole & {
 					#config:    config
@@ -68,11 +68,9 @@ import (
 			}
 		}
 
-		if config.caInjector.serviceAccount != _|_ {
-			objects: caInjectorServiceAccount: #ServiceAccount & {
-				#config:    config
-				#component: "cainjector"
-			}
+		objects: caInjectorServiceAccount: #ServiceAccount & {
+			#config:    config
+			#component: "cainjector"
 		}
 
 		objects: caInjectorDeployment: #Deployment & {
@@ -102,14 +100,14 @@ import (
 		}
 	}
 
-	if config.controller.podDisruptionBudget != _|_ {
+	if config.controller.podDisruptionBudget.enabled {
 		objects: controllerPodDisruptionBudget: #PodDisruptionBudget & {
 			#config:    config
 			#component: "controller"
 		}
 	}
 
-	if config.rbac != _|_ {
+	if config.rbac.enabled {
 		objects: {
 			controllerRole: #Role & {
 				#config:    config
@@ -258,7 +256,7 @@ import (
 		}
 	}
 
-	if config.controller.prometheus != _|_ && config.controller.prometheus.serviceMonitor != _|_ {
+	if config.controller.monitoring.enabled && config.controller.monitoring.serviceMonitor.enabled {
 		objects: {
 			service: #Service & {
 				#config:    config
@@ -271,11 +269,9 @@ import (
 		}
 	}
 
-	if config.controller.serviceAccount != _|_ {
-		objects: controllerServiceAccount: #ServiceAccount & {
-			#config:    config
-			#component: "controller"
-		}
+	objects: controllerServiceAccount: #ServiceAccount & {
+		#config:    config
+		#component: "controller"
 	}
 
 	if config.webhook.config != _|_ {
@@ -285,24 +281,22 @@ import (
 		}
 	}
 
-	if config.webhook.podDisruptionBudget != _|_ {
+	if config.webhook.podDisruptionBudget.enabled {
 		objects: webhookPodDisruptionBudget: #PodDisruptionBudget & {
 			#config:    config
 			#component: "webhook"
 		}
 	}
 
-	if config.webhook.serviceAccount != _|_ {
-		objects: webhookServiceAccount: #ServiceAccount & {
-			#config:    config
-			#component: "webhook"
-		}
+	objects: webhookServiceAccount: #ServiceAccount & {
+		#config:    config
+		#component: "webhook"
 	}
 
 	if config.test != _|_ {
 		tests: startupAPICheckJob: #StartupAPICheckJob & {#config: config}
 
-		if config.rbac != _|_ {
+		if config.rbac.enabled {
 			tests: {
 				startupAPICheckRole: #Role & {
 					#config:    config
@@ -315,11 +309,9 @@ import (
 			}
 		}
 
-		if config.test.startupAPICheck.serviceAccount != _|_ {
-			tests: startupAPICheckServiceAccount: #ServiceAccount & {
-				#config:    config
-				#component: "startupapicheck"
-			}
+		tests: startupAPICheckServiceAccount: #ServiceAccount & {
+			#config:    config
+			#component: "startupapicheck"
 		}
 	}
 }

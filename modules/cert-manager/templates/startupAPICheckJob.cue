@@ -18,6 +18,7 @@ import (
 	apiVersion: "batch/v1"
 	kind:       "Job"
 	metadata:   #meta
+	metadata: annotations: timoniv1.Action.Force
 
 	if #config.test.startupAPICheck.jobAnnotations != _|_ {
 		metadata: annotations: #config.test.startupAPICheck.jobAnnotations
@@ -58,7 +59,7 @@ import (
 				containers: [{
 					name:            #meta.name
 					image:           #config.test.startupAPICheck.image.reference
-					imagePullPolicy: #config.test.startupAPICheck.imagePullPolicy
+					imagePullPolicy: #config.test.startupAPICheck.image.pullPolicy
 					args: [
 						"check",
 						"api",

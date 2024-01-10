@@ -13,12 +13,20 @@ import (
 	#deployment_meta:      timoniv1.#MetaComponent
 	#deployment_strategy?: appsv1.#DeploymentStrategy
 
-	replicas: #main_config.caInjector.replicas
+	if #main_config.highAvailability.enabled {
+		replicas: #main_config.highAvailability.caInjectorReplicas
+	}
+
+	if !#main_config.highAvailability.enabled {
+		replicas: #main_config.caInjector.replicas
+	}
+
 	selector: matchLabels: #deployment_meta.#LabelSelector
 
 	if #deployment_strategy != _|_ {
 		strategy: #deployment_strategy
 	}
+
 	template: corev1.#PodTemplateSpec & {
 		metadata: labels: #deployment_meta.labels
 
@@ -53,7 +61,7 @@ import (
 				{
 					name:            #deployment_meta.name
 					image:           #main_config.caInjector.image.reference
-					imagePullPolicy: #main_config.caInjector.imagePullPolicy
+					imagePullPolicy: #main_config.caInjector.image.pullPolicy
 
 					args: [
 						"--v=\(#main_config.logLevel)",
