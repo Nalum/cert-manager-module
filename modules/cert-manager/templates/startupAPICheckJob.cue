@@ -18,6 +18,7 @@ import (
 	apiVersion: "batch/v1"
 	kind:       "Job"
 	metadata:   #meta
+	metadata: annotations: timoniv1.Action.Force
 
 	if #config.test.startupAPICheck.jobAnnotations != _|_ {
 		metadata: annotations: #config.test.startupAPICheck.jobAnnotations

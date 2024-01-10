@@ -17,23 +17,35 @@ values: {
 		resources: requests: cpu: "100m"
 		ingressShim: defaultIssuerName:    "dev"
 		monitoring: enabled:               true
-		podDisruptionBudget: minAvailable: 1
+		podDisruptionBudget: minAvailable: 2
 
 		strategy: {
 			type: "RollingUpdate"
 			rollingUpdate: {
-				maxSurge: 2
+				maxSurge: 1
 			}
 		}
 	}
 
 	webhook: {
-		podDisruptionBudget: enabled:      true
-		podDisruptionBudget: minAvailable: 1
+		podDisruptionBudget: minAvailable: 2
+
+		strategy: {
+			type: "RollingUpdate"
+			rollingUpdate: {
+				maxSurge: 1
+			}
+		}
 	}
 
 	caInjector: {
-		podDisruptionBudget: enabled:      true
-		podDisruptionBudget: minAvailable: 1
+		podDisruptionBudget: minAvailable: 2
+
+		strategy: {
+			type: "RollingUpdate"
+			rollingUpdate: {
+				maxSurge: 1
+			}
+		}
 	}
 }

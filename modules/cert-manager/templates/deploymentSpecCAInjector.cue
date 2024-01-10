@@ -19,6 +19,7 @@ import (
 	if #deployment_strategy != _|_ {
 		strategy: #deployment_strategy
 	}
+
 	template: corev1.#PodTemplateSpec & {
 		metadata: labels: #deployment_meta.labels
 
