@@ -14,7 +14,14 @@ import (
 	#deployment_strategy?:   appsv1.#DeploymentStrategy
 	#deployment_monitoring?: cfg.#Monitoring
 
-	replicas: #main_config.controller.replicas
+	if #main_config.highAvailability.enabled {
+		replicas: #main_config.highAvailability.controllerReplicas
+	}
+
+	if !#main_config.highAvailability.enabled {
+		replicas: #main_config.controller.replicas
+	}
+
 	selector: matchLabels: #deployment_meta.#LabelSelector
 
 	if #deployment_strategy != _|_ {

@@ -24,6 +24,7 @@ import (
 	podLabels?:          timoniv1.#Labels
 	proxy?:              #Proxy
 	readinessProbe:      corev1.#Probe
+	replicas:            *1 | int32
 
 	resources?: timoniv1.#ResourceRequirements & {
 		requests?: timoniv1.#ResourceRequirement & {

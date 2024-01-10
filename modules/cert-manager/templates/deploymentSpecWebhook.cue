@@ -13,7 +13,14 @@ import (
 	#deployment_meta:      timoniv1.#MetaComponent
 	#deployment_strategy?: appsv1.#DeploymentStrategy
 
-	replicas: #main_config.webhook.replicas
+	if #main_config.highAvailability.enabled {
+		replicas: #main_config.highAvailability.webhookReplicas
+	}
+
+	if !#main_config.highAvailability.enabled {
+		replicas: #main_config.webhook.replicas
+	}
+
 	selector: matchLabels: #deployment_meta.#LabelSelector
 
 	if #deployment_strategy != _|_ {

@@ -44,6 +44,13 @@ import (
 		level: "privileged" | "baseline" | *"restricted"
 	}
 
+	highAvailability: {
+		enabled:            *false | bool
+		controllerReplicas: *2 | int
+		webhookReplicas:    *3 | int
+		caInjectorReplicas: *2 | int
+	}
+
 	leaderElection: {
 		namespace:      *"kube-system" | string
 		leaseDuration?: *"60s" | #Duration

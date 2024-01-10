@@ -13,7 +13,14 @@ import (
 	#deployment_meta:      timoniv1.#MetaComponent
 	#deployment_strategy?: appsv1.#DeploymentStrategy
 
-	replicas: #main_config.caInjector.replicas
+	if #main_config.highAvailability.enabled {
+		replicas: #main_config.highAvailability.caInjectorReplicas
+	}
+
+	if !#main_config.highAvailability.enabled {
+		replicas: #main_config.caInjector.replicas
+	}
+
 	selector: matchLabels: #deployment_meta.#LabelSelector
 
 	if #deployment_strategy != _|_ {
