@@ -70,10 +70,11 @@ jobs:
       - name: Create Certificate
         run: |
           kubectl apply -f test/data/certificate.yaml
+          echo "Sleeping for 5 seconds"
+          sleep 5
           kubectl describe -f test/data/certificate.yaml
-          sleep 3
           READY=$(kubectl -n test get certificate my-selfsigned-ca -o jsonpath="{$.status.conditions[?(@.type=='Ready')].status}")
-          [ "${READ}" = "True" ]
+          [ "${READ}" = "True" ] && echo "Certificate created successfully"
       - name: Uninstall module
         run: |
           timoni -n test delete cert-manager --wait
