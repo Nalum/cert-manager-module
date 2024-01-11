@@ -72,7 +72,7 @@ jobs:
           kubectl apply -f test/data/certificate.yaml
           kubectl describe -f test/data/certificate.yaml
           sleep 3
-          READY=$(kubectl -n cert-manager get certificate my-selfsigned-ca -o jsonpath="{$.status.conditions[?(@.type=='Ready')].status}")
+          READY=$(kubectl -n test get certificate my-selfsigned-ca -o jsonpath="{$.status.conditions[?(@.type=='Ready')].status}")
           [ "${READ}" = "True" ]
       - name: Uninstall module
         run: |
