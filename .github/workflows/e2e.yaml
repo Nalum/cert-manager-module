@@ -37,6 +37,7 @@ jobs:
           version: v0.20.0
           node_image: kindest/node:v${{ matrix.version }}
           cluster_name: kind
+          kubectl_version: v${{ matrix.version }}
       - name: Setup Timoni
         uses: stefanprodan/timoni/actions/setup@main
       - name: Push module
@@ -62,6 +63,17 @@ jobs:
       - name: Status module
         run: |
           timoni -n test status cert-manager
+      - name: Create ClusterIssuer
+        run: |
+          kubectl apply -f test/data/clusterIssuer.yaml
+          kubectl describe -f test/data/clusterIssuer.yaml
+      - name: Create Certificate
+        run: |
+          kubectl apply -f test/data/certificate.yaml
+          kubectl describe -f test/data/certificate.yaml
+          sleep 3
+          READY=$(kubectl -n cert-manager get certificate my-selfsigned-ca -o jsonpath="{$.status.conditions[?(@.type=='Ready')].status}")
+          [ "${READ}" = "True" ]
       - name: Uninstall module
         run: |
           timoni -n test delete cert-manager --wait
