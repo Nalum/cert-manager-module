@@ -74,7 +74,7 @@ jobs:
           sleep 5
           kubectl describe -f test/data/certificate.yaml
           READY=$(kubectl -n test get certificate my-selfsigned-ca -o jsonpath="{$.status.conditions[?(@.type=='Ready')].status}")
-          [ "${READ}" = "True" ] && echo "Certificate created successfully"
+          [ "${READY}" = "True" ] && echo "Certificate created successfully"
       - name: Uninstall module
         run: |
           timoni -n test delete cert-manager --wait
