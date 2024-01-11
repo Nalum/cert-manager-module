@@ -70,8 +70,8 @@ jobs:
       - name: Create Certificate
         run: |
           kubectl apply -f test/data/certificate.yaml
-          echo "Sleeping for 5 seconds"
-          sleep 5
+          echo "Sleeping for 30 seconds"
+          sleep 30
           kubectl describe -f test/data/certificate.yaml
           READY=$(kubectl -n test get certificate my-selfsigned-ca -o jsonpath="{$.status.conditions[?(@.type=='Ready')].status}")
           [ "${READY}" = "True" ] && echo "Certificate created successfully"
