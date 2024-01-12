@@ -42,7 +42,7 @@ jobs:
         uses: stefanprodan/timoni/actions/setup@main
       - name: Push module
         run: |
-          timoni mod push ./modules/cert-manager oci://localhost:5000/cert-manager -v 1.0.0 --latest
+          timoni mod push ./ oci://localhost:5000/cert-manager -v 1.0.0 --latest
       - name: Install module
         run: |
           timoni -n test apply cert-manager oci://localhost:5000/cert-manager
@@ -54,7 +54,7 @@ jobs:
           echo 'values: logLevel: 6' | timoni -n test apply cert-manager oci://localhost:5000/cert-manager -v 1.0.0 -f-
       - name: Upgrade module with debug values
         run: |
-          timoni -n test apply cert-manager oci://localhost:5000/cert-manager -f ./modules/cert-manager/debug_values.cue
+          timoni -n test apply cert-manager oci://localhost:5000/cert-manager -f ./debug_values.cue
       - name: Inspect module
         run: |
           timoni -n test inspect resources cert-manager

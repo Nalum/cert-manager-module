@@ -29,7 +29,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Push cert-manager module
         run: |
-          timoni mod push ./modules/cert-manager oci://ghcr.io/nalum/timoni/cert-manager \
+          timoni mod push ./ oci://ghcr.io/nalum/timoni/modules/cert-manager \
           -v ${GITHUB_REF_NAME#v} --latest \
           -a 'org.opencontainers.image.licenses=Apache-2.0' \
           -a 'org.opencontainers.image.source=https://github.com/nalum/cert-manager-module'  \

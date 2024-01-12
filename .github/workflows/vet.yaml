@@ -19,7 +19,7 @@ jobs:
       uses: stefanprodan/timoni/actions/setup@main
     - name: Vet Module
       run: |
-        timoni mod vet --namespace cert-manager --name cert-manager ./modules/cert-manager
+        timoni mod vet --namespace cert-manager --name cert-manager ./
   vet-debug-module:
     runs-on: ubuntu-latest
     steps:
@@ -29,4 +29,4 @@ jobs:
       uses: stefanprodan/timoni/actions/setup@main
     - name: Debug Vet Module
       run: |
-        timoni mod vet --debug --namespace cert-manager --name cert-manager ./modules/cert-manager
+        timoni mod vet --debug --namespace cert-manager --name cert-manager ./
