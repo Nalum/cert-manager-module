@@ -12,3 +12,8 @@ go.sum
 # CUE
 *_tool.cue
 debug_values.cue
+
+.github
+Makefile
+test
+DCO
