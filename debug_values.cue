@@ -19,6 +19,13 @@ values: {
 		monitoring: enabled:               true
 		podDisruptionBudget: minAvailable: 2
 
+		livenessProbe: {
+			initialDelaySeconds: 30
+			periodSeconds:       15
+			failureThreshold:    4
+			timeoutSeconds:      2
+		}
+
 		strategy: {
 			type: "RollingUpdate"
 			rollingUpdate: {
@@ -29,6 +36,20 @@ values: {
 
 	webhook: {
 		podDisruptionBudget: minAvailable: 2
+
+		livenessProbe: {
+			initialDelaySeconds: 30
+			periodSeconds:       15
+			failureThreshold:    4
+			timeoutSeconds:      2
+		}
+
+		readinessProbe: {
+			initialDelaySeconds: 20
+			periodSeconds:       10
+			failureThreshold:    6
+			timeoutSeconds:      2
+		}
 
 		strategy: {
 			type: "RollingUpdate"
