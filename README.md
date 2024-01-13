@@ -26,10 +26,25 @@ For example, create a file `my-values.cue` with the following content:
 ```cue
 values: {
     controller: {
-        prometheus: enabled: true
+        config: logging: format:  "json"
+        podDisruptionBudget: minAvailable: 2
+
+        monitoring: {
+            enabled: true
+            serviceMonitor: enabled: true
+        }
+
+        image: {
+            tag: "v1.12.7"
+            digest: "sha256:6425a6a27c8f9afc589202238504384300e26fa1e03f9bd55c4ca86b645316f4"
+        }
     }
 
-    test: enabled: true
+    webhook: {
+        podDisruptionBudget: minAvailable: 2
+    }
+
+    test: enabled: false
 }
 ```
 
@@ -123,26 +138,32 @@ for deploying in a non production manner the below configuration should suffice:
 values: {
     logLevel: 4
 
+    // There are two ways to setup high availability one is to set the replicas in each controller section, another is
+    // this shortcut, which defaults to the recommended settings defined here: https://cert-manager.io/docs/installation/best-practice/#high-availability
+    highAvailability: enabled: true
+    // Setting the above true will ignore controller: replicas: etc and use the below
+    // highAvailanility: controllerReplicas: 2
+    // highAvailanility: webhookReplicas:    3
+    // highAvailanility: caInjectorReplicas: 2
+
+    // By default ServiceAccount tokens are not mounted, instead a Volume and VolumeMount are setup to add the
+    // ServiceAccount token to the Pod, so here we're reversing that
     controller: automountServiceAccountToken: true
-    controller: replicas: 1
     controller: serviceAccount: automountServiceAccountToken: true
     controller: volumes: []
     controller: volumeMounts: []
 
     caInjector: automountServiceAccountToken: true
-    caInjector: replicas: 1
     caInjector: serviceAccount: automountServiceAccountToken: true
     caInjector: volumes: []
     caInjector: volumeMounts: []
 
     webhook: automountServiceAccountToken: true
-    webhook: replicas: 1
     webhook: serviceAccount: automountServiceAccountToken: true
     webhook: volumes: []
     webhook: volumeMounts: []
 
     startupAPICheck: automountServiceAccountToken: true
-    startupAPICheck: replicas: 1
     startupAPICheck: serviceAccount: automountServiceAccountToken: true
     startupAPICheck: volumes: []
     startupAPICheck: volumeMounts: []
