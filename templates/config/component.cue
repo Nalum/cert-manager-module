@@ -47,13 +47,7 @@ import (
 	}
 
 	strategy?: appsv1.#DeploymentStrategy
-	tolerations?: [...corev1.#Toleration] | [
-		{
-			key:      "node-restriction.kubernetes.io/reserved-for"
-			operator: "Equal"
-			value:    "platform"
-		},
-	]
+	tolerations?: [...corev1.#Toleration]
 	topologySpreadConstraints?: [...corev1.#TopologySpreadConstraint]
 
 	volumeMounts: [...corev1.#VolumeMount] | *[{
