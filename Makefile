@@ -22,32 +22,28 @@ tools: ## Install cue, kind, kubectl, Timoni and FLux CLIs
 .PHONY: fmt
 fmt: ## Format all CUE definitions
 	@cue fmt ./bundles/...
-	@cue fmt ./modules/cert-manager/...
+	@cue fmt ./...
 
 .PHONY: gen
 gen: ## Print the CUE generated objects
-	@cd modules/cert-manager
 	@cue cmd -t name=$(NAME) -t namespace=$(NAMESPACE) -t mv=v$(MV) -t kv=$(KV) build
 
 .PHONY: vet-debug
 vet-debug:
-	@cd modules/cert-manager
 	@timoni mod vet --debug --namespace $(NAMESPACE) --name $(NAME)
 
 .PHONY: vet
 vet:
-	@cd modules/cert-manager
 	@timoni mod vet --namespace $(NAMESPACE) --name $(NAME)
 
 .PHONY: ls
 ls: ## List the CUE generated objects
-	@cd modules/cert-manager
 	@cue cmd -t name=$(NAME) -t namespace=$(NAMESPACE) -t mv=v$(MV) -t kv=$(KV) ls
 
 .PHONY: gen-debug-files
 gen-debug-files: ## Generate resources and write to files
 	@mkdir -p output
-	@timoni -n $(NAMESPACE) build $(NAME) ./modules/cert-manager -f ./modules/cert-manager/debug_values.cue > all.yaml
+	@timoni -n $(NAMESPACE) build $(NAME) ./ -f ./debug_values.cue > all.yaml
 	@yq --yaml-output '. | select(.kind == "ClusterRole")' all.yaml > output/ClusterRole.yaml
 	@yq --yaml-output '. | select(.kind == "ClusterRoleBinding")' all.yaml > output/ClusterRoleBinding.yaml
 	@yq --yaml-output '. | select(.kind == "ConfigMap")' all.yaml > output/ConfigMap.yaml
@@ -69,7 +65,7 @@ gen-debug-files: ## Generate resources and write to files
 .PHONY: gen-files
 gen-files: ## Generate resources and write to files
 	@mkdir -p output
-	@timoni -n $(NAMESPACE) build $(NAME) ./modules/cert-manager > all.yaml
+	@timoni -n $(NAMESPACE) build $(NAME) ./ > all.yaml
 	@yq --yaml-output '. | select(.kind == "ClusterRole")' all.yaml > output/ClusterRole.yaml
 	@yq --yaml-output '. | select(.kind == "ClusterRoleBinding")' all.yaml > output/ClusterRoleBinding.yaml
 	@yq --yaml-output '. | select(.kind == "ConfigMap")' all.yaml > output/ConfigMap.yaml
@@ -90,7 +86,7 @@ gen-files: ## Generate resources and write to files
 
 .PHONY: import-crds
 import-crds: ## Update Cert-Manager API CUE definitions
-	@cd modules/cert-manager/templates
+	@cd ./templates
 	@curl -OLJ https://github.com/cert-manager/cert-manager/releases/download/v$(CERT_MANAGER_VERSION)/cert-manager.crds.yaml
 	@yq --yaml-output 'del(.metadata.labels["app.kubernetes.io/name"], .metadata.labels["app.kubernetes.io/instance"], .metadata.labels["app.kubernetes.io/version"])' cert-manager.crds.yaml > crds.yaml
 	@cue import -f -o crds.cue -l 'strings.ToLower(kind)' -l 'metadata.name' -p templates crds.yaml
