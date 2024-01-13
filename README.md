@@ -15,7 +15,7 @@ A [timoni.sh](http://timoni.sh) module for deploying cert-manager to Kubernetes 
 To create an instance using the default values:
 
 ```shell
-timoni -n cert-manager apply cert-manager oci://ghcr.io/nalum/timoni/cert-manager
+timoni -n cert-manager apply cert-manager oci://ghcr.io/nalum/timoni/modules/cert-manager
 ```
 
 To change the [default configuration](#configuration),
@@ -52,7 +52,7 @@ values: {
 And apply the values with:
 
 ```shell
-timoni -n cert-manager apply cert-manager oci://ghcr.io/nalum/timoni/cert-manager \
+timoni -n cert-manager apply cert-manager oci://ghcr.io/nalum/timoni/modules/cert-manager \
   --values ./my-values.cue
 ```
 
