@@ -8,7 +8,7 @@
 
 A [timoni.sh](http://timoni.sh) module for deploying cert-manager to Kubernetes clusters.
 
-[![Timoni cert-manager](https://asciinema.org/a/631206.svg)](https://asciinema.org/a/631206)
+[![Timoni cert-manager](https://asciinema.org/a/631238)](https://asciinema.org/a/631238)
 
 ## Install
 
