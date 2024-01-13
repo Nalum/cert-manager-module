@@ -25,23 +25,24 @@ For example, create a file `my-values.cue` with the following content:
 
 ```cue
 values: {
+    highAvailability: enabled: true
+
     controller: {
-        config: logging: format:  "json"
+        config: logging: format: "json"
         podDisruptionBudget: minAvailable: 2
 
         monitoring: {
             enabled: true
-            serviceMonitor: enabled: true
         }
 
         image: {
-            tag: "v1.12.7"
-            digest: "sha256:6425a6a27c8f9afc589202238504384300e26fa1e03f9bd55c4ca86b645316f4"
+            tag:    "v1.13.0"
+            digest: "sha256:2547fde4e736101abf33f8c2503f12aa3a0b42614d3d64cfecf2835c0ee81c10"
         }
     }
 
     webhook: {
-        podDisruptionBudget: minAvailable: 2
+        podDisruptionBudget: minAvailable: 3
     }
 
     test: enabled: false
@@ -52,7 +53,7 @@ And apply the values with:
 
 ```shell
 timoni -n cert-manager apply cert-manager oci://<ghcr.io/nalum/timoni/cert-manager \
---values ./my-values.cue
+  --values ./my-values.cue
 ```
 
 ## Uninstall
