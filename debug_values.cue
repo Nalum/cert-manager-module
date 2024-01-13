@@ -44,7 +44,7 @@ values: {
 			timeoutSeconds:      2
 		}
 
-		readynessProbe: {
+		readinessProbe: {
 			initialDelaySeconds: 20
 			periodSeconds:       10
 			failureThreshold:    6
