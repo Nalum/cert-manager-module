@@ -145,7 +145,7 @@ import (
 					}
 
 					if #main_config.webhook.readinessProbe != _|_ {
-						readinessProbe: #main_config.webhook.livenessProbe & {
+						readinessProbe: #main_config.webhook.readynessProbe & {
 							httpGet: {
 								port:   "healthcheck"
 								path:   "/healthz"
