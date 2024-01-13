@@ -76,7 +76,7 @@ timoni -n cert-manager delete cert-manager
 | `caInjector: config:` | `false` | `{[string]: string}` | `_\|_` | |
 | `caInjecotr: args:` | `false` | `[string]` | `_\|_` | |
 | `controller:` | `true` | `string` | `_\|_` | |
-| `controller: clusterResourceNamespace:` | `false | `string` | `_\|_` | |
+| `controller: clusterResourceNamespace:` | `false` | `string` | `_\|_` | |
 | `controller: config:` | `false` | `struct` | `_\|_` | |
 | `controller: dns01RecursiveNameservers:` | `false` | `string` | `_\|_` | |
 | `controller: dns01RecursiveNameserversOnly:` | `false` | `bool` | `false` | |
@@ -89,7 +89,7 @@ timoni -n cert-manager delete cert-manager
 | `controller: maxConcurrentChallenges:` | `false` | `int` | `60` | |
 | `controller: podDNSConfig:` | `false` | `corev1.#PodDNSConfig` | `_\|_` | |
 | `controller: podDNSPolicy:` | `false` | `string` | `ClusterFirst` | |
-| `controller: prometheus:` | `false | `struct` | `_\|_` | |
+| `controller: prometheus:` | `false` | `struct` | `_\|_` | |
 | `controller: prometheus: serviceMonitor: annotations?:` | `false` | `timoniv1.#Annotations` | `_\|_` | |
 | `controller: prometheus: serviceMonitor: endpointAdditionalProperties:` | `false` | `{[ string]: string}` | `_\|_` | |
 | `controller: prometheus: serviceMonitor: honorLabels:` | `false` | `bool` | `false` | |
@@ -164,9 +164,9 @@ values: {
     webhook: volumes: []
     webhook: volumeMounts: []
 
-    startupAPICheck: automountServiceAccountToken: true
-    startupAPICheck: serviceAccount: automountServiceAccountToken: true
-    startupAPICheck: volumes: []
-    startupAPICheck: volumeMounts: []
+    test: startupAPICheck: automountServiceAccountToken: true
+    test: startupAPICheck: serviceAccount: automountServiceAccountToken: true
+    test: startupAPICheck: volumes: []
+    test: startupAPICheck: volumeMounts: []
 }
 ```
