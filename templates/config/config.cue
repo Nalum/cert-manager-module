@@ -34,28 +34,45 @@ import (
 
 	// Setup the Cluster RBAC roles and bindings
 	rbac: {
+		// Create the roles and bindings for cert-manager
 		enabled: *true | bool
 		// Aggregate ClusterRoles to Kubernetes default user-facing roles. Ref: https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles
 		aggregateClusterRoles: *true | bool
 	}
 
 	podSecurityAdmission: {
-		mode:  "audit" | "warn" | *"enforce"
+		// Set the PodSecurity admission controller mode for the namespace
+		mode: "audit" | "warn" | *"enforce"
+		// Set the PodSecurity admission controller level for the namespace
 		level: "privileged" | "baseline" | *"restricted"
 	}
 
 	highAvailability: {
-		enabled:            *false | bool
+		// Enable high availability features
+		enabled: *false | bool
+		// Number of replicas of the cert-manager controller to run
 		controllerReplicas: *2 | int
-		webhookReplicas:    *3 | int
+		// Number of replicas of the cert-manager webhook to run
+		webhookReplicas: *3 | int
+		// Number of replicas of the cert-manager caInjector to run
 		caInjectorReplicas: *2 | int
 	}
 
 	leaderElection: {
-		namespace:      *"kube-system" | string
+		// Override the namespace used for the leader election lease
+		namespace: *"kube-system" | string
+		// The duration that non-leader candidates will wait after observing a
+		// leadership renewal until attempting to acquire leadership of a led but
+		// unrenewed leader slot. This is effectively the maximum duration that a
+		// leader can be stopped before it is replaced by another candidate.
 		leaseDuration?: *"60s" | #Duration
+		// The interval between attempts by the acting master to renew a leadership
+		// slot before it stops leading. This must be less than or equal to the
+		// lease duration.
 		renewDeadline?: *"40s" | #Duration
-		retryPeriod?:   *"15s" | #Duration
+		// The duration the clients should wait between attempting acquisition and
+		// renewal of a leadership.
+		retryPeriod?: *"15s" | #Duration
 	}
 
 	controller: #Controller
@@ -64,6 +81,7 @@ import (
 	acmeSolver: #ACMESolver
 
 	test: {
+		// Enable startupAPICheck to verify the cert-manager API is available
 		enabled:         *true | bool
 		startupAPICheck: #StartupAPICheck
 	}
@@ -73,8 +91,10 @@ import (
 #Percent:  string & =~"^(100|[1-9][0-9]?)%$"
 
 #Monitoring: {
+	// Enable Prometheus monitoring
 	enabled: *false | bool
 	serviceMonitor: {
+		// Enable Prometheus ServiceMonitor monitoring instead of the prometheus shim
 		enabled:            *false | bool
 		prometheusInstance: *"default" | string
 		targetPort:         *"http-metrics" | int | string
@@ -89,9 +109,12 @@ import (
 }
 
 #Proxy: {
-	httpProxy!:  string
+	// What domains should be proxied through the http proxy
+	httpProxy!: string
+	// What domains should be proxied through the https proxy
 	httpsProxy!: string
-	noProxy!:    string
+	// What domains should not be proxied
+	noProxy!: string
 }
 
 #SecurityContext: {
