@@ -13,14 +13,6 @@ import (
 	#deployment_meta:      timoniv1.#MetaComponent
 	#deployment_strategy?: appsv1.#DeploymentStrategy
 
-	if #main_config.highAvailability.enabled {
-		replicas: #main_config.highAvailability.webhookReplicas
-	}
-
-	if !#main_config.highAvailability.enabled {
-		replicas: #main_config.webhook.replicas
-	}
-
 	selector: matchLabels: #deployment_meta.#LabelSelector
 
 	if #deployment_strategy != _|_ {
@@ -28,28 +20,8 @@ import (
 	}
 
 	template: corev1.#PodTemplateSpec & {
-		metadata: labels: #deployment_meta.labels
-
-		if #main_config.webhook.podLabels != _|_ {
-			metadata: labels: #main_config.webhook.podLabels
-		}
-
-		if #main_config.webhook.podAnnotations != _|_ {
-			metadata: annotations: #main_config.webhook.podAnnotations
-		}
 
 		spec: corev1.#PodSpec & {
-			enableServiceLinks: #main_config.webhook.enableServiceLinks
-			securityContext:    #main_config.webhook.securityContext
-			serviceAccountName: #deployment_meta.name
-
-			if #main_config.webhook.automountServiceAccountToken != _|_ {
-				automountServiceAccountToken: #main_config.webhook.automountServiceAccountToken
-			}
-
-			if #main_config.priorityClass != _|_ {
-				priorityClassName: #main_config.priorityClass
-			}
 
 			if #main_config.webhook.hostNetwork != false {
 				hostNetwork: true
@@ -58,11 +30,6 @@ import (
 
 			containers: [...corev1.#Container] & [
 				{
-					name: #deployment_meta.name
-
-					image:           #main_config.webhook.image.reference
-					imagePullPolicy: #main_config.webhook.image.pullPolicy
-
 					args: [
 						"--v=\(#main_config.logLevel)",
 
@@ -159,25 +126,6 @@ import (
 						}
 					}
 
-					if #main_config.webhook.containerSecurityContext != _|_ {
-						securityContext: #main_config.webhook.containerSecurityContext
-					}
-
-					env: [
-						{
-							name: "POD_NAMESPACE"
-							valueFrom: fieldRef: fieldPath: "metadata.namespace"
-						},
-
-						if #main_config.webhook.extraEnvs != _|_ {
-							for e in #main_config.webhook.extraEnvs {e}
-						},
-					]
-
-					if #main_config.webhook.resources != _|_ {
-						resources: #main_config.webhook.resources
-					}
-
 					if #main_config.webhook.volumeMounts != _|_ || #main_config.webhook.config != _|_ {
 						volumeMounts: [
 							if #main_config.webhook.config != _|_ {
@@ -193,22 +141,6 @@ import (
 					}
 				},
 			]
-
-			if #main_config.webhook.nodeSelector != _|_ {
-				nodeSelector: #main_config.webhook.nodeSelector
-			}
-
-			if #main_config.webhook.affinity != _|_ {
-				affinity: #main_config.webhook.affinity
-			}
-
-			if #main_config.webhook.tolerations != _|_ {
-				tolerations: #main_config.webhook.tolerations
-			}
-
-			if #main_config.webhook.topologySpreadConstraints != _|_ {
-				topologySpreadConstraints: #main_config.webhook.topologySpreadConstraints
-			}
 
 			if #main_config.webhook.volumes != _|_ || #main_config.webhook.config != _|_ {
 				volumes: [

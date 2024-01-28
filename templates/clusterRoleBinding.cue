@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"strings"
 	rbacv1 "k8s.io/api/rbac/v1"
 	timoniv1 "timoni.sh/core/v1alpha1"
 
@@ -14,7 +15,7 @@ import (
 
 	#meta: timoniv1.#MetaComponent & {
 		#Meta:      #config.metadata
-		#Component: #component
+		#Component: strings.ToLower(#component)
 	}
 
 	apiVersion: "rbac.authorization.k8s.io/v1"

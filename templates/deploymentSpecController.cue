@@ -14,14 +14,6 @@ import (
 	#deployment_strategy?:   appsv1.#DeploymentStrategy
 	#deployment_monitoring?: cfg.#Monitoring
 
-	if #main_config.highAvailability.enabled {
-		replicas: #main_config.highAvailability.controllerReplicas
-	}
-
-	if !#main_config.highAvailability.enabled {
-		replicas: #main_config.controller.replicas
-	}
-
 	selector: matchLabels: #deployment_meta.#LabelSelector
 
 	if #deployment_strategy != _|_ {
@@ -29,15 +21,6 @@ import (
 	}
 
 	template: corev1.#PodTemplateSpec & {
-		metadata: labels: #deployment_meta.labels
-
-		if #main_config.controller.podLabels != _|_ {
-			metadata: labels: #main_config.controller.podLabels
-		}
-
-		if #main_config.controller.podAnnotations != _|_ {
-			metadata: annotations: #main_config.controller.podAnnotations
-		}
 
 		if #deployment_monitoring != _|_ && #deployment_monitoring.serviceMonitor == _|_ {
 			metadata: annotations: "prometheus.io/path":   "/metrics"
@@ -46,21 +29,6 @@ import (
 		}
 
 		spec: corev1.#PodSpec & {
-			serviceAccountName: #deployment_meta.name
-
-			if #main_config.controller.automountServiceAccountToken != _|_ {
-				automountServiceAccountToken: #main_config.controller.automountServiceAccountToken
-			}
-
-			if #main_config.controller.enableServiceLinks != _|_ {
-				enableServiceLinks: #main_config.controller.enableServiceLinks
-			}
-
-			if #main_config.priorityClass != _|_ {
-				priorityClassName: #main_config.priorityClass
-			}
-
-			securityContext: #main_config.controller.securityContext
 
 			if #main_config.controller.volumes != _|_ || #main_config.controller.config != _|_ {
 				volumes: [
@@ -80,14 +48,6 @@ import (
 
 			containers: [...corev1.#Container] & [
 				{
-					name: #deployment_meta.name
-
-					image:           #main_config.controller.image.reference
-					imagePullPolicy: #main_config.controller.image.pullPolicy
-
-					if #main_config.controller.containerSecurityContext != _|_ {
-						securityContext: #main_config.controller.containerSecurityContext
-					}
 
 					if #main_config.controller.volumeMounts != _|_ || #main_config.controller.config != _|_ {
 						volumeMounts: [
@@ -177,17 +137,6 @@ import (
 						},
 					]
 
-					env: [
-						{
-							name: "POD_NAMESPACE"
-							valueFrom: fieldRef: fieldPath: "metadata.namespace"
-						},
-
-						if #main_config.controller.extraEnvs != _|_ {
-							for e in #main_config.controller.extraEnvs {e}
-						},
-					]
-
 					if #main_config.controller.proxy != _|_ {
 						env: [
 							if #main_config.controller.proxy.httpProxy != _|_ {
@@ -211,10 +160,6 @@ import (
 						]
 					}
 
-					if #main_config.controller.resources != _|_ {
-						resources: #main_config.controller.resources
-					}
-
 					if #main_config.controller.livenessProbe != _|_ {
 						livenessProbe: #main_config.controller.livenessProbe & {
 							httpGet: {
@@ -231,30 +176,6 @@ import (
 					}
 				},
 			]
-
-			if #main_config.controller.nodeSelector != _|_ {
-				nodeSelector: #main_config.controller.nodeSelector
-			}
-
-			if #main_config.controller.affinity != _|_ {
-				affinity: #main_config.controller.affinity
-			}
-
-			if #main_config.controller.tolerations != _|_ {
-				tolerations: #main_config.controller.tolerations
-			}
-
-			if #main_config.controller.topologySpreadConstraints != _|_ {
-				topologySpreadConstraints: #main_config.controller.topologySpreadConstraints
-			}
-
-			if #main_config.controller.podDNSPolicy != _|_ {
-				dnsPolicy: #main_config.controller.podDNSPolicy
-			}
-
-			if #main_config.controller.podDNSConfig != _|_ {
-				dnsConfig: #main_config.controller.podDNSConfig
-			}
 		}
 	}
 }

@@ -20,64 +20,42 @@ import (
 
 	objects: {
 		namespace: #Namespace & {#config: config}
-		controllerDeployment: #Deployment & {
-			#config:     config
-			#component:  "controller"
-			#strategy:   #config.controller.strategy
-			#monitoring: #config.controller.monitoring
-		}
-		webhookDeployment: #Deployment & {
-			#config:    config
-			#component: "webhook"
-			#strategy:  #config.webhook.strategy
-		}
+		controllerDeployment: #ControllerDeployment & {#config: config}
+		webhookDeployment: #WebhookDeployment & {#config: config}
 		webhookMutatingWebhook: #MutatingWebhook & {#config: config}
 		webhookValidatingWebhook: #ValidatingWebhook & {#config: config}
-		webhookService: #Service & {
-			#config:    config
-			#component: "webhook"
-		}
+		webhookService: #ServiceWebhook & {#config: config}
 	}
 
 	if config.caInjector != _|_ {
 		if config.caInjector.podDisruptionBudget.enabled {
 			objects: caInjectorPodDisruptionBudget: #PodDisruptionBudget & {
 				#config:    config
-				#component: "cainjector"
+				#component: "caInjector"
 			}
 		}
 
 		if config.rbac.enabled {
 			objects: {
-				caInjectorClusterRole: #ClusterRole & {
+				caInjectorClusterRole: #CaInjectorClusterRole & {
 					#config:    config
-					#component: "cainjector"
+					#component: "caInjector"
 				}
 				caInjectorClusterRoleBinding: #ClusterRoleBinding & {
 					#config:    config
-					#component: "cainjector"
+					#component: "caInjector"
 				}
-				caInjectorRole: #Role & {
-					#config:    config
-					#component: "cainjector"
-				}
-				caInjectorRoleBinding: #RoleBinding & {
-					#config:    config
-					#component: "cainjector"
-				}
+				caInjectorRole: #CaInjectorRole & {#config: config}
+				caInjectorRoleBinding: #CaInjectorRoleBinding & {#config: config}
 			}
 		}
 
 		objects: caInjectorServiceAccount: #ServiceAccount & {
 			#config:    config
-			#component: "cainjector"
+			#component: "caInjector"
 		}
 
-		objects: caInjectorDeployment: #Deployment & {
-			#config:    config
-			#component: "cainjector"
-			#strategy:  #config.caInjector.strategy
-		}
+		objects: caInjectorDeployment: #CaInjectorrDeployment & {#config: config}
 	}
 
 	if config.controller.config != _|_ {
@@ -93,10 +71,11 @@ import (
 				#config:    config
 				#component: "webhook"
 			}
-			webhookNetworkPolicyIngress: #NetworkPolicyAllowIngress & {
-				#config:    config
-				#component: "webhook"
-			}
+			webhookNetworkPolicyIngress:
+				#NetworkPolicyAllowIngress & {
+					#config:    config
+					#component: "webhook"
+				}
 		}
 	}
 
@@ -109,90 +88,24 @@ import (
 
 	if config.rbac.enabled {
 		objects: {
-			controllerRole: #Role & {
-				#config:    config
-				#component: "controller"
-			}
-			controllerRoleBinding: #RoleBinding & {
-				#config:    config
-				#component: "controller"
-			}
+			controllerRole: #ControllerRole & {#config: config}
+			controllerRoleBinding: #ControllerRoleBinding & {#config: config}
 
 			if config.rbac.aggregateClusterRoles {
-				controllerClusterViewClusterRole: #ClusterRole & {
-					#config:    config
-					#component: "controller"
-					#role:      "cluster-view"
-					#aggregate: config.rbac.aggregateClusterRoles == true
-					#aggregateTo: {
-						reader: true
-					}
+				controllerClusterViewClusterRole: #ControllerClusterViewClusterRole & {
+					#config: config
 				}
 			}
-
-			controllerViewClusterRole: #ClusterRole & {
-				#config:    config
-				#component: "controller"
-				#role:      "view"
-				#aggregate: config.rbac.aggregateClusterRoles == true
-				#aggregateTo: {
-					reader: true
-					view:   true
-					edit:   true
-					admin:  true
-				}
-			}
-			controllerEditClusterRole: #ClusterRole & {
-				#config:    config
-				#component: "controller"
-				#role:      "edit"
-				#aggregate: config.rbac.aggregateClusterRoles == true
-				#aggregateTo: {
-					edit:  true
-					admin: true
-				}
-			}
-
-			controllerIssuersClusterRole: #ClusterRole & {
-				#config:    config
-				#component: "controller"
-				#role:      "issuers"
-			}
-			controllerClusterIssuersClusterRole: #ClusterRole & {
-				#config:    config
-				#component: "controller"
-				#role:      "clusterissuers"
-			}
-			controllerCertificatesClusterRole: #ClusterRole & {
-				#config:    config
-				#component: "controller"
-				#role:      "certificates"
-			}
-			controllerOrdersClusterRole: #ClusterRole & {
-				#config:    config
-				#component: "controller"
-				#role:      "orders"
-			}
-			controllerChallengesClusterRole: #ClusterRole & {
-				#config:    config
-				#component: "controller"
-				#role:      "challenges"
-			}
-			controllerIngressShimClusterRole: #ClusterRole & {
-				#config:    config
-				#component: "controller"
-				#role:      "ingress-shim"
-			}
-			controllerApproveClusterRole: #ClusterRole & {
-				#config:    config
-				#component: "controller"
-				#role:      "approve:cert-manager-io"
-			}
-			controllerCertificateSigningRequestsClusterRole: #ClusterRole & {
-				#config:    config
-				#component: "controller"
-				#role:      "certificatesigningrequests"
-			}
+			controllerViewClusterRole: #ControllerViewClusterRole & {#config: config}
+			controllerEditClusterRole: #ControllerEditClusterRole & {#config: config}
+			controllerIssuersClusterRole: #ControllerIssuersClusterRole & {#config: config}
+			controllerClusterIssuersClusterRole: #ControllerClusterIssuersClusterRole & {#config: config}
+			controllerCertificatesClusterRole: #ControllerCertificatesClusterRole & {#config: config}
+			controllerOrdersClusterRole: #ControllerOrdersClusterRole & {#config: config}
+			controllerChallengesClusterRole: #ControllerChallengesClusterRole & {#config: config}
+			controllerIngressShimClusterRole: #ControllerIngressShimClusterRole & {#config: config}
+			controllerApproveClusterRole: #ControllerApproveClusterRole & {#config: config}
+			controllerCertificateSigningRequestsClusterRole: #ControllerCertificateSigningRequestsClusterRole & {#config: config}
 
 			controllerIssuersClusterRoleBinding: #ClusterRoleBinding & {
 				#config:    config
@@ -235,19 +148,9 @@ import (
 				#role:      "certificatesigningrequests"
 			}
 
-			webhookRole: #Role & {
-				#config:    config
-				#component: "webhook"
-			}
-			webhookRoleBinding: #RoleBinding & {
-				#config:    config
-				#component: "webhook"
-			}
-			webhookClusterRole: #ClusterRole & {
-				#config:    config
-				#component: "webhook"
-				#role:      "subjectaccessreviews"
-			}
+			webhookRole: #WebhookRole & {#config: config}
+			webhookRoleBinding: #WebhookRoleBinding & {#config: config}
+			webhookClusterRole: #ClusterWebhookClusterRole & {#config: config}
 			webhookClusterRoleBinding: #ClusterRoleBinding & {
 				#config:    config
 				#component: "webhook"
@@ -258,10 +161,7 @@ import (
 
 	if config.controller.monitoring.enabled && config.controller.monitoring.serviceMonitor.enabled {
 		objects: {
-			service: #Service & {
-				#config:    config
-				#component: "controller"
-			}
+			service: #ServiceController & {#config: config}
 			serviceMonitor: #ServiceMonitor & {
 				#config:    config
 				#component: "controller"
@@ -298,20 +198,14 @@ import (
 
 		if config.rbac.enabled {
 			tests: {
-				startupAPICheckRole: #Role & {
-					#config:    config
-					#component: "startupapicheck"
-				}
-				startupAPICheckRoleBinding: #RoleBinding & {
-					#config:    config
-					#component: "startupapicheck"
-				}
+				startupAPICheckRole: #StartupApiCheckRole & {#config: config}
+				startupAPICheckRoleBinding: #StartupApiCheckRoleBinding & {#config: config}
 			}
 		}
 
 		tests: startupAPICheckServiceAccount: #ServiceAccount & {
 			#config:    config
-			#component: "startupapicheck"
+			#component: "startupAPICheck"
 		}
 	}
 }
