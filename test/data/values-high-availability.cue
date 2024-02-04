@@ -1,0 +1,1 @@
+values: highAvailability: enabled: true
