@@ -148,6 +148,7 @@ import (
 	extraArgs: [...string] | *[
 		"-v",
 	]
+	podDisruptionBudget: enabled: false
 	// is the number of retries before considering a Job as failed.
 	backoffLimit: *4 | int
 	// is a map of annotations to add to the job.

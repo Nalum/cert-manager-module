@@ -79,10 +79,24 @@ import (
 		monitoring: #Monitoring & {
 			namespace: *metadata.namespace | string
 		}
+		if highAvailability.enabled {
+			replicas: *2 | uint16 & >2
+		}
+		podDisruptionBudget: enabled: *highAvailability.enabled | bool
+	}
+	webhook: #Webhook & {
+		if highAvailability.enabled {
+			replicas: *3 | uint16 & >3
+		}
+		podDisruptionBudget: enabled: *highAvailability.enabled | bool
+	}
+	caInjector: #CAInjector & {
+		if highAvailability.enabled {
+			replicas: *2 | uint16 & >2
+		}
+		podDisruptionBudget: enabled: *highAvailability.enabled | bool
 	}
 
-	webhook:    #Webhook
-	caInjector: #CAInjector
 	acmeSolver: #ACMESolver
 
 	test: {
@@ -159,7 +173,7 @@ import (
 }
 
 #PodDisruptionBudgetData: {
-	enabled:         *true | false
+	enabled:         bool
 	minAvailable?:   int | #Percent
 	maxUnavailable?: int | #Percent
 }
