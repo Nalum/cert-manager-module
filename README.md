@@ -2,13 +2,18 @@
 
 [![cert-manager](https://img.shields.io/badge/cert--manager-v1.13.3-00bfff)](https://cert-manager.io)
 [![timoni.sh](https://img.shields.io/badge/timoni.sh-v0.19.0-7e56c2)](https://timoni.sh)
-[![kubernetes](https://img.shields.io/badge/kubernetes-v1.29.0-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io)
 [![License](https://img.shields.io/github/license/nalum/cert-manager-module)](https://github.com/nalum/cert-manager-module/blob/main/LICENSE)
 [![Release](https://img.shields.io/github/v/release/nalum/cert-manager-module)](https://github.com/nalum/cert-manager-module/releases)
 
 A [timoni.sh](http://timoni.sh) module for deploying cert-manager to Kubernetes clusters.
 
 [![Timoni cert-manager](https://asciinema.org/a/631238.svg)](https://asciinema.org/a/631238)
+
+This module is applied to these Kubernetes version in CI:
+
+- [![kubernetes](https://img.shields.io/badge/kubernetes-v1.27.10-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io)
+- [![kubernetes](https://img.shields.io/badge/kubernetes-v1.28.6-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io)
+- [![kubernetes](https://img.shields.io/badge/kubernetes-v1.29.1-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io)
 
 ## Install
 

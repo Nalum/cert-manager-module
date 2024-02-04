@@ -17,9 +17,9 @@ import (
 	dns01RecursiveNameservers?: string
 	// Forces cert-manager to only use the recursive nameservers for verification.
 	// Enabling this option could cause the DNS01 self check to take longer due to caching performed by the recursive nameservers
-	dns01RecursiveNameserversOnly?: *false | bool
+	dns01RecursiveNameserversOnly: *false | bool
 	// When this flag is enabled, secrets will be automatically removed when the certificate resource is deleted
-	enableCertificateOwnerRef?: *false | bool
+	enableCertificateOwnerRef: *false | bool
 	// Comma separated list of feature gates that should be enabled on the controller pod.
 	featureGates?: string
 	// The maximum number of challenges that can be scheduled as 'processing' at once

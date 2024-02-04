@@ -14,8 +14,6 @@ import (
 	#meta:      timoniv1.#MetaComponent
 	#component: string
 
-	#monitoring?: #config[#component].monitoring
-
 	if #config[#component].deploymentLabels != _|_ {
 		metadata: labels: #config[#component].deploymentLabels
 	}
@@ -29,7 +27,6 @@ import (
 	metadata:   #meta
 
 	spec: appsv1.#DeploymentSpec & {
-
 		selector: matchLabels: #meta.#LabelSelector
 
 		if #config.highAvailability.enabled {
@@ -39,6 +36,7 @@ import (
 		if !#config.highAvailability.enabled {
 			replicas: #config[#component].replicas
 		}
+
 		if #config[#component].strategy != _|_ {
 			strategy: appsv1.#DeploymentStrategy & #config[#component].strategy
 		}
@@ -55,20 +53,17 @@ import (
 			}
 
 			spec: corev1.#PodSpec & {
-
 				containers: [...corev1.#Container] & [
 					{
 						name:            #meta.name
 						image:           #config[#component].image.reference
 						imagePullPolicy: #config[#component].image.pullPolicy
-
-						if #config[#component].containerSecurityContext != _|_ {
-							securityContext: #config[#component].containerSecurityContext
-						}
+						securityContext: #config[#component].containerSecurityContext
 
 						if #config[#component].resources != _|_ {
 							resources: #config[#component].resources
 						}
+
 						env: [
 							{
 								name: "POD_NAMESPACE"
@@ -79,24 +74,19 @@ import (
 								for e in #config[#component].extraEnvs {e}
 							},
 						]
-					}]
-				serviceAccountName: #meta.name
-				securityContext:    #config[#component].securityContext
+					},
+				]
+				serviceAccountName:           #meta.name
+				securityContext:              #config[#component].securityContext
+				nodeSelector:                 #config[#component].nodeSelector
+				automountServiceAccountToken: #config[#component].automountServiceAccountToken
 
-				if #config[#component].automountServiceAccountToken != _|_ {
-					automountServiceAccountToken: #config[#component].automountServiceAccountToken
-				}
-
-				if #config[#component].enableServiceLinks != _|_ {
+				if #config[#component].enableServiceLinks {
 					enableServiceLinks: #config[#component].enableServiceLinks
 				}
 
-				if #config.priorityClass != _|_ {
-					priorityClassName: #config.priorityClass
-				}
-
-				if #config[#component].nodeSelector != _|_ {
-					nodeSelector: #config[#component].nodeSelector
+				if #config.priorityClassName != _|_ {
+					priorityClassName: #config.priorityClassName
 				}
 
 				if #config[#component].affinity != _|_ {
@@ -110,18 +100,9 @@ import (
 				if #config[#component].topologySpreadConstraints != _|_ {
 					topologySpreadConstraints: #config[#component].topologySpreadConstraints
 				}
-
-				if #config[#component].podDNSPolicy != _|_ {
-					dnsPolicy: #config[#component].podDNSPolicy
-				}
-
-				if #config[#component].podDNSConfig != _|_ {
-					dnsConfig: #config[#component].podDNSConfig
-				}
 			}
 		}
 	}
-
 }
 
 #ControllerDeployment: #Deployment & {
@@ -132,21 +113,25 @@ import (
 		#Meta:      #config.metadata
 		#Component: strings.ToLower(#component)
 	}
+
 	spec: #ControllerDeploymentSpec & {
-		#config:          #config
-		#deployment_meta: #meta
+		#main_config:            #config
+		#deployment_meta:        #meta
+		#deployment_monitoring?: #config.controller.monitoring
 	}
 }
 
 #WebhookDeployment: #Deployment & {
 	#config:    cfg.#Config
 	#component: "webhook"
+
 	#meta: timoniv1.#MetaComponent & {
 		#Meta:      #config.metadata
 		#Component: strings.ToLower(#component)
 	}
+
 	spec: #WebhookDeploymentSpec & {
-		#config:          #config
+		#main_config:     #config
 		#deployment_meta: #meta
 	}
 }
@@ -154,12 +139,14 @@ import (
 #CaInjectorrDeployment: #Deployment & {
 	#config:    cfg.#Config
 	#component: "caInjector"
+
 	#meta: timoniv1.#MetaComponent & {
 		#Meta:      #config.metadata
 		#Component: strings.ToLower(#component)
 	}
+
 	spec: #CAInjectorDeploymentSpec & {
-		#config:          #config
+		#main_config:     #config
 		#deployment_meta: #meta
 	}
 }
