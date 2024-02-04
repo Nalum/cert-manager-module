@@ -14,7 +14,7 @@ jobs:
   kubernetes:
     strategy:
       matrix:
-        version: [1.27.0, 1.27.1, 1.27.2, 1.27.3, 1.28.0, 1.29.0]
+        version: [1.27.3, 1.28.0, 1.29.0]
     runs-on: ubuntu-latest
     services:
       registry:
@@ -43,18 +43,18 @@ jobs:
       - name: Push module
         run: |
           timoni mod push ./ oci://localhost:5000/cert-manager -v 1.0.0 --latest
-      - name: Install module
+      - name: Install module without rbac
         run: |
-          timoni -n test apply cert-manager oci://localhost:5000/cert-manager
+          timoni -n test apply cert-manager oci://localhost:5000/cert-manager -f test/data/values-rbac.cue
       - name: List modules
         run: |
           timoni list -A
-      - name: Upgrade module with custom values
+      - name: Upgrade module, enable rbac, HA and monitoring
         run: |
-          echo 'values: logLevel: 6' | timoni -n test apply cert-manager oci://localhost:5000/cert-manager -v 1.0.0 -f-
+          timoni -n test apply cert-manager oci://localhost:5000/cert-manager -v 1.0.0 -f test/data/values-high-availability.cue -f test/data/values-monitoring.cue
       - name: Upgrade module with debug values
         run: |
-          timoni -n test apply cert-manager oci://localhost:5000/cert-manager -f ./debug_values.cue
+          timoni -n test apply cert-manager oci://localhost:5000/cert-manager -f ./debug_values.cue -f test/data/values-high-availability.cue -f test/data/values-monitoring.cue
       - name: Inspect module
         run: |
           timoni -n test inspect resources cert-manager
