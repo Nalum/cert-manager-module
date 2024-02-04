@@ -1,6 +1,7 @@
 package templates
 
 import (
+	"strings"
 	corev1 "k8s.io/api/core/v1"
 	timoniv1 "timoni.sh/core/v1alpha1"
 
@@ -13,69 +14,56 @@ import (
 
 	#meta: timoniv1.#MetaComponent & {
 		#Meta:      #config.metadata
-		#Component: #component
+		#Component: strings.ToLower(#component)
 	}
 
 	apiVersion: "v1"
 	kind:       "Service"
 	metadata:   #meta
 
-	if #component == "controller" {
-		if #config.controller.serviceLabels != _|_ {
-			metadata: labels: #config.controller.service.labels
-		}
-		if #config.controller.serviceAnnotations != _|_ {
-			metadata: annotations: #config.controller.service.annotations
-		}
-		spec: #ServiceSpecController & {
-			#main_config:  #config
-			#service_meta: #meta
-		}
+	if #config[#component].serviceLabels != _|_ {
+		metadata: labels: #config[#component].service.labels
+	}
+	if #config[#component].serviceAnnotations != _|_ {
+		metadata: annotations: #config[#component].service.annotations
 	}
 
-	if #component == "webhook" {
-		if #config.webhook.serviceLabels != _|_ {
-			metadata: labels: #config.webhook.service.labels
-		}
-		if #config.webhook.serviceAnnotations != _|_ {
-			metadata: annotations: #config.webhook.service.annotations
-		}
-		spec: #ServiceSpecWebhook & {
-			#main_config:  #config
-			#service_meta: #meta
-		}
+	spec: {
+		selector: #meta.#LabelSelector
 	}
 }
 
-#ServiceSpecController: {
-	#main_config:  cfg.#Config
-	#service_meta: timoniv1.#MetaComponent
+#ServiceController: #Service & {
+	#config:    cfg.#Config
+	#component: "controller"
 
-	type: "ClusterIP"
-	ports: [{
-		protocol:   "TCP"
-		port:       9402
-		name:       "tcp-prometheus-servicemonitor"
-		targetPort: #main_config.controller.monitoring.serviceMonitor.targetPort
-	}]
-	selector: #service_meta.#LabelSelector
+	spec: {
+		type: "ClusterIP"
+		ports: [{
+			protocol:   "TCP"
+			port:       9402
+			name:       "tcp-prometheus-servicemonitor"
+			targetPort: #config[#component].monitoring.serviceMonitor.targetPort
+		}]
+	}
 }
 
-#ServiceSpecWebhook: {
-	#main_config:  cfg.#Config
-	#service_meta: timoniv1.#MetaComponent
+#ServiceWebhook: #Service & {
+	#config:    cfg.#Config
+	#component: "webhook"
 
-	type: #main_config.webhook.service.type
+	spec: {
 
-	if #main_config.webhook.loadBalancerIP != _|_ {
-		loadBalancerIP: #main_config.webhook.loadBalancerIP
+		type: #config.webhook.service.type
+
+		if #config.webhook.loadBalancerIP != _|_ {
+			loadBalancerIP: #config.webhook.loadBalancerIP
+		}
+		ports: [{
+			protocol:   "TCP"
+			port:       443
+			name:       "https"
+			targetPort: "https"
+		}]
 	}
-
-	ports: [{
-		protocol:   "TCP"
-		port:       443
-		name:       "https"
-		targetPort: "https"
-	}]
-	selector: #service_meta.#LabelSelector
 }
