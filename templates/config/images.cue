@@ -1,33 +1,33 @@
 package config
 
-#AppVersion: *"v1.13.3" | string
+#AppVersion: *"v1.14.1" | string
 
 #Controller: image: {
 	repository: *"quay.io/jetstack/cert-manager-controller" | string
 	tag:        #AppVersion
-	digest:     *"sha256:2121d4250f5734ee097df243507d06536fc264140dba3425045a825ef597c79d" | string
+	digest:     *"sha256:3ef9b7e85e89a21c3727f89f6e3f4186853df8de8393e309fa9bcc9a776e69a5" | string
 }
 
 #Webhook: image: {
 	repository: *"quay.io/jetstack/cert-manager-webhook" | string
 	tag:        #AppVersion
-	digest:     *"sha256:f45b21f770bf4676c732f19e2ef17c34f46ac75873a5e0aa25703d808b2e5566" | string
+	digest:     *"sha256:8a0a0c94a67ef1097db79c26a71a05d4cdbebbb6906a8cab21f4bd15c8ed7c3a" | string
 }
 
 #CAInjector: image: {
 	repository: *"quay.io/jetstack/cert-manager-cainjector" | string
 	tag:        #AppVersion
-	digest:     *"sha256:ac5154525f99bd0872671613741aac1b7dcb9c0df988571a7618155ddb6fabd2" | string
+	digest:     *"sha256:fac683efcd03c95ec61063a80bca257ba24544ab7b233a8574a19ec3a4e8c4aa" | string
 }
 
 #StartupAPICheck: image: {
 	repository: *"quay.io/jetstack/cert-manager-ctl" | string
 	tag:        #AppVersion
-	digest:     *"sha256:d0d12f721e01b19973c989646c96905bfca7a0ea5f7888d5e9b4adabb4fbc56c" | string
+	digest:     *"sha256:c15e970af7eb7a51d60d14ed9ea9f9eae0dfbb095a2c4811590cc6bce2d151e7" | string
 }
 
 #ACMESolver: image: {
 	repository: *"quay.io/jetstack/cert-manager-acmesolver" | string
 	tag:        #AppVersion
-	digest:     *"sha256:b1aa36468479fc5ca1a847f9e7cd1dc21978f273d9cec1d4202a632be9d26fad" | string
+	digest:     *"sha256:d31555b1727c3f1ba1de456c8f45abf32ad561c7ecfad70ac674dbd9d231e434" | string
 }

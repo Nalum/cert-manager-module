@@ -61,11 +61,8 @@ import (
 						"check",
 						"api",
 						"--wait=\(#config.test.startupAPICheck.timeout)",
+						for arg in #config.test.startupAPICheck.extraArgs {arg},
 					]
-
-					if #config.test.startupAPICheck.extraArgs != _|_ {
-						args: #config.test.startupAPICheck.extraArgs
-					}
 
 					if #config.test.startupAPICheck.resources != _|_ {
 						resources: #config.test.startupAPICheck.resources
