@@ -98,71 +98,40 @@ import (
 	// with your own ServiceMonitor (managed outside of this Helm chart).
 	// Otherwise, a ServiceMonitor/ PodMonitor is created.
 	enabled: *false | true
-	podMonitor: {
-		// Create a PodMonitor to add cert-manager to Prometheus
-		enabled: *false | true
-		// Specifies the `prometheus` label on the created PodMonitor, this is
-		// used when different Prometheus instances have label selectors matching
-		// different PodMonitor.
-		prometheusInstance: *"default" | string
-		// The path to scrape for metrics
-		path: *"/metrics" | string
-		// The interval to scrape metrics
-		interval: *"60s" | #Duration
-		// The timeout before a metrics scrape fails
-		scrapeTimeout: *"30s" | #Duration
-		// Additional labels to add to the PodMonitor
-		labels?: timoniv1.#Labels
-		// Additional annotations to add to the PodMonitor
-		annotations?: timoniv1.#Annotations
-		// Keep labels from scraped data, overriding server-side labels.
-		honorLabels: *false | true
-		// EndpointAdditionalProperties allows setting additional properties on the
-		// endpoint such as relabelings, metricRelabelings etc.
-		//
-		// For example:
-		//  endpointAdditionalProperties:
-		//   relabelings:
-		//   - action: replace
-		//     sourceLabels:
-		//     - __meta_kubernetes_pod_node_name
-		//     targetLabel: instance
-		endpointAdditionalProperties?: {[string]: string}
-	}
-	serviceMonitor: {
-		// Create a ServiceMonitor to add cert-manager to Prometheus
-		enabled: *false | true
-		// Specifies the `prometheus` label on the created ServiceMonitor, this is
-		// used when different Prometheus instances have label selectors matching
-		// different ServiceMonitors.
-		prometheusInstance: *"default" | string
-		// The target port to set on the ServiceMonitor, should match the port that
-		// cert-manager controller is listening on for metrics
-		targetPort: *"http-metrics" | int | string
-		// The path to scrape for metrics
-		path: *"/metrics" | string
-		// The interval to scrape metrics
-		interval: *"60s" | #Duration
-		// The timeout before a metrics scrape fails
-		scrapeTimeout: *"30s" | #Duration
-		// Additional labels to add to the ServiceMonitor
-		labels?: timoniv1.#Labels
-		// Additional annotations to add to the ServiceMonitor
-		annotations?: timoniv1.#Annotations
-		// Keep labels from scraped data, overriding server-side labels.
-		honorLabels: *false | true
-		// EndpointAdditionalProperties allows setting additional properties on the
-		// endpoint such as relabelings, metricRelabelings etc.
-		//
-		// For example:
-		//  endpointAdditionalProperties:
-		//   relabelings:
-		//   - action: replace
-		//     sourceLabels:
-		//     - __meta_kubernetes_pod_node_name
-		//     targetLabel: instance
-		endpointAdditionalProperties?: {[string]: string}
-	}
+	// The type of monitoring to enable, can be one of "ServiceMonitor", "PodMonitor" or "Annotations"
+	type: "ServiceMonitor" | "PodMonitor" | *"Annotations"
+	// Create a PodMonitor to add cert-manager to Prometheus
+	enabled: *false | true
+	// Specifies the `prometheus` label on the created PodMonitor, this is
+	// used when different Prometheus instances have label selectors matching
+	// different PodMonitor.
+	prometheusInstance: *"default" | string
+	// The target port to set on the ServiceMonitor, should match the port that
+	// cert-manager controller is listening on for metrics
+	targetPort: *"http-metrics" | int | string
+	// The path to scrape for metrics
+	path: *"/metrics" | string
+	// The interval to scrape metrics
+	interval: *"60s" | #Duration
+	// The timeout before a metrics scrape fails
+	scrapeTimeout: *"30s" | #Duration
+	// Additional labels to add to the PodMonitor
+	labels?: timoniv1.#Labels
+	// Additional annotations to add to the PodMonitor
+	annotations?: timoniv1.#Annotations
+	// Keep labels from scraped data, overriding server-side labels.
+	honorLabels: *false | true
+	// EndpointAdditionalProperties allows setting additional properties on the
+	// endpoint such as relabelings, metricRelabelings etc.
+	//
+	// For example:
+	//  endpointAdditionalProperties:
+	//   relabelings:
+	//   - action: replace
+	//     sourceLabels:
+	//     - __meta_kubernetes_pod_node_name
+	//     targetLabel: instance
+	endpointAdditionalProperties?: {[string]: string}
 }
 
 #Proxy: {

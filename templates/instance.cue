@@ -159,10 +159,19 @@ import (
 		}
 	}
 
-	if config.controller.monitoring.enabled && config.controller.monitoring.serviceMonitor.enabled {
-		objects: {
-			service: #ServiceController & {#config: config}
-			serviceMonitor: #ServiceMonitor & {
+	if config.controller.monitoring.enabled {
+		if config.controller.monitoring.type == "ServiceMonitor" {
+			objects: {
+				service: #ServiceController & {#config: config}
+				serviceMonitor: #ServiceMonitor & {
+					#config:    config
+					#component: "controller"
+				}
+			}
+		}
+
+		if config.controller.monitoring.type == "PodMonitor" {
+			objects: podMonitor: #PodMonitor & {
 				#config:    config
 				#component: "controller"
 			}
