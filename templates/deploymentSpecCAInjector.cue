@@ -15,9 +15,7 @@ import (
 	selector: matchLabels: #deployment_meta.#LabelSelector
 
 	template: corev1.#PodTemplateSpec & {
-
 		spec: corev1.#PodSpec & {
-
 			containers: [...corev1.#Container] & [
 				{
 					args: [

@@ -9,57 +9,47 @@ import (
 )
 
 #ControllerDeploymentSpec: appsv1.#DeploymentSpec & {
-	#main_config:            cfg.#Config
-	#deployment_meta:        timoniv1.#MetaComponent
-	#deployment_strategy?:   appsv1.#DeploymentStrategy
-	#deployment_monitoring?: cfg.#Monitoring
+	#main_config:           cfg.#Config
+	#deployment_meta:       timoniv1.#MetaComponent
+	#deployment_monitoring: cfg.#Monitoring
 
 	selector: matchLabels: #deployment_meta.#LabelSelector
 
-	if #deployment_strategy != _|_ {
-		strategy: #deployment_strategy
-	}
-
 	template: corev1.#PodTemplateSpec & {
-
-		if #deployment_monitoring != _|_ && #deployment_monitoring.serviceMonitor == _|_ {
+		if #deployment_monitoring.enabled && !#deployment_monitoring.serviceMonitor.enabled {
 			metadata: annotations: "prometheus.io/path":   "/metrics"
 			metadata: annotations: "prometheus.io/scrape": "true"
 			metadata: annotations: "prometheus.io/port":   "9402"
 		}
 
 		spec: corev1.#PodSpec & {
+			volumes: [
+				for k, v in #main_config.controller.volumes {v},
 
-			if #main_config.controller.volumes != _|_ || #main_config.controller.config != _|_ {
-				volumes: [
-					if #main_config.controller.config != _|_ {
-						{
-							name: "config"
-							configMap: name: #deployment_meta.name
-						}
-					},
-					if #main_config.controller.volumes != _|_ {
-						for k, v in #main_config.controller.volumes {
-							v
-						}
-					},
-				]
+				if #main_config.controller.config != _|_ {
+					{
+						name: "config"
+						configMap: name: #deployment_meta.name
+					}
+				},
+			]
+
+			dnsPolicy: #main_config.controller.podDNSPolicy
+
+			if #main_config.controller.podDNSConfig != _|_ {
+				dnsConfig: #main_config.controller.podDNSConfig
 			}
 
 			containers: [...corev1.#Container] & [
 				{
+					volumeMounts: [
+						for k, v in #main_config.controller.volumeMounts {v},
 
-					if #main_config.controller.volumeMounts != _|_ || #main_config.controller.config != _|_ {
-						volumeMounts: [
-							if #main_config.controller.config != _|_ {
-								name:      "config"
-								mountPath: "/var/cert-manager/config"
-							},
-							if #main_config.controller.volumeMounts != _|_ {
-								for k, v in #main_config.controller.volumeMounts {v}
-							},
-						]
-					}
+						if #main_config.controller.config != _|_ {
+							name:      "config"
+							mountPath: "/var/cert-manager/config"
+						},
+					]
 
 					ports: [{
 						containerPort: 9402
@@ -75,6 +65,7 @@ import (
 						"--v=\(#main_config.logLevel)",
 						"--leader-election-namespace=\(#main_config.leaderElection.namespace)",
 						"--acme-http01-solver-image=\(#main_config.acmeSolver.image.reference)",
+						"--max-concurrent-challenges=\(#main_config.controller.maxConcurrentChallenges)",
 
 						if #main_config.controller.config != _|_ {
 							"--config=/var/cert-manager/config/config.yaml"
@@ -116,15 +107,11 @@ import (
 							"--feature-gates=\(#main_config.controller.featureGates)"
 						},
 
-						if #main_config.controller.maxConcurrentChallenges != _|_ {
-							"--max-concurrent-challenges=\(#main_config.controller.maxConcurrentChallenges)"
-						},
-
-						if #main_config.controller.enableCertificateOwnerRef != _|_ {
+						if #main_config.controller.enableCertificateOwnerRef {
 							"--enable-certificate-owner-ref=true"
 						},
 
-						if #main_config.controller.dns01RecursiveNameserversOnly != _|_ {
+						if #main_config.controller.dns01RecursiveNameserversOnly {
 							"--dns01-recursive-nameservers-only=true"
 						},
 
@@ -147,32 +134,30 @@ import (
 							},
 							if #main_config.controller.proxy.httpsProxy != _|_ {
 								{
-									name:  "HTTP_PROXY"
+									name:  "HTTPS_PROXY"
 									value: #main_config.controller.proxy.httpsProxy
 								}
 							},
 							if #main_config.controller.proxy.noProxy != _|_ {
 								{
-									name:  "HTTP_PROXY"
+									name:  "NO_PROXY"
 									value: #main_config.controller.proxy.noProxy
 								}
 							},
 						]
 					}
 
-					if #main_config.controller.livenessProbe != _|_ {
-						livenessProbe: #main_config.controller.livenessProbe & {
-							httpGet: {
-								port:   "http-healthz"
-								path:   "/livez"
-								scheme: "HTTP"
-							}
-							initialDelaySeconds: *10 | int
-							periodSeconds:       *10 | int
-							timeoutSeconds:      *15 | int
-							successThreshold:    *1 | int
-							failureThreshold:    *8 | int
+					livenessProbe: #main_config.controller.livenessProbe & {
+						httpGet: {
+							port:   "http-healthz"
+							path:   "/livez"
+							scheme: "HTTP"
 						}
+						initialDelaySeconds: *10 | int
+						periodSeconds:       *10 | int
+						timeoutSeconds:      *15 | int
+						successThreshold:    *1 | int
+						failureThreshold:    *8 | int
 					}
 				},
 			]

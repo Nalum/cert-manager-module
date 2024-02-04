@@ -22,7 +22,7 @@ import (
 
 	spec: {
 		selector: matchLabels: #meta.#LabelSelector
-		if #config[#component].podDisruptionBudget != _|_ {
+		if #config[#component].podDisruptionBudget.enabled {
 			if #config[#component].podDisruptionBudget.minAvailable != _|_ {
 				minAvailable: #config[#component].podDisruptionBudget.minAvailable
 			}

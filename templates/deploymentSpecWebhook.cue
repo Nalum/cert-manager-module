@@ -9,20 +9,13 @@ import (
 )
 
 #WebhookDeploymentSpec: appsv1.#DeploymentSpec & {
-	#main_config:          cfg.#Config
-	#deployment_meta:      timoniv1.#MetaComponent
-	#deployment_strategy?: appsv1.#DeploymentStrategy
+	#main_config:     cfg.#Config
+	#deployment_meta: timoniv1.#MetaComponent
 
 	selector: matchLabels: #deployment_meta.#LabelSelector
 
-	if #deployment_strategy != _|_ {
-		strategy: #deployment_strategy
-	}
-
 	template: corev1.#PodTemplateSpec & {
-
 		spec: corev1.#PodSpec & {
-
 			if #main_config.webhook.hostNetwork != false {
 				hostNetwork: true
 				dnsPolicy:   "ClusterFirstWithHostNet"
@@ -96,65 +89,53 @@ import (
 						},
 					]
 
-					if #main_config.webhook.livenessProbe != _|_ {
-						livenessProbe: #main_config.webhook.livenessProbe & {
-							httpGet: {
-								port:   "healthcheck"
-								path:   "/livez"
-								scheme: "HTTP"
-							}
-							initialDelaySeconds: *60 | int
-							periodSeconds:       *10 | int
-							timeoutSeconds:      *1 | int
-							successThreshold:    *1 | int
-							failureThreshold:    *3 | int
+					livenessProbe: #main_config.webhook.livenessProbe & {
+						httpGet: {
+							port:   "healthcheck"
+							path:   "/livez"
+							scheme: "HTTP"
 						}
+						initialDelaySeconds: *60 | int
+						periodSeconds:       *10 | int
+						timeoutSeconds:      *1 | int
+						successThreshold:    *1 | int
+						failureThreshold:    *3 | int
 					}
 
-					if #main_config.webhook.readinessProbe != _|_ {
-						readinessProbe: #main_config.webhook.readinessProbe & {
-							httpGet: {
-								port:   "healthcheck"
-								path:   "/healthz"
-								scheme: "HTTP"
-							}
-							initialDelaySeconds: *5 | int
-							periodSeconds:       *5 | int
-							timeoutSeconds:      *1 | int
-							successThreshold:    *1 | int
-							failureThreshold:    *3 | int
+					readinessProbe: #main_config.webhook.readinessProbe & {
+						httpGet: {
+							port:   "healthcheck"
+							path:   "/healthz"
+							scheme: "HTTP"
 						}
+						initialDelaySeconds: *5 | int
+						periodSeconds:       *5 | int
+						timeoutSeconds:      *1 | int
+						successThreshold:    *1 | int
+						failureThreshold:    *3 | int
 					}
 
-					if #main_config.webhook.volumeMounts != _|_ || #main_config.webhook.config != _|_ {
-						volumeMounts: [
-							if #main_config.webhook.config != _|_ {
-								{
-									name:      "config"
-									mountPath: "/var/cert-manager/config"
-								}
-							},
-							if #main_config.webhook.volumeMounts != _|_ {
-								for k, v in #main_config.webhook.volumeMounts {v}
-							},
-						]
-					}
+					volumeMounts: [
+						for k, v in #main_config.webhook.volumeMounts {v},
+						if #main_config.webhook.config != _|_ {
+							{
+								name:      "config"
+								mountPath: "/var/cert-manager/config"
+							}
+						},
+					]
 				},
 			]
 
-			if #main_config.webhook.volumes != _|_ || #main_config.webhook.config != _|_ {
-				volumes: [
-					if #main_config.webhook.config != _|_ {
-						{
-							name: "config"
-							configMap: name: #deployment_meta.name
-						}
-					},
-					if #main_config.webhook.volumes != _|_ {
-						for k, v in #main_config.webhook.volumes {v}
-					},
-				]
-			}
+			volumes: [
+				for k, v in #main_config.webhook.volumes {v},
+				if #main_config.webhook.config != _|_ {
+					{
+						name: "config"
+						configMap: name: #deployment_meta.name
+					}
+				},
+			]
 		}
 	}
 }

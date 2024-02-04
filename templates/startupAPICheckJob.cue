@@ -40,37 +40,31 @@ import (
 			}
 
 			spec: {
-				restartPolicy:      "OnFailure"
-				serviceAccountName: #meta.name
-				enableServiceLinks: #config.test.startupAPICheck.enableServiceLinks
-
-				if #config.test.startupAPICheck.automountServiceAccountToken != _|_ {
-					automountServiceAccountToken: #config.test.startupAPICheck.automountServiceAccountToken
-				}
+				restartPolicy:                "OnFailure"
+				serviceAccountName:           #meta.name
+				enableServiceLinks:           #config.test.startupAPICheck.enableServiceLinks
+				automountServiceAccountToken: #config.test.startupAPICheck.automountServiceAccountToken
+				securityContext:              #config.test.startupAPICheck.securityContext
+				nodeSelector:                 #config.test.startupAPICheck.nodeSelector
 
 				if #config.priorityClassName != _|_ {
 					priorityClassName: #config.priorityClassName
-				}
-
-				if #config.test.startupAPICheck.securityContext != _|_ {
-					securityContext: #config.test.startupAPICheck.securityContext
 				}
 
 				containers: [{
 					name:            #meta.name
 					image:           #config.test.startupAPICheck.image.reference
 					imagePullPolicy: #config.test.startupAPICheck.image.pullPolicy
+					securityContext: #config.test.startupAPICheck.containerSecurityContext
+
 					args: [
 						"check",
 						"api",
 						"--wait=\(#config.test.startupAPICheck.timeout)",
 					]
+
 					if #config.test.startupAPICheck.extraArgs != _|_ {
 						args: #config.test.startupAPICheck.extraArgs
-					}
-
-					if #config.test.startupAPICheck.containerSecurityContext != _|_ {
-						securityContext: #config.test.startupAPICheck.containerSecurityContext
 					}
 
 					if #config.test.startupAPICheck.resources != _|_ {
@@ -81,10 +75,6 @@ import (
 						volumeMounts: #config.test.startupAPICheck.volumeMounts
 					}
 				}]
-
-				if #config.test.startupAPICheck.nodeSelector != _|_ {
-					nodeSelector: #config.test.startupAPICheck.nodeSelector
-				}
 
 				if #config.test.startupAPICheck.affinity != _|_ {
 					affinity: #config.test.startupAPICheck.affinity

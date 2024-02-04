@@ -203,7 +203,7 @@ import (
 			}
 		}
 
-		tests: startupAPICheckServiceAccount: #ServiceAccount & {
+		tests: startupAPICheckServiceAccount: #TestServiceAccount & {
 			#config:    config
 			#component: "startupAPICheck"
 		}

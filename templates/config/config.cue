@@ -65,14 +65,14 @@ import (
 		// leadership renewal until attempting to acquire leadership of a led but
 		// unrenewed leader slot. This is effectively the maximum duration that a
 		// leader can be stopped before it is replaced by another candidate.
-		leaseDuration?: *"60s" | #Duration
+		leaseDuration?: #Duration
 		// The interval between attempts by the acting master to renew a leadership
 		// slot before it stops leading. This must be less than or equal to the
 		// lease duration.
-		renewDeadline?: *"40s" | #Duration
+		renewDeadline?: #Duration
 		// The duration the clients should wait between attempting acquisition and
 		// renewal of a leadership.
-		retryPeriod?: *"15s" | #Duration
+		retryPeriod?: #Duration
 	}
 
 	controller: #Controller
@@ -132,6 +132,7 @@ import (
 }
 
 #PodDisruptionBudgetData: {
-	enabled:      *true | bool
-	minAvailable: *1 | int | #Percent
+	enabled:         *true | bool
+	minAvailable?:   int | #Percent
+	maxUnavailable?: int | #Percent
 }
