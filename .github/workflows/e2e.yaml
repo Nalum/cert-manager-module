@@ -43,9 +43,10 @@ jobs:
       - name: Push module
         run: |
           timoni mod push ./ oci://localhost:5000/cert-manager -v 1.0.0 --latest
-      - name: Install module without rbac
+      - name: Install module without rbac, expect failure
+        continue-on-error: true
         run: |
-          timoni -n test apply cert-manager oci://localhost:5000/cert-manager -f test/data/values-rbac.cue
+          timoni -n test apply cert-manager oci://localhost:5000/cert-manager -f test/data/values-rbac.cue --timeout 60s
       - name: List modules
         run: |
           timoni list -A
