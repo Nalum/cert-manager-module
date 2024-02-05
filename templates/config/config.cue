@@ -35,9 +35,9 @@ import (
 	// Setup the Cluster RBAC roles and bindings
 	rbac: {
 		// Create the roles and bindings for cert-manager
-		enabled: *true | bool
+		enabled: *true | false
 		// Aggregate ClusterRoles to Kubernetes default user-facing roles. Ref: https://kubernetes.io/docs/reference/access-authn-authz/rbac/#user-facing-roles
-		aggregateClusterRoles: *true | bool
+		aggregateClusterRoles: *true | false
 	}
 
 	podSecurityAdmission: {
@@ -49,7 +49,7 @@ import (
 
 	highAvailability: {
 		// Enable high availability features
-		enabled: *false | bool
+		enabled: *false | true
 		// Number of replicas of the cert-manager controller to run
 		controllerReplicas: *2 | int
 		// Number of replicas of the cert-manager webhook to run
@@ -75,14 +75,19 @@ import (
 		retryPeriod?: #Duration
 	}
 
-	controller: #Controller
+	controller: #Controller & {
+		monitoring: #Monitoring & {
+			namespace: *metadata.namespace | string
+		}
+	}
+
 	webhook:    #Webhook
 	caInjector: #CAInjector
 	acmeSolver: #ACMESolver
 
 	test: {
 		// Enable startupAPICheck to verify the cert-manager API is available
-		enabled:         *true | bool
+		enabled:         *true | false
 		startupAPICheck: #StartupAPICheck
 	}
 }
@@ -91,21 +96,43 @@ import (
 #Percent:  string & =~"^(100|[1-9][0-9]?)%$"
 
 #Monitoring: {
-	// Enable Prometheus monitoring
-	enabled: *false | bool
-	serviceMonitor: {
-		// Enable Prometheus ServiceMonitor monitoring instead of the prometheus shim
-		enabled:            *false | bool
-		prometheusInstance: *"default" | string
-		targetPort:         *"http-metrics" | int | string
-		path:               *"/metrics" | string
-		interval:           *"60s" | #Duration
-		scrapeTimeout:      *"30s" | #Duration
-		labels?:            timoniv1.#Labels
-		annotations?:       timoniv1.#Annotations
-		honorLabels:        *false | bool
-		endpointAdditionalProperties?: {[string]: string}
-	}
+	// Enable Prometheus monitoring for the cert-manager controller to use with the Prometheus Operator.
+	enabled: *false | true
+	// The namespace to create the Monitor in
+	namespace: string
+	// The type of monitoring to enable, can be one of "ServiceMonitor", "PodMonitor" or "Annotations"
+	// If ServiceMonitor is used a Service will also be created
+	type: "ServiceMonitor" | "PodMonitor" | *"Annotations"
+	// Specifies the `prometheus` label on the created PodMonitor/ServiceMonitor, this is
+	// used when different Prometheus instances have label selectors matching
+	// different PodMonitor/ServiceMonitor.
+	prometheusInstance: *"default" | string
+	// The target port to set on the Monitor, should match the port that
+	// cert-manager controller is listening on for metrics
+	targetPort: *"http-metrics" | int | string
+	// The path to scrape for metrics
+	path: *"/metrics" | string
+	// The interval to scrape metrics
+	interval: *"60s" | #Duration
+	// The timeout before a metrics scrape fails
+	scrapeTimeout: *"30s" | #Duration
+	// Additional labels to add to the PodMonitor
+	labels?: timoniv1.#Labels
+	// Additional annotations to add to the PodMonitor
+	annotations?: timoniv1.#Annotations
+	// Keep labels from scraped data, overriding server-side labels.
+	honorLabels: *false | true
+	// EndpointAdditionalProperties allows setting additional properties on the
+	// endpoint such as relabelings, metricRelabelings etc.
+	//
+	// For example:
+	//  endpointAdditionalProperties:
+	//   relabelings:
+	//   - action: replace
+	//     sourceLabels:
+	//     - __meta_kubernetes_pod_node_name
+	//     targetLabel: instance
+	endpointAdditionalProperties?: {[string]: string}
 }
 
 #Proxy: {
@@ -118,21 +145,21 @@ import (
 }
 
 #SecurityContext: {
-	runAsNonRoot: *true | bool
+	runAsNonRoot: *true | false
 	seccompProfile: type: *"RuntimeDefault" | string
 }
 
 #ContainerSecurityContext: corev1.#SecurityContext & {
-	allowPrivilegeEscalation: *false | bool
-	readOnlyRootFilesystem:   *true | bool
-	runAsNonRoot:             *true | bool
+	allowPrivilegeEscalation: *false | true
+	readOnlyRootFilesystem:   *true | false
+	runAsNonRoot:             *true | false
 	capabilities: corev1.#Capabilities & {
 		drop: *["ALL"] | null | [...string]
 	}
 }
 
 #PodDisruptionBudgetData: {
-	enabled:         *true | bool
+	enabled:         *true | false
 	minAvailable?:   int | #Percent
 	maxUnavailable?: int | #Percent
 }

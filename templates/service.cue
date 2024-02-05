@@ -43,7 +43,7 @@ import (
 			protocol:   "TCP"
 			port:       9402
 			name:       "tcp-prometheus-servicemonitor"
-			targetPort: #config[#component].monitoring.serviceMonitor.targetPort
+			targetPort: #config[#component].monitoring.targetPort
 		}]
 	}
 }

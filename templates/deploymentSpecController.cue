@@ -16,7 +16,7 @@ import (
 	selector: matchLabels: #deployment_meta.#LabelSelector
 
 	template: corev1.#PodTemplateSpec & {
-		if #deployment_monitoring.enabled && !#deployment_monitoring.serviceMonitor.enabled {
+		if #deployment_monitoring.enabled && #deployment_monitoring.type == "Annotations" {
 			metadata: annotations: "prometheus.io/path":   "/metrics"
 			metadata: annotations: "prometheus.io/scrape": "true"
 			metadata: annotations: "prometheus.io/port":   "9402"

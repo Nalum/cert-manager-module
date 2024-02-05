@@ -17,9 +17,9 @@ import (
 	dns01RecursiveNameservers?: string
 	// Forces cert-manager to only use the recursive nameservers for verification.
 	// Enabling this option could cause the DNS01 self check to take longer due to caching performed by the recursive nameservers
-	dns01RecursiveNameserversOnly: *false | bool
+	dns01RecursiveNameserversOnly: *false | true
 	// When this flag is enabled, secrets will be automatically removed when the certificate resource is deleted
-	enableCertificateOwnerRef: *false | bool
+	enableCertificateOwnerRef: *false | true
 	// Comma separated list of feature gates that should be enabled on the controller pod.
 	featureGates?: string
 	// The maximum number of challenges that can be scheduled as 'processing' at once
@@ -49,12 +49,12 @@ import (
 		kubernetesAPIBurst:        *9000 | int
 		numberOfConcurrentWorkers: *200 | int
 		featureGates?: {
-			AdditionalCertificateOutputFormats:               *true | bool
-			ExperimentalCertificateSigningRequestControllers: *true | bool
-			ExperimentalGatewayAPISupport:                    *true | bool
-			ServerSideApply:                                  *true | bool
-			LiteralCertificateSubject:                        *true | bool
-			UseCertificateRequestBasicConstraints:            *true | bool
+			AdditionalCertificateOutputFormats:               *true | false
+			ExperimentalCertificateSigningRequestControllers: *true | false
+			ExperimentalGatewayAPISupport:                    *true | false
+			ServerSideApply:                                  *true | false
+			LiteralCertificateSubject:                        *true | false
+			UseCertificateRequestBasicConstraints:            *true | false
 		}
 	}
 
@@ -74,7 +74,7 @@ import (
 	// is a comma separated list of feature gates to enable.
 	featureGates?: string
 	// enalbes host networking for the webhook pod.
-	hostNetwork: *false | bool
+	hostNetwork: *false | true
 	// is the IP address to bind to when running the webhook pod.
 	loadBalancerIP?: string
 	// is a map of annotations to add to the mutating webhook configuration.
@@ -139,6 +139,15 @@ import (
 #StartupAPICheck: {
 	#Component
 
+	// Additional command line flags to pass to startupapicheck binary.
+	// To see all available flags run docker run quay.io/jetstack/cert-manager-ctl:<version> --help
+	//
+	// We enable verbose logging by default so that if startupapicheck fails, users
+	// can know what exactly caused the failure. Verbose logs include details of
+	// the webhook URL, IP address and TCP connect errors for example.
+	extraArgs: [...string] | *[
+		"-v",
+	]
 	// is the number of retries before considering a Job as failed.
 	backoffLimit: *4 | int
 	// is a map of annotations to add to the job.
