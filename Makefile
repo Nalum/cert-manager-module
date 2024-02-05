@@ -54,6 +54,7 @@ gen-debug-files: ## Generate resources and write to files
 	@yq --yaml-output '. | select(.kind == "Namespace")' all.yaml > output/Namespace.yaml
 	@yq --yaml-output '. | select(.kind == "NetworkPolicy")' all.yaml > output/NetworkPolicy.yaml
 	@yq --yaml-output '. | select(.kind == "PodDisruptionBudget")' all.yaml > output/PodDisruptionBudget.yaml
+	@yq --yaml-output '. | select(.kind == "PodMonitor")' all.yaml > output/PodMonitor.yaml
 	@yq --yaml-output '. | select(.kind == "Role")' all.yaml > output/Role.yaml
 	@yq --yaml-output '. | select(.kind == "RoleBinding")' all.yaml > output/RoleBinding.yaml
 	@yq --yaml-output '. | select(.kind == "Service")' all.yaml > output/Service.yaml
@@ -76,6 +77,7 @@ gen-files: ## Generate resources and write to files
 	@yq --yaml-output '. | select(.kind == "Namespace")' all.yaml > output/Namespace.yaml
 	@yq --yaml-output '. | select(.kind == "NetworkPolicy")' all.yaml > output/NetworkPolicy.yaml
 	@yq --yaml-output '. | select(.kind == "PodDisruptionBudget")' all.yaml > output/PodDisruptionBudget.yaml
+	@yq --yaml-output '. | select(.kind == "PodMonitor")' all.yaml > output/PodMonitor.yaml
 	@yq --yaml-output '. | select(.kind == "Role")' all.yaml > output/Role.yaml
 	@yq --yaml-output '. | select(.kind == "RoleBinding")' all.yaml > output/RoleBinding.yaml
 	@yq --yaml-output '. | select(.kind == "Service")' all.yaml > output/Service.yaml

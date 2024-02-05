@@ -26,10 +26,7 @@ import (
 	spec: {
 		jobLabel: #config.metadata.name
 		selector: matchLabels: #meta.#LabelSelector
-
-		if #config.controller.monitoring.namespace != _|_ {
-			namespaceSelector: matchNames: [#meta.namespace]
-		}
+		namespaceSelector: matchNames: [#config.controller.monitoring.namespace]
 
 		podMetricsEndpoints: [{
 			port:          #config.controller.monitoring.targetPort

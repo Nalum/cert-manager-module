@@ -75,7 +75,12 @@ import (
 		retryPeriod?: #Duration
 	}
 
-	controller: #Controller
+	controller: #Controller & {
+		monitoring: #Monitoring & {
+			namespace: *metadata.namespace | string
+		}
+	}
+
 	webhook:    #Webhook
 	caInjector: #CAInjector
 	acmeSolver: #ACMESolver
@@ -91,22 +96,18 @@ import (
 #Percent:  string & =~"^(100|[1-9][0-9]?)%$"
 
 #Monitoring: {
-	// Enable Prometheus monitoring for the cert-manager controller to use with the
-	// Prometheus Operator. If this option is enabled without enabling `prometheus.servicemonitor.enabled` or
-	// `prometheus.podmonitor.enabled`, 'prometheus.io' annotations are added to the cert-manager Deployment
-	// resources. Additionally, a service is created which can be used together
-	// with your own ServiceMonitor (managed outside of this Helm chart).
-	// Otherwise, a ServiceMonitor/ PodMonitor is created.
+	// Enable Prometheus monitoring for the cert-manager controller to use with the Prometheus Operator.
 	enabled: *false | true
+	// The namespace to create the Monitor in
+	namespace: string
 	// The type of monitoring to enable, can be one of "ServiceMonitor", "PodMonitor" or "Annotations"
+	// If ServiceMonitor is used a Service will also be created
 	type: "ServiceMonitor" | "PodMonitor" | *"Annotations"
-	// Create a PodMonitor to add cert-manager to Prometheus
-	enabled: *false | true
-	// Specifies the `prometheus` label on the created PodMonitor, this is
+	// Specifies the `prometheus` label on the created PodMonitor/ServiceMonitor, this is
 	// used when different Prometheus instances have label selectors matching
-	// different PodMonitor.
+	// different PodMonitor/ServiceMonitor.
 	prometheusInstance: *"default" | string
-	// The target port to set on the ServiceMonitor, should match the port that
+	// The target port to set on the Monitor, should match the port that
 	// cert-manager controller is listening on for metrics
 	targetPort: *"http-metrics" | int | string
 	// The path to scrape for metrics
