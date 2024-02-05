@@ -34,5 +34,5 @@ jobs:
           -a 'org.opencontainers.image.licenses=Apache-2.0' \
           -a 'org.opencontainers.image.source=https://github.com/nalum/cert-manager-module'  \
           -a 'org.opencontainers.image.description=A timoni.sh module for cert-manager.' \
-          -a 'org.opencontainers.image.documentation=https://github.com/nalum/cert-manager-module'  \
+          -a "org.opencontainers.image.documentation=https://github.com/Nalum/cert-manager-module/blob/${GITHUB_REF_NAME}/README.md"  \
           --sign cosign
