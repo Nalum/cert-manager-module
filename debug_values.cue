@@ -16,6 +16,9 @@ values: {
 	}
 
 	controller: {
+		replicas: 5
+		podDisruptionBudget: minAvailable: 3
+
 		config: logging: format:  "json"
 		resources: requests: cpu: "100m"
 		ingressShim: defaultIssuerName:    "dev"
@@ -61,7 +64,7 @@ values: {
 	}
 
 	caInjector: {
-		podDisruptionBudget: minAvailable: 2
+		podDisruptionBudget: maxUnavailable: "20%"
 
 		strategy: {
 			type: "RollingUpdate"
