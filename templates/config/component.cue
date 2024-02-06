@@ -42,7 +42,7 @@ import (
 	// is the readiness probe.
 	readinessProbe: corev1.#Probe
 	// is the number of desired replicas.
-	replicas: *1 | int32
+	replicas: *1 | uint16 & >0
 
 	// is the resource requirements for the container.
 	resources?: timoniv1.#ResourceRequirements & {

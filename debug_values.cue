@@ -7,6 +7,9 @@ package main
 values: {
 	metadata: labels: team:                                  "dev"
 	metadata: annotations: "cert-manager.timoni.sh/testing": "true"
+
+	highAvailability: enabled: true
+
 	rbac: {
 		enabled:               true
 		aggregateClusterRoles: false
@@ -17,7 +20,6 @@ values: {
 		resources: requests: cpu: "100m"
 		ingressShim: defaultIssuerName:    "dev"
 		monitoring: enabled:               true
-		podDisruptionBudget: minAvailable: 2
 
 		livenessProbe: {
 			initialDelaySeconds: 30
@@ -35,7 +37,6 @@ values: {
 	}
 
 	webhook: {
-		podDisruptionBudget: minAvailable: 2
 
 		livenessProbe: {
 			initialDelaySeconds: 30

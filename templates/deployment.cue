@@ -28,14 +28,7 @@ import (
 
 	spec: appsv1.#DeploymentSpec & {
 		selector: matchLabels: #meta.#LabelSelector
-
-		if #config.highAvailability.enabled {
-			replicas: #config.highAvailability[#component+"Replicas"]
-		}
-
-		if !#config.highAvailability.enabled {
-			replicas: #config[#component].replicas
-		}
+		replicas: #config[#component].replicas
 
 		if #config[#component].strategy != _|_ {
 			strategy: appsv1.#DeploymentStrategy & #config[#component].strategy

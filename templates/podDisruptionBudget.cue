@@ -22,13 +22,14 @@ import (
 
 	spec: {
 		selector: matchLabels: #meta.#LabelSelector
-		if #config[#component].podDisruptionBudget.enabled {
-			if #config[#component].podDisruptionBudget.minAvailable != _|_ {
-				minAvailable: #config[#component].podDisruptionBudget.minAvailable
-			}
-			if #config[#component].podDisruptionBudget.maxUnavailable != _|_ {
-				maxUnavailable: #config[#component].podDisruptionBudget.maxUnavailable
-			}
+		if #config[#component].podDisruptionBudget.minAvailable == _|_ && #config.highAvailability.enabled {
+			minAvailable: #config[#component].replicas - 1
+		}
+		if #config[#component].podDisruptionBudget.minAvailable != _|_ {
+			minAvailable: #config[#component].podDisruptionBudget.minAvailable & {uint16 & <=#config[#component].replicas | cfg.#Percent}
+		}
+		if #config[#component].podDisruptionBudget.maxUnavailable != _|_ {
+			maxUnavailable: #config[#component].podDisruptionBudget.maxUnavailable
 		}
 	}
 }
