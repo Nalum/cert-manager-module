@@ -9,17 +9,21 @@ import (
 #Config: {
 	// The kubeVersion is a required field, set at apply-time
 	// via timoni.cue by querying the user's Kubernetes API.
+	// +nodoc
 	kubeVersion!: string
 	// Using the kubeVersion you can enforce a minimum Kubernetes minor version.
 	// By default, the minimum Kubernetes version is set to 1.20.
+	// +nodoc
 	clusterVersion: timoniv1.#SemVer & {#Version: kubeVersion, #Minimum: "1.27.0"}
 
 	// The moduleVersion is set from the user-supplied module version.
 	// This field is used for the `app.kubernetes.io/version` label.
+	// +nodoc
 	moduleVersion!: string
 
 	// Metadata (common to all resources)
 	metadata: timoniv1.#Metadata & {#Version: moduleVersion}
+	// +nodoc
 	metadata: labels: (timoniv1.#StdLabelPartOf): "cert-manager"
 
 	// Reference to one or more secrets to be used when pulling images
@@ -50,12 +54,6 @@ import (
 	highAvailability: {
 		// Enable high availability features
 		enabled: *false | true
-		// Number of replicas of the cert-manager controller to run
-		controllerReplicas: *2 | int
-		// Number of replicas of the cert-manager webhook to run
-		webhookReplicas: *3 | int
-		// Number of replicas of the cert-manager caInjector to run
-		caInjectorReplicas: *2 | int
 	}
 
 	leaderElection: {
@@ -79,21 +77,25 @@ import (
 		monitoring: #Monitoring & {
 			namespace: *metadata.namespace | string
 		}
+
 		if highAvailability.enabled {
 			replicas: *2 | uint16 & >2
 		}
+
 		podDisruptionBudget: enabled: *highAvailability.enabled | bool
 	}
 	webhook: #Webhook & {
 		if highAvailability.enabled {
 			replicas: *3 | uint16 & >3
 		}
+
 		podDisruptionBudget: enabled: *highAvailability.enabled | bool
 	}
 	caInjector: #CAInjector & {
 		if highAvailability.enabled {
 			replicas: *2 | uint16 & >2
 		}
+
 		podDisruptionBudget: enabled: *highAvailability.enabled | bool
 	}
 
@@ -108,7 +110,7 @@ import (
 
 #Duration: string & =~"^[+-]?((\\d+h)?(\\d+m)?(\\d+s)?(\\d+ms)?(\\d+(us|µs))?(\\d+ns)?)$"
 #Percent:  string & =~"^(100|[1-9][0-9]?)%$"
-#PdbValue: (int &>=0) | #Percent
+#PdbValue: (int & >=0) | #Percent
 
 #Monitoring: {
 	// Enable Prometheus monitoring for the cert-manager controller to use with the Prometheus Operator.

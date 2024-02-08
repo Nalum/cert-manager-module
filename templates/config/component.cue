@@ -30,6 +30,7 @@ import (
 	livenessProbe: corev1.#Probe
 	// is a selector which must be true for the pod to fit on a node.
 	nodeSelector: timoniv1.#Labels
+	// +nodoc
 	nodeSelector: "kubernetes.io/os": "linux"
 	// is the annotations for the pod.
 	podAnnotations?: timoniv1.#Annotations

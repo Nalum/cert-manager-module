@@ -31,12 +31,17 @@ timoni: {
 		config: values
 		// These values are injected at runtime by Timoni.
 		config: {
+			// +nodoc
 			metadata: {
-				name:      string @tag(name)
+				// +nodoc
+				name: string @tag(name)
+				// +nodoc
 				namespace: string @tag(namespace)
 			}
+			// +nodoc
 			moduleVersion: string @tag(mv, var=moduleVersion)
-			kubeVersion:   string @tag(kv, var=kubeVersion)
+			// +nodoc
+			kubeVersion: string @tag(kv, var=kubeVersion)
 		}
 	}
 
