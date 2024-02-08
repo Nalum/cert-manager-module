@@ -43,8 +43,11 @@ import "strings"
 
 	// Standard Kubernetes labels: app name, version and managed-by.
 	labels: {
-		"\(#StdLabelName)":      name
-		"\(#StdLabelVersion)":   #Version
+		// +nodoc
+		"\(#StdLabelName)": name
+		// +nodoc
+		"\(#StdLabelVersion)": #Version
+		// +nodoc
 		"\(#StdLabelManagedBy)": "timoni"
 	}
 
@@ -69,6 +72,7 @@ import "strings"
 	namespace: #Meta.namespace
 
 	labels: #Meta.labels
+	// +nodoc
 	labels: "\(#StdLabelComponent)": #Component
 
 	annotations?: #Annotations
@@ -99,6 +103,7 @@ import "strings"
 	name: #Meta.name + "-" + #Component
 
 	labels: #Meta.labels
+	// +nodoc
 	labels: "\(#StdLabelComponent)": #Component
 
 	annotations?: #Annotations
