@@ -108,6 +108,7 @@ import (
 
 #Duration: string & =~"^[+-]?((\\d+h)?(\\d+m)?(\\d+s)?(\\d+ms)?(\\d+(us|µs))?(\\d+ns)?)$"
 #Percent:  string & =~"^(100|[1-9][0-9]?)%$"
+#PdbValue: (int &>=0) | #Percent
 
 #Monitoring: {
 	// Enable Prometheus monitoring for the cert-manager controller to use with the Prometheus Operator.
@@ -172,8 +173,9 @@ import (
 	}
 }
 
+#OneOfPDB: *{minAvailable?: #PdbValue} | {maxUnavailable?: #PdbValue}
+
 #PodDisruptionBudgetData: {
-	enabled:         bool
-	minAvailable?:   int | #Percent
-	maxUnavailable?: int | #Percent
+	enabled: bool
+	#OneOfPDB
 }
