@@ -11,9 +11,9 @@ A [timoni.sh](http://timoni.sh) module for deploying cert-manager to Kubernetes 
 
 This module is applied to these Kubernetes version in CI:
 
-- [![kubernetes](https://img.shields.io/badge/kubernetes-v1.27.10-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io)
-- [![kubernetes](https://img.shields.io/badge/kubernetes-v1.28.6-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io)
-- [![kubernetes](https://img.shields.io/badge/kubernetes-v1.29.1-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io)
+- [![kubernetes](https://img.shields.io/badge/kubernetes-v1.27.11-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io)
+- [![kubernetes](https://img.shields.io/badge/kubernetes-v1.28.7-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io)
+- [![kubernetes](https://img.shields.io/badge/kubernetes-v1.29.2-326CE5?logo=kubernetes&logoColor=white)](https://kubernetes.io)
 
 ## Install
 
